@@ -291,31 +291,7 @@ class SGWTermineScraper:
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(ics_content)
         
-        # Versuche GitHub Upload falls konfiguriert
-        self._upload_to_github(output_file)
-        
         return output_file
-    
-    def _upload_to_github(self, ics_file: str):
-        """Lädt ICS-Datei zu GitHub Gist hoch"""
-        try:
-            from gist_uploader import GistUploader
-            
-            uploader = GistUploader()
-            calendar_url = uploader.upload_calendar(ics_file)
-            
-            if calendar_url:
-                print("✅ Kalender automatisch zu GitHub Gist hochgeladen!")
-                print(f"📱 Android Kalender URL: {calendar_url}")
-                return calendar_url
-            
-        except ImportError:
-            print("Gist Uploader nicht verfügbar")
-        except Exception as e:
-            print(f"Gist Upload fehlgeschlagen: {e}")
-        
-        print("\n💡 Für automatischen Upload:")
-        print("python gist_uploader.py")
     
     def _create_ics_content(self, termine: List) -> str:
         """Erstellt den ICS-Inhalt"""

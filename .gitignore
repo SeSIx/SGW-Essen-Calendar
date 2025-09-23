@@ -31,16 +31,5 @@ Thumbs.db
 # Local files
 *.log
 *.tmp
-token.json
-credentials.json
-github_config.json
-auto_drive_config.txt
-cloud_config.txt
-calendar_link.txt
-calendar_url.txt
 
-# Database (optional - können Sie auch committen)
-# sgw_termine.db
-
-# Generated ICS files (werden neu generiert)
-# sgw_termine.ics
+# Database and ICS files werden committed für direkten Zugang
