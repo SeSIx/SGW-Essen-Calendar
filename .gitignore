@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local files
+*.log
+*.tmp
+token.json
+credentials.json
+github_config.json
+auto_drive_config.txt
+cloud_config.txt
+calendar_link.txt
+calendar_url.txt
+
+# Database (optional - können Sie auch committen)
+# sgw_termine.db
+
+# Generated ICS files (werden neu generiert)
+# sgw_termine.ics
