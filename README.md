@@ -1,36 +1,31 @@
 # SGW Essen Wasserball Kalender
 
-🏊‍♂️ Automatischer Kalender für SG Wasserball Essen Termine
+🏊‍♂️ Einfacher Kalender für SG Wasserball Essen Termine
 
 ## 📱 Kalender abonnieren
 
-**Direkt in Ihrer Kalender-App hinzufügen:**
+**Direkt in Ihrer Kalender-App:**
 
 ```
 https://raw.githubusercontent.com/SeSIx/SGW-Essen-Calendar/main/sgw_termine.ics
 ```
 
-### Android (Google Calendar):
-1. Google Calendar öffnen
-2. ☰ Menü → Einstellungen
-3. "Kalender hinzufügen" → "Über URL"
-4. URL einfügen → "Kalender hinzufügen"
+### So geht's:
+- **Android**: Google Calendar → ☰ → Einstellungen → Kalender hinzufügen → Über URL
+- **iOS**: Kalender → Kalender hinzufügen → Abonnement
+- **Desktop**: Outlook/Thunderbird → Internetkalender hinzufügen
 
-### iOS (Apple Calendar):
-1. Einstellungen → Kalender → Accounts
-2. "Account hinzufügen" → "Andere"
-3. "Kalenderabonnement hinzufügen"
-4. URL einfügen
+## 🎯 Termine hinzufügen
 
-### Desktop:
-- **Outlook**: Datei → Kontoeinstellungen → Internetkalender
-- **Thunderbird**: Datei → Neu → Kalender → Im Netzwerk
-
-## 🚀 Verwendung
-
-### Termine scrapen:
+### Einzelner Termin:
 ```bash
-python sgw_essen_scraper.py
+python sgw_essen_scraper.py --add "20.12.2025" "15:00" "SGW Essen" "Weihnachtsfeier" "Weihnachtsmarkt" ""
+```
+*Format: DATUM ZEIT HEIM GAST ORT ERGEBNIS*
+
+### Interaktive Eingabe:
+```bash
+python sgw_essen_scraper.py -new
 ```
 
 ### Termine anzeigen:
@@ -38,17 +33,22 @@ python sgw_essen_scraper.py
 python sgw_essen_scraper.py --list
 ```
 
-### Manuell Termine hinzufügen:
+### Web-Scraping testen:
 ```bash
-python sgw_essen_scraper.py -new
+python sgw_essen_scraper.py --enable-scraping
 ```
+*(Sobald die neue DSV-Website für 2025 online ist)*
 
-## 🔄 Updates
+## 🔄 Kalender aktualisieren
 
-1. Script ausführen: `python sgw_essen_scraper.py`
-2. Änderungen committen: `git add . && git commit -m "Update calendar"`
-3. Push zu GitHub: `git push`
-4. **Fertig!** Kalender wird automatisch aktualisiert
+1. Termine hinzufügen (siehe oben)
+2. Zu GitHub pushen:
+   ```bash
+   git add .
+   git commit -m "Add new games"
+   git push
+   ```
+3. **Fertig!** Kalender wird automatisch aktualisiert
 
 ## ⚙️ Installation
 
@@ -56,21 +56,12 @@ python sgw_essen_scraper.py -new
 pip install -r requirements.txt
 ```
 
-## 📋 Features
+## 📋 Aktueller Status
 
-- ✅ **18 Spiele automatisch** von DSV-Website scrapen
-- ✅ **Alle Plattformen** (Android, iOS, Desktop)
-- ✅ **Automatische Updates** via Git Push
-- ✅ **Keine Duplikate** bei Re-Import
-- ✅ **Einfach zu verwenden**
-
-## 🗂️ Dateien
-
-- `sgw_essen_scraper.py` - Hauptprogramm
-- `sgw_termine.ics` - Generierte Kalenderdatei
-- `sgw_termine.db` - Lokale Datenbank
-- `requirements.txt` - Python Abhängigkeiten
+- ✅ **Weihnachtsfeier**: 20.12.2025, 15:00 Uhr
+- ✅ **Neue Saison**: Spiele ab November 2026
+- ℹ️ **DSV-Website**: Noch nicht für neue Saison verfügbar
 
 ---
 
-*Automatisch generiert vom SGW Termine Scraper*
+*Einfach und funktional! 🎉*
