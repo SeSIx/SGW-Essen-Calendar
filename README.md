@@ -7,7 +7,7 @@
 **Direkt in Ihrer Kalender-App:**
 
 ```
-[https://github.com/SeSIx/SGW-Essen-Calendar/raw/main/sgw_termine.ics]
+https://github.com/SeSIx/SGW-Essen-Calendar/raw/main/sgw_termine.ics
 ```
 
 ### So geht's:
