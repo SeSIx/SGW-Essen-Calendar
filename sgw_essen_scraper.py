@@ -17,11 +17,31 @@ from typing import List, Dict
 class SGWTermineScraper:
     def __init__(self, db_path: str = "sgw_termine.db"):
         self.db_path = db_path
-        # URL für die neue Saison (wird aktiviert sobald verfügbar)
-        self.base_url = "https://dsvdaten.dsv.de/Modules/WB/League.aspx?Season=2025&LeagueID=197&Group=&LeagueKind=L"
+        # URL für die aktuelle Saison 2024 (Pokalrunde Ruhrgebiet)
+        self.base_url = "https://dsvdaten.dsv.de/Modules/WB/League.aspx"
+        self.params = {
+            'Season': '2024',
+            'LeagueID': '250',
+            'Group': '',
+            'LeagueKind': 'C'
+        }
         self.session = requests.Session()
         self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            'Host': 'dsvdaten.dsv.de',
+            'Sec-Ch-Ua': '"Not?A_Brand";v="99", "Chromium";v="130"',
+            'Sec-Ch-Ua-Mobile': '?0',
+            'Sec-Ch-Ua-Platform': '"Windows"',
+            'Accept-Language': 'de-DE,de;q=0.9',
+            'Upgrade-Insecure-Requests': '1',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.6723.70 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Sec-Fetch-Site': 'same-origin',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-User': '?1',
+            'Sec-Fetch-Dest': 'document',
+            'Referer': 'https://dsvdaten.dsv.de/Modules/WB/Index.aspx',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Priority': 'u=0, i'
         })
         self.init_database()
     
@@ -64,47 +84,109 @@ class SGWTermineScraper:
         return hashlib.md5(content.encode('utf-8')).hexdigest()
     
     def scrape_termine(self, enable_scraping=False) -> List[Dict]:
-        """Scraping von DSV-Website (aktivierbar sobald neue Saison online)"""
+        """Einfaches Scraping von DSV-Website"""
         if not enable_scraping:
-            print("ℹ️  Scraping deaktiviert - Website für neue Saison noch nicht verfügbar")
-            print("💡 Verwenden Sie --enable-scraping um zu testen oder --add für manuelle Eingabe")
+            print("ℹ️  Scraping deaktiviert - verwenden Sie --enable-scraping um zu aktivieren")
             return []
         
-        print(f"🔍 Versuche Scraping von: {self.base_url}")
+        print("🔍 Scraping DSV Pokalrunde Ruhrgebiet 2024...")
         
         try:
-            response = self.session.get(self.base_url)
+            response = self.session.get(self.base_url, params=self.params)
             response.raise_for_status()
             soup = BeautifulSoup(response.content, 'html.parser')
             
+            # Finde alle Tabellenzeilen
+            rows = soup.find_all('tr')
+            print(f"📋 {len(rows)} Zeilen gefunden")
+            
             termine = []
-            tables = soup.find_all('table')
-            print(f"📋 {len(tables)} Tabellen gefunden")
+            current_round = ""
             
-            for table in tables:
-                rows = table.find_all('tr')
-                for row in rows:
-                    cells = row.find_all(['td', 'th'])
-                    if len(cells) >= 8:  # Mindestens 8 Spalten für vollständige Spielinfos
-                        row_text = ' '.join([cell.get_text(strip=True) for cell in cells])
-                        
-                        # Prüfe ob SG Wasserball Essen in der Zeile vorkommt
-                        if 'SG Wasserball Essen' in row_text or 'SGW Essen' in row_text:
-                            termin = self._parse_game_row(cells, row_text)
-                            if termin:
-                                termine.append(termin)
+            for row in rows:
+                cells = row.find_all(['td', 'th'])
+                if len(cells) < 6:
+                    continue
+                
+                # Prüfe auf Runden-Header
+                if len(cells) == 1 and 'Runde' in cells[0].get_text():
+                    current_round = cells[0].get_text(strip=True)
+                    print(f"📅 {current_round}")
+                    continue
+                
+                # Extrahiere Spiel-Daten
+                row_text = ' '.join([cell.get_text(strip=True) for cell in cells])
+                
+                # Suche nach SGW Essen Spielen
+                if 'SG Wasserball Essen' in row_text or 'Essen' in row_text:
+                    print(f"🎯 Spiel gefunden: {row_text[:100]}...")
+                    
+                    game = self._parse_simple_game_row(cells, current_round)
+                    if game:
+                        termine.append(game)
             
-            print(f"🎯 {len(termine)} SGW Essen Spiele gefunden")
+            print(f"✅ {len(termine)} SGW Essen Spiele gefunden")
             return termine
             
-        except requests.RequestException as e:
-            print(f"❌ Netzwerk-Fehler: {e}")
-            print("💡 Website möglicherweise noch nicht verfügbar für neue Saison")
-            return []
         except Exception as e:
-            print(f"❌ Scraping-Fehler: {e}")
+            print(f"❌ Fehler: {e}")
             return []
     
+    def _parse_simple_game_row(self, cells, current_round: str) -> Dict:
+        """Einfaches Parsing einer Spielzeile"""
+        try:
+            # Extrahiere Daten aus den Zellen
+            game_id = cells[0].get_text(strip=True)
+            date_time = cells[1].get_text(strip=True)
+            home_team = cells[3].get_text(strip=True)
+            guest_team = cells[5].get_text(strip=True)
+            location = cells[6].get_text(strip=True)
+            result = cells[7].get_text(strip=True)
+            
+            # Parse Datum und Zeit
+            date_match = re.search(r'(\d{1,2}\.\d{1,2}\.\d{2,4})', date_time)
+            time_match = re.search(r'(\d{1,2}:\d{2})', date_time)
+            
+            date = ""
+            time = ""
+            if date_match:
+                date = date_match.group(1)
+                # Konvertiere 2-stelliges Jahr
+                if len(date.split('.')[-1]) == 2:
+                    year = int(date.split('.')[-1])
+                    year += 2000 if year < 50 else 1900
+                    date = date[:-2] + str(year)
+            
+            if time_match:
+                time = time_match.group(1)
+            
+            # Bestimme Home/Guest basierend auf Location
+            if location and 'essen' in location.lower():
+                # SG Wasserball Essen ist zu Hause
+                final_home = home_team if 'SG Wasserball Essen' in home_team else guest_team
+                final_guest = guest_team if 'SG Wasserball Essen' in home_team else home_team
+            else:
+                # SG Wasserball Essen ist Gast
+                final_home = guest_team if 'SG Wasserball Essen' in home_team else home_team
+                final_guest = home_team if 'SG Wasserball Essen' in home_team else guest_team
+            
+            # Bereinige Ergebnis
+            clean_result = "" if result == "mehr..." else result
+            
+            return {
+                'round': current_round,
+                'date': date,
+                'time': time,
+                'home': final_home,
+                'guest': final_guest,
+                'location': location,
+                'result': clean_result
+            }
+            
+        except Exception as e:
+            print(f"⚠️  Parsing-Fehler: {e}")
+            return None
+
     def _parse_game_row(self, cells: List, row_text: str) -> Dict:
         """Parst eine Tabellenzeile mit Spielansetzungen"""
         try:
@@ -202,10 +284,11 @@ class SGWTermineScraper:
         updated_count = 0
         
         for termin in termine:
-            event_id = self.generate_event_id(
-                termin.get('home', ''),
-                termin.get('guest', '')
-            )
+            # Replace "SG Wasserball Essen" with "SGW Essen" in team names before saving
+            home_clean = termin.get('home', '').replace("SG Wasserball Essen", "SGW Essen")
+            guest_clean = termin.get('guest', '').replace("SG Wasserball Essen", "SGW Essen")
+            
+            event_id = self.generate_event_id(home_clean, guest_clean)
             
             # Prüfe ob Event bereits existiert
             cursor.execute('SELECT id FROM games WHERE event_id = ?', (event_id,))
@@ -219,15 +302,15 @@ class SGWTermineScraper:
                         last_change = CURRENT_TIMESTAMP
                     WHERE event_id = ?
                 ''', (
-                    termin.get('home', ''),
-                    termin.get('guest', ''),
+                    home_clean,
+                    guest_clean,
                     termin.get('date', ''),
                     termin.get('time', ''),
                     termin.get('location', ''),
                     termin.get('result', ''),
                     event_id
                 ))
-                print(f"🔄 Aktualisiert: {termin.get('home', '')} vs {termin.get('guest', '')}")
+                print(f"🔄 Aktualisiert: {home_clean} vs {guest_clean}")
             else:
                 # Füge neuen Eintrag hinzu
                 cursor.execute('''
@@ -236,8 +319,8 @@ class SGWTermineScraper:
                     VALUES (?, ?, ?, ?, ?, ?, ?)
                 ''', (
                     event_id,
-                    termin.get('home', ''),
-                    termin.get('guest', ''),
+                    home_clean,
+                    guest_clean,
                     termin.get('date', ''),
                     termin.get('time', ''),
                     termin.get('location', ''),
@@ -248,6 +331,56 @@ class SGWTermineScraper:
         conn.commit()
         conn.close()
         return updated_count
+    
+    def delete_games_and_recalculate_ids(self, ids_to_delete: List[int]) -> int:
+        """Löscht Spiele mit den angegebenen IDs und berechnet IDs neu"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        # Prüfe welche IDs existieren
+        placeholders = ','.join(['?' for _ in ids_to_delete])
+        cursor.execute(f'SELECT id FROM games WHERE id IN ({placeholders})', ids_to_delete)
+        existing_ids = [row[0] for row in cursor.fetchall()]
+        
+        if not existing_ids:
+            print("❌ Keine der angegebenen IDs gefunden")
+            conn.close()
+            return 0
+        
+        print(f"🗑️  Lösche {len(existing_ids)} Spiele mit IDs: {existing_ids}")
+        
+        # Lösche die Spiele
+        cursor.execute(f'DELETE FROM games WHERE id IN ({placeholders})', ids_to_delete)
+        deleted_count = cursor.rowcount
+        
+        # Hole alle verbleibenden Spiele und sortiere sie nach ID
+        cursor.execute('SELECT * FROM games ORDER BY id')
+        remaining_games = cursor.fetchall()
+        
+        # Lösche alle Spiele und füge sie mit neuen IDs ein
+        cursor.execute('DELETE FROM games')
+        
+        for i, game in enumerate(remaining_games, 1):
+            # Neue ID ist i, restliche Daten bleiben gleich
+            (old_id, event_id, home, guest, date, time, location, result, last_change) = game
+            cursor.execute('''
+                INSERT INTO games 
+                (id, event_id, home, guest, date, time, location, result, last_change)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (i, event_id, home, guest, date, time, location, result, last_change))
+        
+        # Setze den Auto-Increment Counter
+        max_id = len(remaining_games)
+        cursor.execute('DELETE FROM sqlite_sequence WHERE name="games"')
+        cursor.execute('INSERT INTO sqlite_sequence (name, seq) VALUES ("games", ?)', (max_id,))
+        
+        conn.commit()
+        conn.close()
+        
+        print(f"✅ {deleted_count} Spiele gelöscht")
+        print(f"🔄 IDs neu berechnet, nächste ID wird {max_id + 1} sein")
+        
+        return deleted_count
     
     def generate_ics(self, output_file: str = "sgw_termine.ics") -> str:
         """Generiert ICS-Kalenderdatei"""
@@ -461,6 +594,8 @@ Beispiele:
   python sgw_essen_scraper.py --add "20.12.2025" "15:00" "SGW Essen" "Weihnachtsfeier" ""
   python sgw_essen_scraper.py -new
   python sgw_essen_scraper.py --list
+  python sgw_essen_scraper.py --delete 5 7 9
+  python sgw_essen_scraper.py --enable-scraping
         """
     )
     
@@ -478,10 +613,21 @@ Beispiele:
                        help='Zeigt Termine aus der Datenbank')
     parser.add_argument('--limit', type=int, default=10,
                        help='Anzahl der anzuzeigenden Termine')
+    parser.add_argument('--delete', nargs='+', type=int, metavar='ID',
+                       help='Löscht Termine mit den angegebenen IDs und berechnet IDs neu')
     
     args = parser.parse_args()
     
     scraper = SGWTermineScraper(db_path=args.db)
+    
+    # Spiele löschen
+    if args.delete:
+        deleted_count = scraper.delete_games_and_recalculate_ids(args.delete)
+        if deleted_count > 0:
+            # Generiere ICS nach dem Löschen
+            ics_file = scraper.generate_ics(args.ics)
+            print(f"📅 ICS-Datei aktualisiert: {ics_file}")
+        return
     
     # Liste anzeigen
     if args.list:
