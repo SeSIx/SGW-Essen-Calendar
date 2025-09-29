@@ -12,7 +12,8 @@ import os
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
-from typing import List, Dict
+from typing import List, Dict, Optional
+import urllib.parse
 
 class SGWTermineScraper:
     def __init__(self, db_path: str = "sgw_termine.db"):
@@ -43,6 +44,8 @@ class SGWTermineScraper:
             'Accept-Encoding': 'gzip, deflate, br',
             'Priority': 'u=0, i'
         })
+        # URL für einzelne Spiele
+        self.game_detail_url = "https://dsvdaten.dsv.de/Modules/WB/Game.aspx"
         self.init_database()
     
     def init_database(self):
@@ -59,7 +62,7 @@ class SGWTermineScraper:
                 date TEXT NOT NULL,
                 time TEXT,
                 location TEXT,
-                result TEXT,
+                description TEXT,
                 last_change TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
@@ -73,6 +76,57 @@ class SGWTermineScraper:
             print("✅ Location-Spalte zur Datenbank hinzugefügt")
         except sqlite3.OperationalError:
             # Spalte existiert bereits
+            pass
+        
+        # Füge description-Spalte hinzu und migriere result-Daten (Migration)
+        try:
+            cursor.execute('ALTER TABLE games ADD COLUMN description TEXT')
+            print("✅ Description-Spalte zur Datenbank hinzugefügt")
+        except sqlite3.OperationalError:
+            # Spalte existiert bereits
+            pass
+        
+        # Migriere result zu description falls result-Spalte existiert
+        try:
+            cursor.execute("SELECT name FROM pragma_table_info('games') WHERE name='result'")
+            if cursor.fetchone():
+                # Migriere alle Daten von result zu description
+                cursor.execute('UPDATE games SET description = result WHERE result IS NOT NULL AND result != ""')
+                print("✅ Result-Daten zu Description migriert")
+                
+                # SQLite unterstützt kein DROP COLUMN direkt, also erstelle neue Tabelle
+                cursor.execute('''
+                    CREATE TABLE games_new (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        event_id TEXT UNIQUE NOT NULL,
+                        home TEXT,
+                        guest TEXT,
+                        date TEXT NOT NULL,
+                        time TEXT,
+                        location TEXT,
+                        description TEXT,
+                        last_change TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                ''')
+                
+                # Kopiere Daten in neue Tabelle
+                cursor.execute('''
+                    INSERT INTO games_new (id, event_id, home, guest, date, time, location, description, last_change)
+                    SELECT id, event_id, home, guest, date, time, location, description, last_change
+                    FROM games
+                ''')
+                
+                # Lösche alte Tabelle und benenne neue um
+                cursor.execute('DROP TABLE games')
+                cursor.execute('ALTER TABLE games_new RENAME TO games')
+                
+                # Erstelle Indizes neu
+                cursor.execute('CREATE INDEX IF NOT EXISTS idx_event_id ON games(event_id)')
+                cursor.execute('CREATE INDEX IF NOT EXISTS idx_date ON games(date)')
+                
+                print("✅ Tabelle umstrukturiert - result-Spalte entfernt")
+        except sqlite3.OperationalError as e:
+            print(f"Migration-Info: {e}")
             pass
         
         conn.commit()
@@ -170,8 +224,26 @@ class SGWTermineScraper:
                 final_home = guest_team if 'SG Wasserball Essen' in home_team else home_team
                 final_guest = home_team if 'SG Wasserball Essen' in home_team else guest_team
             
-            # Bereinige Ergebnis
+            # Extrahiere Game-ID für detaillierte Informationen
+            game_id = None
+            # Suche nach Links in allen Zellen
+            for cell in cells:
+                links = cell.find_all('a')
+                for link in links:
+                    if link.get('href'):
+                        href = link.get('href')
+                        # Extrahiere GameID aus dem Link
+                        game_id_match = re.search(r'GameID=(\d+)', href)
+                        if game_id_match:
+                            game_id = game_id_match.group(1)
+                            break
+                if game_id:
+                    break
+            
+            # Bereinige Ergebnis und prüfe auf "mehr..."
             clean_result = "" if result == "mehr..." else result
+            # Immer Details holen wenn game_id verfügbar (für Schiedsrichter und Ort)
+            needs_detail_fetch = game_id is not None
             
             return {
                 'round': current_round,
@@ -180,7 +252,9 @@ class SGWTermineScraper:
                 'home': final_home,
                 'guest': final_guest,
                 'location': location,
-                'result': clean_result
+                'result': clean_result,
+                'game_id': game_id,
+                'needs_detail_fetch': needs_detail_fetch
             }
             
         except Exception as e:
@@ -276,6 +350,187 @@ class SGWTermineScraper:
         cleaned = re.sub(r'\s+', ' ', cleaned)
         return cleaned
     
+    def fetch_game_details(self, game_id: str) -> Optional[Dict]:
+        """Holt detaillierte Spielinformationen von der Einzelspiel-Seite"""
+        if not game_id:
+            return None
+            
+        try:
+            # Parameter für die Game-Detail-URL
+            game_params = {
+                'Season': self.params['Season'],
+                'LeagueID': self.params['LeagueID'],
+                'Group': self.params['Group'],
+                'LeagueKind': self.params['LeagueKind'],
+                'GameID': game_id
+            }
+            
+            response = self.session.get(self.game_detail_url, params=game_params)
+            response.raise_for_status()
+            
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Extrahiere detaillierte Informationen
+            details = {
+                'location_address': '',
+                'location_maps_link': '',
+                'detailed_result': '',
+                'referee1': '',
+                'referee2': '',
+                'is_played': False
+            }
+            
+            # Suche nach Adressinformationen
+            address_info = self._extract_location_info(soup)
+            if address_info:
+                details.update(address_info)
+            
+            # Suche nach detailliertem Ergebnis
+            result_info = self._extract_detailed_result(soup)
+            if result_info:
+                details['detailed_result'] = result_info
+                details['is_played'] = True
+            
+            # Suche nach Schiedsrichter-Informationen
+            referee_info = self._extract_referee_info(soup)
+            if referee_info:
+                details.update(referee_info)
+            
+            return details
+            
+        except Exception as e:
+            print(f"⚠️  Fehler beim Laden der Spieldetails für Game-ID {game_id}: {e}")
+            return None
+    
+    def _extract_location_info(self, soup: BeautifulSoup) -> Optional[Dict]:
+        """Extrahiert Adress- und Google Maps-Informationen aus der Spieldetail-Seite"""
+        location_info = {
+            'location_address': '',
+            'location_maps_link': ''
+        }
+        
+        try:
+            # Suche nach "Google Maps:" in Tabellen
+            tables = soup.find_all('table')
+            for table in tables:
+                rows = table.find_all('tr')
+                for row in rows:
+                    cells = row.find_all(['td', 'th'])
+                    for i, cell in enumerate(cells):
+                        cell_text = cell.get_text(strip=True).lower()
+                        if 'google maps' in cell_text and i + 1 < len(cells):
+                            link = cells[i + 1].find('a', href=True)
+                            if link:
+                                location_info['location_maps_link'] = link.get('href', '')
+                                # Versuche Adresse aus URL zu extrahieren
+                                try:
+                                    parsed_url = urllib.parse.urlparse(location_info['location_maps_link'])
+                                    query_params = urllib.parse.parse_qs(parsed_url.query)
+                                    if 'q' in query_params:
+                                        location_info['location_address'] = query_params['q'][0]
+                                    elif 'query' in query_params:
+                                        location_info['location_address'] = query_params['query'][0]
+                                except:
+                                    pass
+                                break
+                    if location_info['location_maps_link']:
+                        break
+                if location_info['location_maps_link']:
+                    break
+            
+            # Suche nach Adresse in Tabellen falls nicht aus URL extrahiert
+            if not location_info['location_address']:
+                for table in tables:
+                    rows = table.find_all('tr')
+                    for row in rows:
+                        cells = row.find_all(['td', 'th'])
+                        for i, cell in enumerate(cells):
+                            cell_text = cell.get_text(strip=True).lower()
+                            if any(keyword in cell_text for keyword in ['adresse', 'bad-adresse']):
+                                if i + 1 < len(cells):
+                                    address = cells[i + 1].get_text(strip=True)
+                                    if address and len(address) > 3:
+                                        location_info['location_address'] = address
+                                        break
+                        if location_info['location_address']:
+                            break
+                    if location_info['location_address']:
+                        break
+            
+            return location_info if location_info['location_address'] or location_info['location_maps_link'] else None
+            
+        except Exception as e:
+            print(f"⚠️  Fehler beim Extrahieren der Ortsinformationen: {e}")
+            return None
+    
+    def _extract_detailed_result(self, soup: BeautifulSoup) -> Optional[str]:
+        """Extrahiert detailliertes Spielergebnis aus der Spieldetail-Seite"""
+        try:
+            # Suche nach Ergebnis in Tabellen
+            tables = soup.find_all('table')
+            for table in tables:
+                rows = table.find_all('tr')
+                for row in rows:
+                    cells = row.find_all(['td', 'th'])
+                    for i, cell in enumerate(cells):
+                        cell_text = cell.get_text(strip=True).lower()
+                        if any(keyword in cell_text for keyword in ['ergebnis', 'result', 'endstand']):
+                            for j in range(i + 1, len(cells)):
+                                result_text = cells[j].get_text(strip=True)
+                                match = re.search(r'\b(\d{1,2}[:\-]\d{1,2})\b', result_text)
+                                if match:
+                                    result = match.group(1)
+                                    parts = result.replace('-', ':').split(':')
+                                    if len(parts) == 2:
+                                        first, second = int(parts[0]), int(parts[1])
+                                        # Filtere Zeit-Patterns aus
+                                        if first > 23 or second > 59 or (first <= 30 and second <= 30):
+                                            return result.replace('-', ':')
+            return None
+            
+        except Exception as e:
+            print(f"⚠️  Fehler beim Extrahieren des detaillierten Ergebnisses: {e}")
+            return None
+    
+    def _extract_referee_info(self, soup: BeautifulSoup) -> Optional[Dict]:
+        """Extrahiert Schiedsrichter-Informationen aus der Spieldetail-Seite"""
+        referee_info = {
+            'referee1': '',
+            'referee2': ''
+        }
+        
+        try:
+            all_ref_names = []
+            
+            # Suche in Tabellen nach Schiedsrichter-Keywords
+            tables = soup.find_all('table')
+            for table in tables:
+                rows = table.find_all('tr')
+                for row in rows:
+                    cells = row.find_all(['td', 'th'])
+                    for i, cell in enumerate(cells):
+                        cell_text = cell.get_text(strip=True).lower()
+                        if any(keyword in cell_text for keyword in ['schiedsrichter', 'referee', 'ref', 'sr']):
+                            for j in range(i + 1, len(cells)):
+                                ref_name = cells[j].get_text(strip=True)
+                                if (ref_name and len(ref_name) > 2 and not ref_name.isdigit() and
+                                    not any(word in ref_name.lower() for word in ['essen', 'oberhausen', 'vs', 'mehr', 'spiel'])):
+                                    all_ref_names.append(ref_name)
+            
+            # Entferne Duplikate
+            unique_refs = list(dict.fromkeys(all_ref_names))
+            
+            if unique_refs:
+                referee_info['referee1'] = unique_refs[0] if len(unique_refs) > 0 else ''
+                referee_info['referee2'] = unique_refs[1] if len(unique_refs) > 1 else ''
+                return referee_info
+            
+            return None
+            
+        except Exception as e:
+            print(f"⚠️  Fehler beim Extrahieren der Schiedsrichter-Informationen: {e}")
+            return None
+    
     def save_termine(self, termine: List[Dict]) -> int:
         """Speichert Termine in der Datenbank"""
         conn = sqlite3.connect(self.db_path)
@@ -290,6 +545,61 @@ class SGWTermineScraper:
             
             event_id = self.generate_event_id(home_clean, guest_clean)
             
+            # Hole detaillierte Informationen falls nötig
+            game_details = None
+            if termin.get('needs_detail_fetch', False) and termin.get('game_id'):
+                game_details = self.fetch_game_details(termin['game_id'])
+            
+            # Bestimme finale Werte für Location und Description
+            base_location = termin.get('location', '')
+            base_result = termin.get('result', '')
+            
+            # Kombiniere Location: Adresse + Google Maps Link
+            final_location = base_location
+            final_description = ""
+            
+            if game_details:
+                # Kombiniere Adresse und Maps Link für Location
+                location_parts = []
+                if game_details.get('location_address'):
+                    location_parts.append(game_details['location_address'])
+                elif base_location.strip():
+                    location_parts.append(base_location)
+                
+                if game_details.get('location_maps_link'):
+                    location_parts.append(game_details['location_maps_link'])
+                
+                if location_parts:
+                    final_location = ' | '.join(location_parts)
+                
+                # Formatiere Description basierend auf Spielstatus
+                description_parts = []
+                
+                # Ergebnis hinzufügen
+                if game_details.get('is_played') and game_details.get('detailed_result'):
+                    # Gespieltes Spiel: Ergebnis von Detail-Seite
+                    description_parts.append(f"Result: {game_details['detailed_result']}")
+                elif base_result.strip():
+                    # Fallback auf base result von Übersichtsseite
+                    description_parts.append(f"Result: {base_result}")
+                else:
+                    # Kein Ergebnis verfügbar
+                    description_parts.append("Result: -")
+                
+                # Schiedsrichter hinzufügen
+                if game_details.get('referee1'):
+                    description_parts.append(f"Ref 1: {game_details['referee1']}")
+                if game_details.get('referee2'):
+                    description_parts.append(f"Ref 2: {game_details['referee2']}")
+                
+                final_description = '\n'.join(description_parts)
+            else:
+                # Keine Details verfügbar, verwende base values
+                if base_result.strip():
+                    final_description = f"Result: {base_result}"
+                else:
+                    final_description = "Result: -"
+            
             # Prüfe ob Event bereits existiert
             cursor.execute('SELECT id FROM games WHERE event_id = ?', (event_id,))
             existing = cursor.fetchone()
@@ -298,7 +608,7 @@ class SGWTermineScraper:
                 # Aktualisiere bestehenden Eintrag
                 cursor.execute('''
                     UPDATE games 
-                    SET home = ?, guest = ?, date = ?, time = ?, location = ?, result = ?, 
+                    SET home = ?, guest = ?, date = ?, time = ?, location = ?, description = ?, 
                         last_change = CURRENT_TIMESTAMP
                     WHERE event_id = ?
                 ''', (
@@ -306,8 +616,8 @@ class SGWTermineScraper:
                     guest_clean,
                     termin.get('date', ''),
                     termin.get('time', ''),
-                    termin.get('location', ''),
-                    termin.get('result', ''),
+                    final_location,
+                    final_description,
                     event_id
                 ))
                 print(f"🔄 Aktualisiert: {home_clean} vs {guest_clean}")
@@ -315,7 +625,7 @@ class SGWTermineScraper:
                 # Füge neuen Eintrag hinzu
                 cursor.execute('''
                     INSERT INTO games 
-                    (event_id, home, guest, date, time, location, result)
+                    (event_id, home, guest, date, time, location, description)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
                 ''', (
                     event_id,
@@ -323,8 +633,8 @@ class SGWTermineScraper:
                     guest_clean,
                     termin.get('date', ''),
                     termin.get('time', ''),
-                    termin.get('location', ''),
-                    termin.get('result', '')
+                    final_location,
+                    final_description
                 ))
                 updated_count += 1
         
@@ -388,7 +698,7 @@ class SGWTermineScraper:
         cursor = conn.cursor()
         
         cursor.execute('''
-            SELECT id, event_id, home, guest, date, time, location, result
+            SELECT id, event_id, home, guest, date, time, location, description
             FROM games 
             ORDER BY date, time
         ''')
@@ -419,7 +729,7 @@ class SGWTermineScraper:
         ]
         
         for termin in termine:
-            (id, event_id, home, guest, date, time, location, result) = termin
+            (id, event_id, home, guest, date, time, location, description) = termin
             
             uid = f"sgw-{event_id}@essen.de"
             title = f"{home} vs {guest}"
@@ -452,11 +762,23 @@ class SGWTermineScraper:
             dtend = end_time.strftime('%Y%m%dT%H%M%S')
             dtstamp = now.strftime('%Y%m%dT%H%M%SZ')
             
-            # Beschreibung
-            description = f"Result: {result}" if result else ""
+            # Verwende Description direkt (bereits formatiert mit Result/Refs)
+            ics_description = description if description else ""
             
-            # Location
-            location_text = location if location and location.strip() else "TBA"
+            # Location: Kombiniere Adresse und Google Maps Link für bessere Kalender-Integration
+            if location and '|' in location:
+                parts = location.split('|', 1)
+                address = parts[0].strip()
+                maps_link = parts[1].strip()
+                if address and maps_link:
+                    # Format: "Address\nGoogle Maps: Link" für bessere Darstellung in Kalendern
+                    location_text = f"{address}\\nGoogle Maps: {maps_link}"
+                else:
+                    location_text = address if address else maps_link
+            else:
+                location_text = location.strip() if location else "TBA"
+            
+            location_text = location_text if location_text else "TBA"
             
             # Event
             ics_lines.extend([
@@ -466,7 +788,7 @@ class SGWTermineScraper:
                 f"DTSTART:{dtstart}",
                 f"DTEND:{dtend}",
                 f"SUMMARY:{title}",
-                f"DESCRIPTION:{description}",
+                f"DESCRIPTION:{ics_description}",
                 f"LOCATION:{location_text}",
                 "STATUS:CONFIRMED",
                 "TRANSP:OPAQUE",
@@ -482,7 +804,7 @@ class SGWTermineScraper:
         cursor = conn.cursor()
         
         cursor.execute('''
-            SELECT id, date, time, home, guest, location, result, last_change
+            SELECT id, date, time, home, guest, location, description, last_change
             FROM games 
             ORDER BY date DESC, time DESC
             LIMIT ?
@@ -499,14 +821,30 @@ class SGWTermineScraper:
         print(f"\n=== {len(termine)} Termine ===")
         print("-" * 80)
         for termin in termine:
-            (id, date, time, home, guest, location, result, last_change) = termin
+            (id, date, time, home, guest, location, description, last_change) = termin
             time_str = f" {time}" if time else ""
-            location_str = f" @ {location}" if location and location.strip() else ""
-            result_str = f" | {result}" if result else ""
             
-            print(f"ID {id:3d} | {date}{time_str}{location_str}")
-            print(f"      | {home} vs {guest}{result_str}")
-            print(f"      | {last_change}")
+            # Location: Zeige nur Adress-Teil (vor "|"), Maps-Link wird separat angezeigt
+            display_location = location.split('|')[0].strip() if location else ""
+            location_str = f" @ {display_location}" if display_location else ""
+            maps_str = f" 🗺️" if '|' in location else ""
+            
+            print(f"ID {id:3d} | {date}{time_str}{location_str}{maps_str}")
+            print(f"      | {home} vs {guest}")
+            
+            # Zeige Description (Result/Refs) wenn vorhanden
+            if description and description.strip():
+                desc_lines = description.split('\n')
+                for desc_line in desc_lines:
+                    print(f"      | {desc_line}")
+            
+            # Zeige Google Maps Link wenn vorhanden
+            if '|' in location:
+                maps_link = location.split('|', 1)[1].strip()
+                if maps_link.startswith('http'):
+                    print(f"      | Maps: {maps_link}")
+            
+            print(f"      | Updated: {last_change}")
             print("-" * 80)
     
     def add_manual_termine(self) -> List[Dict]:
