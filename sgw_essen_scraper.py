@@ -18,13 +18,23 @@ import urllib.parse
 class SGWTermineScraper:
     def __init__(self, db_path: str = "sgw_termine.db"):
         self.db_path = db_path
-        # URL für die aktuelle Saison 2024 (Pokalrunde Ruhrgebiet)
+        # URL für die aktuelle Saison
         self.base_url = "https://dsvdaten.dsv.de/Modules/WB/League.aspx"
-        self.params = {
+        
+        # Parameter für Pokalrunde Ruhrgebiet 2024
+        self.cup_params = {
             'Season': '2024',
             'LeagueID': '250',
             'Group': '',
             'LeagueKind': 'C'
+        }
+        
+        # Parameter für Liga 2025 (vom User bereitgestellt)
+        self.league_params = {
+            'Season': '2025',
+            'LeagueID': '197',
+            'Group': 'B',
+            'LeagueKind': 'L'
         }
         self.session = requests.Session()
         self.session.headers.update({
@@ -86,6 +96,7 @@ class SGWTermineScraper:
             # Spalte existiert bereits
             pass
         
+        
         # Migriere result zu description falls result-Spalte existiert
         try:
             cursor.execute("SELECT name FROM pragma_table_info('games') WHERE name='result'")
@@ -133,26 +144,95 @@ class SGWTermineScraper:
         conn.close()
     
     def generate_event_id(self, home: str, guest: str) -> str:
-        """Generiert eindeutige Event-ID basierend auf Teams"""
-        content = f"{home}_vs_{guest}".strip()
+        """Generiert eindeutige Event-ID basierend auf Teams (normalisiert)"""
+        # Normalisiere Teamnamen für konsistente Event-IDs
+        home_norm = self._normalize_team_name(home)
+        guest_norm = self._normalize_team_name(guest)
+        content = f"{home_norm}_vs_{guest_norm}".strip()
         return hashlib.md5(content.encode('utf-8')).hexdigest()
     
+    def _normalize_team_name(self, team_name: str) -> str:
+        """Normalisiert Teamnamen für konsistente Event-IDs"""
+        if not team_name:
+            return ""
+        
+        # Entferne häufige Variationen
+        normalized = team_name.strip()
+        
+        # Normalisiere SGW Essen Varianten
+        if "SGW Essen" in normalized or "SG Wasserball Essen" in normalized:
+            # Extrahiere Team-Nummer (I, II, III, etc.)
+            if " III" in normalized:
+                return "SGW Essen III"
+            elif " II" in normalized:
+                return "SGW Essen II"
+            else:
+                return "SGW Essen"
+        
+        # Normalisiere andere Teams (entferne Jahreszahlen und Zusätze)
+        # SV Rheinhausen 1913 II -> SV Rheinhausen II
+        normalized = re.sub(r'\s+\d{4}', '', normalized)  # Entferne Jahreszahlen
+        normalized = re.sub(r'\s+', ' ', normalized).strip()  # Normalisiere Leerzeichen
+        
+        return normalized
+    
+    def _is_valid_game(self, game: Dict) -> bool:
+        """Prüft ob ein Spiel gültige Daten hat (mindestens Datum)"""
+        if not game:
+            return False
+        
+        date = game.get('date', '').strip()
+        
+        # Spiel muss ein gültiges Datum haben
+        if not date or date.lower() in ['unbekannt', 'unknown', '', '-']:
+            print(f"⚠️  Überspringe Spiel ohne gültiges Datum: {game.get('home', '')} vs {game.get('guest', '')}")
+            return False
+        
+        # Prüfe ob Datum ein gültiges Format hat
+        try:
+            if '.' in date:
+                # Format: DD.MM.YYYY
+                parts = date.split('.')
+                if len(parts) == 3:
+                    day, month, year = parts
+                    if int(day) > 0 and int(month) > 0 and int(year) > 2020:
+                        return True
+            return False
+        except (ValueError, IndexError):
+            print(f"⚠️  Überspringe Spiel mit ungültigem Datumsformat: {date}")
+            return False
+    
     def scrape_termine(self, enable_scraping=False) -> List[Dict]:
-        """Einfaches Scraping von DSV-Website"""
+        """Scraping von DSV-Website für Pokal und Liga"""
         if not enable_scraping:
             print("ℹ️  Scraping deaktiviert - verwenden Sie --enable-scraping um zu aktivieren")
             return []
         
-        print("🔍 Scraping DSV Pokalrunde Ruhrgebiet 2024...")
+        all_termine = []
         
+        # Scrape Pokalrunde
+        print("🔍 Scraping DSV Pokalrunde Ruhrgebiet 2024...")
+        cup_termine = self._scrape_competition(self.cup_params, "cup")
+        all_termine.extend(cup_termine)
+        
+        # Scrape Liga
+        print("🔍 Scraping DSV Liga 2025...")
+        league_termine = self._scrape_competition(self.league_params, "league")
+        all_termine.extend(league_termine)
+        
+        print(f"✅ Gesamt: {len(all_termine)} SGW Essen Spiele gefunden")
+        return all_termine
+    
+    def _scrape_competition(self, params: Dict, competition_type: str) -> List[Dict]:
+        """Scraping einer spezifischen Competition (Pokal oder Liga)"""
         try:
-            response = self.session.get(self.base_url, params=self.params)
+            response = self.session.get(self.base_url, params=params)
             response.raise_for_status()
             soup = BeautifulSoup(response.content, 'html.parser')
             
             # Finde alle Tabellenzeilen
             rows = soup.find_all('tr')
-            print(f"📋 {len(rows)} Zeilen gefunden")
+            print(f"📋 {len(rows)} Zeilen gefunden für {competition_type}")
             
             termine = []
             current_round = ""
@@ -173,20 +253,29 @@ class SGWTermineScraper:
                 
                 # Suche nach SGW Essen Spielen
                 if 'SG Wasserball Essen' in row_text or 'Essen' in row_text:
-                    print(f"🎯 Spiel gefunden: {row_text[:100]}...")
+                    # Filtere Tabellen-/Statistik-Zeilen aus
+                    if ('Gesamttabelle' in row_text or 
+                        'kein dir. Vergleich' in row_text or
+                        'Pkt:' in row_text or
+                        'TD:' in row_text or
+                        'Tore:' in row_text):
+                        print(f"⚠️  Überspringe Tabellen-Zeile: {row_text[:100]}...")
+                        continue
                     
-                    game = self._parse_simple_game_row(cells, current_round)
-                    if game:
+                    print(f"🎯 {competition_type.upper()} Spiel gefunden: {row_text[:100]}...")
+                    
+                    game = self._parse_simple_game_row(cells, current_round, competition_type)
+                    if game and self._is_valid_game(game):
                         termine.append(game)
             
-            print(f"✅ {len(termine)} SGW Essen Spiele gefunden")
+            print(f"✅ {len(termine)} SGW Essen {competition_type} Spiele gefunden")
             return termine
             
         except Exception as e:
-            print(f"❌ Fehler: {e}")
+            print(f"❌ Fehler beim {competition_type} Scraping: {e}")
             return []
     
-    def _parse_simple_game_row(self, cells, current_round: str) -> Dict:
+    def _parse_simple_game_row(self, cells, current_round: str, competition_type: str = "cup") -> Dict:
         """Einfaches Parsing einer Spielzeile"""
         try:
             # Extrahiere Daten aus den Zellen
@@ -254,7 +343,8 @@ class SGWTermineScraper:
                 'location': location,
                 'result': clean_result,
                 'game_id': game_id,
-                'needs_detail_fetch': needs_detail_fetch
+                'needs_detail_fetch': needs_detail_fetch,
+                'competition': competition_type
             }
             
         except Exception as e:
@@ -350,18 +440,23 @@ class SGWTermineScraper:
         cleaned = re.sub(r'\s+', ' ', cleaned)
         return cleaned
     
-    def fetch_game_details(self, game_id: str) -> Optional[Dict]:
+    def fetch_game_details(self, game_id: str, competition_type: str = "cup") -> Optional[Dict]:
         """Holt detaillierte Spielinformationen von der Einzelspiel-Seite"""
         if not game_id:
             return None
             
         try:
-            # Parameter für die Game-Detail-URL
+            # Parameter für die Game-Detail-URL (verwende entsprechende Competition-Parameter)
+            if competition_type == "league":
+                base_params = self.league_params
+            else:
+                base_params = self.cup_params
+                
             game_params = {
-                'Season': self.params['Season'],
-                'LeagueID': self.params['LeagueID'],
-                'Group': self.params['Group'],
-                'LeagueKind': self.params['LeagueKind'],
+                'Season': base_params['Season'],
+                'LeagueID': base_params['LeagueID'],
+                'Group': base_params['Group'],
+                'LeagueKind': base_params['LeagueKind'],
                 'GameID': game_id
             }
             
@@ -514,7 +609,12 @@ class SGWTermineScraper:
                             for j in range(i + 1, len(cells)):
                                 ref_name = cells[j].get_text(strip=True)
                                 if (ref_name and len(ref_name) > 2 and not ref_name.isdigit() and
-                                    not any(word in ref_name.lower() for word in ['essen', 'oberhausen', 'vs', 'mehr', 'spiel'])):
+                                    ',' in ref_name and  # Schiedsrichter haben meist Format "Nachname, Vorname"
+                                    not any(word in ref_name.lower() for word in [
+                                        'essen', 'oberhausen', 'vs', 'mehr', 'spiel', 'solingen', 
+                                        'wuppertal', 'bochum', 'duisburg', 'rheinhausen', 'kevelaer',
+                                        'tpsk', 'sgw', 'sv', 'asc', 'wsg', 'blau-weiß'
+                                    ])):
                                     all_ref_names.append(ref_name)
             
             # Entferne Duplikate
@@ -548,7 +648,7 @@ class SGWTermineScraper:
             # Hole detaillierte Informationen falls nötig
             game_details = None
             if termin.get('needs_detail_fetch', False) and termin.get('game_id'):
-                game_details = self.fetch_game_details(termin['game_id'])
+                game_details = self.fetch_game_details(termin['game_id'], termin.get('competition', 'cup'))
             
             # Bestimme finale Werte für Location und Description
             base_location = termin.get('location', '')
@@ -599,6 +699,14 @@ class SGWTermineScraper:
                     final_description = f"Result: {base_result}"
                 else:
                     final_description = "Result: -"
+            
+            # Füge Competition-Information zur Description hinzu (falls noch nicht vorhanden)
+            competition_type = termin.get('competition', 'cup')
+            comp_prefix = "[POKAL]" if competition_type == "cup" else "[LIGA]"
+            
+            # Prüfe ob Competition-Info bereits vorhanden ist
+            if not final_description.startswith("[LIGA]") and not final_description.startswith("[POKAL]"):
+                final_description = f"{comp_prefix}\n{final_description}"
             
             # Prüfe ob Event bereits existiert
             cursor.execute('SELECT id FROM games WHERE event_id = ?', (event_id,))
@@ -672,12 +780,12 @@ class SGWTermineScraper:
         
         for i, game in enumerate(remaining_games, 1):
             # Neue ID ist i, restliche Daten bleiben gleich
-            (old_id, event_id, home, guest, date, time, location, result, last_change) = game
+            (old_id, event_id, home, guest, date, time, location, description, last_change) = game
             cursor.execute('''
                 INSERT INTO games 
-                (id, event_id, home, guest, date, time, location, result, last_change)
+                (id, event_id, home, guest, date, time, location, description, last_change)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (i, event_id, home, guest, date, time, location, result, last_change))
+            ''', (i, event_id, home, guest, date, time, location, description, last_change))
         
         # Setze den Auto-Increment Counter
         max_id = len(remaining_games)
@@ -732,7 +840,13 @@ class SGWTermineScraper:
             (id, event_id, home, guest, date, time, location, description) = termin
             
             uid = f"sgw-{event_id}@essen.de"
-            title = f"{home} vs {guest}"
+            # Extrahiere Competition-Info aus Description für Titel
+            comp_prefix = ""
+            if description and description.startswith("[LIGA]"):
+                comp_prefix = "[LIGA] "
+            elif description and description.startswith("[POKAL]"):
+                comp_prefix = "[POKAL] "
+            title = f"{comp_prefix}{home} vs {guest}"
             
             # Parse Datum
             try:
@@ -763,7 +877,8 @@ class SGWTermineScraper:
             dtstamp = now.strftime('%Y%m%dT%H%M%SZ')
             
             # Verwende Description direkt (bereits formatiert mit Result/Refs)
-            ics_description = description if description else ""
+            # Ersetze \n durch \\n für korrekte ICS-Formatierung
+            ics_description = description.replace('\n', '\\n') if description else ""
             
             # Location: Kombiniere Adresse und Google Maps Link für bessere Kalender-Integration
             if location and '|' in location:
@@ -824,12 +939,19 @@ class SGWTermineScraper:
             (id, date, time, home, guest, location, description, last_change) = termin
             time_str = f" {time}" if time else ""
             
+            # Competition indicator aus Description extrahieren
+            comp_str = ""
+            if description and description.startswith("[LIGA]"):
+                comp_str = "[LIGA] "
+            elif description and description.startswith("[POKAL]"):
+                comp_str = "[POKAL] "
+            
             # Location: Zeige nur Adress-Teil (vor "|"), Maps-Link wird separat angezeigt
             display_location = location.split('|')[0].strip() if location else ""
             location_str = f" @ {display_location}" if display_location else ""
             maps_str = f" 🗺️" if '|' in location else ""
             
-            print(f"ID {id:3d} | {date}{time_str}{location_str}{maps_str}")
+            print(f"ID {id:3d} | {comp_str}{date}{time_str}{location_str}{maps_str}")
             print(f"      | {home} vs {guest}")
             
             # Zeige Description (Result/Refs) wenn vorhanden
