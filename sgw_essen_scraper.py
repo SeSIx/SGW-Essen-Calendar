@@ -841,12 +841,8 @@ class SGWTermineScraper:
             
             uid = f"sgw-{event_id}@essen.de"
             # Extrahiere Competition-Info aus Description für Titel
-            comp_prefix = ""
-            if description and description.startswith("[LIGA]"):
-                comp_prefix = "[LIGA] "
-            elif description and description.startswith("[POKAL]"):
-                comp_prefix = "[POKAL] "
-            title = f"{comp_prefix}{home} vs {guest}"
+            # Kalender-Titel ohne Competition-Tags
+            title = f"{home} vs {guest}"
             
             # Parse Datum
             try:
@@ -1106,11 +1102,7 @@ Beispiele:
             'result': result
         }
         count = scraper.save_termine([termin])
-        print(f"✅ Termin hinzugefügt: {home} vs {guest} am {date} {time}")
-        print(f"Neue/aktualisierte Termine: {count}")
-        
-        ics_file = scraper.generate_ics(args.ics)
-        print(f"ICS-Datei erstellt: {ics_file}")
+    
         return
     
     # Standard oder manuelle Eingabe
