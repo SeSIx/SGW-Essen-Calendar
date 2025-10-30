@@ -21,20 +21,35 @@ class SGWTermineScraper:
         # URL für die aktuelle Saison
         self.base_url = "https://dsvdaten.dsv.de/Modules/WB/League.aspx"
         
-        # Parameter für Pokalrunde Ruhrgebiet 2024
-        self.cup_params = {
-            'Season': '2024',
-            'LeagueID': '250',
-            'Group': '',
-            'LeagueKind': 'C'
-        }
-        
-        # Parameter für Liga 2025 (vom User bereitgestellt)
-        self.league_params = {
-            'Season': '2025',
-            'LeagueID': '197',
-            'Group': 'B',
-            'LeagueKind': 'L'
+        # Parameter für verschiedene Wettbewerbe
+        self.competitions = {
+            'pokal': {
+                'name': 'Bezirkspokal',
+                'params': {
+                    'Season': '2024',
+                    'LeagueID': '250',
+                    'Group': '',
+                    'LeagueKind': 'C'
+                }
+            },
+            'verbandsliga': {
+                'name': 'Verbandsliga',
+                'params': {
+                    'Season': '2025',
+                    'LeagueID': '197',
+                    'Group': 'B',
+                    'LeagueKind': 'L'
+                }
+            },
+            'ruhrgebietsliga': {
+                'name': 'Ruhrgebietsliga',
+                'params': {
+                    'Season': '2025',
+                    'LeagueID': '212',
+                    'Group': '',
+                    'LeagueKind': 'L'
+                }
+            }
         }
         self.session = requests.Session()
         self.session.headers.update({
@@ -143,12 +158,12 @@ class SGWTermineScraper:
         conn.commit()
         conn.close()
     
-    def generate_event_id(self, home: str, guest: str) -> str:
-        """Generiert eindeutige Event-ID basierend auf Teams (normalisiert)"""
+    def generate_event_id(self, home: str, guest: str, competition: str = "") -> str:
+        """Generiert eindeutige Event-ID basierend auf Teams und Wettbewerb (normalisiert)"""
         # Normalisiere Teamnamen für konsistente Event-IDs
         home_norm = self._normalize_team_name(home)
         guest_norm = self._normalize_team_name(guest)
-        content = f"{home_norm}_vs_{guest_norm}".strip()
+        content = f"{competition}_{home_norm}_vs_{guest_norm}".strip()
         return hashlib.md5(content.encode('utf-8')).hexdigest()
     
     def _normalize_team_name(self, team_name: str) -> str:
@@ -203,22 +218,18 @@ class SGWTermineScraper:
             return False
     
     def scrape_termine(self, enable_scraping=False) -> List[Dict]:
-        """Scraping von DSV-Website für Pokal und Liga"""
+        """Scraping von DSV-Website für alle Wettbewerbe"""
         if not enable_scraping:
             print("ℹ️  Scraping deaktiviert - verwenden Sie --enable-scraping um zu aktivieren")
             return []
         
         all_termine = []
         
-        # Scrape Pokalrunde
-        print("🔍 Scraping DSV Pokalrunde Ruhrgebiet 2024...")
-        cup_termine = self._scrape_competition(self.cup_params, "cup")
-        all_termine.extend(cup_termine)
-        
-        # Scrape Liga
-        print("🔍 Scraping DSV Liga 2025...")
-        league_termine = self._scrape_competition(self.league_params, "league")
-        all_termine.extend(league_termine)
+        # Scrape alle konfigurierten Wettbewerbe
+        for comp_key, comp_info in self.competitions.items():
+            print(f"🔍 Scraping DSV {comp_info['name']}...")
+            comp_termine = self._scrape_competition(comp_info['params'], comp_key)
+            all_termine.extend(comp_termine)
         
         print(f"✅ Gesamt: {len(all_termine)} SGW Essen Spiele gefunden")
         return all_termine
@@ -447,10 +458,11 @@ class SGWTermineScraper:
             
         try:
             # Parameter für die Game-Detail-URL (verwende entsprechende Competition-Parameter)
-            if competition_type == "league":
-                base_params = self.league_params
+            if competition_type in self.competitions:
+                base_params = self.competitions[competition_type]['params']
             else:
-                base_params = self.cup_params
+                # Fallback auf ersten Wettbewerb
+                base_params = list(self.competitions.values())[0]['params']
                 
             game_params = {
                 'Season': base_params['Season'],
@@ -643,7 +655,7 @@ class SGWTermineScraper:
             home_clean = termin.get('home', '').replace("SG Wasserball Essen", "SGW Essen")
             guest_clean = termin.get('guest', '').replace("SG Wasserball Essen", "SGW Essen")
             
-            event_id = self.generate_event_id(home_clean, guest_clean)
+            event_id = self.generate_event_id(home_clean, guest_clean, termin.get('competition', ''))
             
             # Hole detaillierte Informationen falls nötig
             game_details = None
@@ -701,11 +713,23 @@ class SGWTermineScraper:
                     final_description = "Result: -"
             
             # Füge Competition-Information zur Description hinzu (falls noch nicht vorhanden)
-            competition_type = termin.get('competition', 'cup')
-            comp_prefix = "[POKAL]" if competition_type == "cup" else "[LIGA]"
+            competition_type = termin.get('competition', 'pokal')
+            
+            # Bestimme Competition-Prefix basierend auf dem tatsächlichen Wettbewerb
+            if competition_type == 'pokal':
+                comp_prefix = "[POKAL]"
+            elif competition_type == 'verbandsliga':
+                comp_prefix = "[VERBANDSLIGA]"
+            elif competition_type == 'ruhrgebietsliga':
+                comp_prefix = "[RUHRGEBIETSLIGA]"
+            else:
+                comp_prefix = f"[{competition_type.upper()}]"
             
             # Prüfe ob Competition-Info bereits vorhanden ist
-            if not final_description.startswith("[LIGA]") and not final_description.startswith("[POKAL]"):
+            existing_prefixes = ["[LIGA]", "[POKAL]", "[VERBANDSLIGA]", "[RUHRGEBIETSLIGA]"]
+            has_prefix = any(final_description.startswith(prefix) for prefix in existing_prefixes)
+            
+            if not has_prefix:
                 final_description = f"{comp_prefix}\n{final_description}"
             
             # Prüfe ob Event bereits existiert
@@ -937,15 +961,20 @@ class SGWTermineScraper:
             
             # Competition indicator aus Description extrahieren
             comp_str = ""
-            if description and description.startswith("[LIGA]"):
-                comp_str = "[LIGA] "
-            elif description and description.startswith("[POKAL]"):
-                comp_str = "[POKAL] "
+            if description:
+                if description.startswith("[VERBANDSLIGA]"):
+                    comp_str = "[VERBANDSLIGA] "
+                elif description.startswith("[RUHRGEBIETSLIGA]"):
+                    comp_str = "[RUHRGEBIETSLIGA] "
+                elif description.startswith("[POKAL]"):
+                    comp_str = "[POKAL] "
+                elif description.startswith("[LIGA]"):  # Fallback für alte Einträge
+                    comp_str = "[LIGA] "
             
             # Location: Zeige nur Adress-Teil (vor "|"), Maps-Link wird separat angezeigt
             display_location = location.split('|')[0].strip() if location else ""
             location_str = f" @ {display_location}" if display_location else ""
-            maps_str = f" 🗺️" if '|' in location else ""
+            maps_str = f" [Maps]" if '|' in location else ""
             
             print(f"ID {id:3d} | {comp_str}{date}{time_str}{location_str}{maps_str}")
             print(f"      | {home} vs {guest}")
