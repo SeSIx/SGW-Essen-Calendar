@@ -9,6 +9,7 @@ import hashlib
 import argparse
 import re
 import os
+import sys
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
@@ -98,7 +99,6 @@ class SGWTermineScraper:
         # Füge location-Spalte hinzu falls sie nicht existiert (Migration)
         try:
             cursor.execute('ALTER TABLE games ADD COLUMN location TEXT')
-            print("✅ Location-Spalte zur Datenbank hinzugefügt")
         except sqlite3.OperationalError:
             # Spalte existiert bereits
             pass
@@ -106,7 +106,6 @@ class SGWTermineScraper:
         # Füge description-Spalte hinzu und migriere result-Daten (Migration)
         try:
             cursor.execute('ALTER TABLE games ADD COLUMN description TEXT')
-            print("✅ Description-Spalte zur Datenbank hinzugefügt")
         except sqlite3.OperationalError:
             # Spalte existiert bereits
             pass
@@ -118,7 +117,6 @@ class SGWTermineScraper:
             if cursor.fetchone():
                 # Migriere alle Daten von result zu description
                 cursor.execute('UPDATE games SET description = result WHERE result IS NOT NULL AND result != ""')
-                print("✅ Result-Daten zu Description migriert")
                 
                 # SQLite unterstützt kein DROP COLUMN direkt, also erstelle neue Tabelle
                 cursor.execute('''
@@ -149,10 +147,7 @@ class SGWTermineScraper:
                 # Erstelle Indizes neu
                 cursor.execute('CREATE INDEX IF NOT EXISTS idx_event_id ON games(event_id)')
                 cursor.execute('CREATE INDEX IF NOT EXISTS idx_date ON games(date)')
-                
-                print("✅ Tabelle umstrukturiert - result-Spalte entfernt")
         except sqlite3.OperationalError as e:
-            print(f"Migration-Info: {e}")
             pass
         
         conn.commit()
@@ -200,7 +195,6 @@ class SGWTermineScraper:
         
         # Spiel muss ein gültiges Datum haben
         if not date or date.lower() in ['unbekannt', 'unknown', '', '-']:
-            print(f"⚠️  Überspringe Spiel ohne gültiges Datum: {game.get('home', '')} vs {game.get('guest', '')}")
             return False
         
         # Prüfe ob Datum ein gültiges Format hat
@@ -214,24 +208,22 @@ class SGWTermineScraper:
                         return True
             return False
         except (ValueError, IndexError):
-            print(f"⚠️  Überspringe Spiel mit ungültigem Datumsformat: {date}")
             return False
     
     def scrape_termine(self, enable_scraping=False) -> List[Dict]:
         """Scraping von DSV-Website für alle Wettbewerbe"""
         if not enable_scraping:
-            print("ℹ️  Scraping deaktiviert - verwenden Sie --enable-scraping um zu aktivieren")
+            print("Scraping disabled - use --enable-scraping to activate")
             return []
         
         all_termine = []
         
+        print("Scraping DSV website...")
         # Scrape alle konfigurierten Wettbewerbe
         for comp_key, comp_info in self.competitions.items():
-            print(f"🔍 Scraping DSV {comp_info['name']}...")
             comp_termine = self._scrape_competition(comp_info['params'], comp_key)
             all_termine.extend(comp_termine)
         
-        print(f"✅ Gesamt: {len(all_termine)} SGW Essen Spiele gefunden")
         return all_termine
     
     def _scrape_competition(self, params: Dict, competition_type: str) -> List[Dict]:
@@ -243,7 +235,6 @@ class SGWTermineScraper:
             
             # Finde alle Tabellenzeilen
             rows = soup.find_all('tr')
-            print(f"📋 {len(rows)} Zeilen gefunden für {competition_type}")
             
             termine = []
             current_round = ""
@@ -256,7 +247,6 @@ class SGWTermineScraper:
                 # Prüfe auf Runden-Header
                 if len(cells) == 1 and 'Runde' in cells[0].get_text():
                     current_round = cells[0].get_text(strip=True)
-                    print(f"📅 {current_round}")
                     continue
                 
                 # Extrahiere Spiel-Daten
@@ -270,20 +260,16 @@ class SGWTermineScraper:
                         'Pkt:' in row_text or
                         'TD:' in row_text or
                         'Tore:' in row_text):
-                        print(f"⚠️  Überspringe Tabellen-Zeile: {row_text[:100]}...")
                         continue
-                    
-                    print(f"🎯 {competition_type.upper()} Spiel gefunden: {row_text[:100]}...")
                     
                     game = self._parse_simple_game_row(cells, current_round, competition_type)
                     if game and self._is_valid_game(game):
                         termine.append(game)
             
-            print(f"✅ {len(termine)} SGW Essen {competition_type} Spiele gefunden")
             return termine
             
         except Exception as e:
-            print(f"❌ Fehler beim {competition_type} Scraping: {e}")
+            print(f"Error scraping {competition_type}: {e}")
             return []
     
     def _parse_simple_game_row(self, cells, current_round: str, competition_type: str = "cup") -> Dict:
@@ -359,7 +345,6 @@ class SGWTermineScraper:
             }
             
         except Exception as e:
-            print(f"⚠️  Parsing-Fehler: {e}")
             return None
 
     def _parse_game_row(self, cells: List, row_text: str) -> Dict:
@@ -435,7 +420,6 @@ class SGWTermineScraper:
             }
             
         except Exception as e:
-            print(f"⚠️  Fehler beim Parsen der Zeile: {e}")
             return None
     
     def _clean_team_name(self, team_name: str) -> str:
@@ -506,7 +490,6 @@ class SGWTermineScraper:
             return details
             
         except Exception as e:
-            print(f"⚠️  Fehler beim Laden der Spieldetails für Game-ID {game_id}: {e}")
             return None
     
     def _extract_location_info(self, soup: BeautifulSoup) -> Optional[Dict]:
@@ -567,7 +550,6 @@ class SGWTermineScraper:
             return location_info if location_info['location_address'] or location_info['location_maps_link'] else None
             
         except Exception as e:
-            print(f"⚠️  Fehler beim Extrahieren der Ortsinformationen: {e}")
             return None
     
     def _extract_detailed_result(self, soup: BeautifulSoup) -> Optional[str]:
@@ -596,7 +578,6 @@ class SGWTermineScraper:
             return None
             
         except Exception as e:
-            print(f"⚠️  Fehler beim Extrahieren des detaillierten Ergebnisses: {e}")
             return None
     
     def _extract_referee_info(self, soup: BeautifulSoup) -> Optional[Dict]:
@@ -640,15 +621,16 @@ class SGWTermineScraper:
             return None
             
         except Exception as e:
-            print(f"⚠️  Fehler beim Extrahieren der Schiedsrichter-Informationen: {e}")
             return None
     
-    def save_termine(self, termine: List[Dict]) -> int:
+    def save_termine(self, termine: List[Dict]) -> Dict:
         """Speichert Termine in der Datenbank"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
-        updated_count = 0
+        new_games = []
+        updated_games = []
+        unchanged_games = []
         
         for termin in termine:
             # Replace "SG Wasserball Essen" with "SGW Essen" in team names before saving
@@ -733,10 +715,35 @@ class SGWTermineScraper:
                 final_description = f"{comp_prefix}\n{final_description}"
             
             # Prüfe ob Event bereits existiert
-            cursor.execute('SELECT id FROM games WHERE event_id = ?', (event_id,))
+            cursor.execute('SELECT home, guest, date, time, location, description FROM games WHERE event_id = ?', (event_id,))
             existing = cursor.fetchone()
             
             if existing:
+                # Vergleiche Daten um zu prüfen ob sich etwas geändert hat
+                old_home, old_guest, old_date, old_time, old_location, old_description = existing
+                
+                changes = []
+                if old_date != termin.get('date', ''):
+                    changes.append(f"date: {old_date} -> {termin.get('date', '')}")
+                if old_time != termin.get('time', ''):
+                    changes.append(f"time: {old_time} -> {termin.get('time', '')}")
+                if old_location != final_location:
+                    changes.append("location updated")
+                if old_description != final_description:
+                    # Check if result changed
+                    old_result = ""
+                    new_result = ""
+                    if old_description:
+                        for line in old_description.split('\n'):
+                            if line.startswith('Result:'):
+                                old_result = line.replace('Result:', '').strip()
+                    if final_description:
+                        for line in final_description.split('\n'):
+                            if line.startswith('Result:'):
+                                new_result = line.replace('Result:', '').strip()
+                    if old_result != new_result:
+                        changes.append(f"result: {old_result} -> {new_result}")
+                
                 # Aktualisiere bestehenden Eintrag
                 cursor.execute('''
                     UPDATE games 
@@ -752,7 +759,15 @@ class SGWTermineScraper:
                     final_description,
                     event_id
                 ))
-                print(f"🔄 Aktualisiert: {home_clean} vs {guest_clean}")
+                
+                if changes:
+                    updated_games.append({
+                        'match': f"{home_clean} vs {guest_clean}",
+                        'date': termin.get('date', ''),
+                        'changes': changes
+                    })
+                else:
+                    unchanged_games.append(f"{home_clean} vs {guest_clean}")
             else:
                 # Füge neuen Eintrag hinzu
                 cursor.execute('''
@@ -768,11 +783,21 @@ class SGWTermineScraper:
                     final_location,
                     final_description
                 ))
-                updated_count += 1
+                new_games.append({
+                    'match': f"{home_clean} vs {guest_clean}",
+                    'date': termin.get('date', ''),
+                    'time': termin.get('time', ''),
+                    'competition': comp_prefix
+                })
         
         conn.commit()
         conn.close()
-        return updated_count
+        
+        return {
+            'new': new_games,
+            'updated': updated_games,
+            'unchanged': unchanged_games
+        }
     
     def delete_games_and_recalculate_ids(self, ids_to_delete: List[int]) -> int:
         """Löscht Spiele mit den angegebenen IDs und berechnet IDs neu"""
@@ -785,11 +810,11 @@ class SGWTermineScraper:
         existing_ids = [row[0] for row in cursor.fetchall()]
         
         if not existing_ids:
-            print("❌ Keine der angegebenen IDs gefunden")
+            print("No games found with specified IDs")
             conn.close()
             return 0
         
-        print(f"🗑️  Lösche {len(existing_ids)} Spiele mit IDs: {existing_ids}")
+        print(f"Deleting {len(existing_ids)} games with IDs: {existing_ids}")
         
         # Lösche die Spiele
         cursor.execute(f'DELETE FROM games WHERE id IN ({placeholders})', ids_to_delete)
@@ -819,8 +844,8 @@ class SGWTermineScraper:
         conn.commit()
         conn.close()
         
-        print(f"✅ {deleted_count} Spiele gelöscht")
-        print(f"🔄 IDs neu berechnet, nächste ID wird {max_id + 1} sein")
+        print(f"{deleted_count} games deleted")
+        print(f"IDs recalculated, next ID: {max_id + 1}")
         
         return deleted_count
     
@@ -949,8 +974,8 @@ class SGWTermineScraper:
         conn.close()
         
         if not termine:
-            print("Keine Termine in der Datenbank gefunden.")
-            print("💡 Verwenden Sie --add um Termine hinzuzufügen")
+            print("No games found in database.")
+            print("Use --add to add games")
             return
         
         print(f"\n=== {len(termine)} Termine ===")
@@ -1036,15 +1061,19 @@ class SGWTermineScraper:
         
         return termine
     
-    def run(self, scrape=True, add_new=False, enable_scraping=False):
-        """Hauptausführung"""
-        print("🏊‍♂️ SGW Essen Termine Scraper gestartet...")
+    def run(self, scrape=True, add_new=False, enable_scraping=False) -> int:
+        """Hauptausführung
+        
+        Returns:
+            0 - No changes detected
+            1 - Changes detected (new or updated games)
+        """
+        print("SGW Essen Scraper started\n")
         
         alle_termine = []
         
         # Scraping (mit Feature-Flag)
         if scrape:
-            print("Extrahiere Termine von DSV-Seite...")
             termine = self.scrape_termine(enable_scraping=enable_scraping)
             alle_termine.extend(termine)
         
@@ -1054,21 +1083,54 @@ class SGWTermineScraper:
             alle_termine.extend(manual_termine)
         
         # Speichere in Datenbank
-        if alle_termine:
-            print("Speichere Termine in Datenbank...")
-            count = self.save_termine(alle_termine)
-            print(f"Neue/aktualisierte Termine: {count}")
+        results = None
+        has_changes = False
         
-        # Generiere ICS
-        print("Generiere ICS-Kalender...")
-        ics_file = self.generate_ics()
-        print(f"ICS-Datei erstellt: {ics_file}")
+        if alle_termine:
+            results = self.save_termine(alle_termine)
+            has_changes = bool(results['new'] or results['updated'])
+            
+            # Print summary
+            print("\n" + "="*60)
+            print(f"SUMMARY: {len(alle_termine)} games scraped")
+            print("="*60)
+            
+            # New games
+            if results['new']:
+                print(f"\nNEW GAMES ({len(results['new'])}):")
+                for game in results['new']:
+                    print(f"  + {game['competition']} {game['match']}")
+                    print(f"    Date: {game['date']} {game['time']}")
+            else:
+                print("\nNEW GAMES: None")
+            
+            # Updated games
+            if results['updated']:
+                print(f"\nUPDATED GAMES ({len(results['updated'])}):")
+                for game in results['updated']:
+                    print(f"  * {game['match']} ({game['date']})")
+                    for change in game['changes']:
+                        print(f"    - {change}")
+            else:
+                print("\nUPDATED GAMES: None (all data unchanged)")
+            
+            print("\n" + "="*60)
+        
+        # Generiere ICS nur bei Änderungen
+        if has_changes:
+            ics_file = self.generate_ics()
+            print(f"\nICS calendar updated: {ics_file}")
+        else:
+            print("\nNo changes detected - ICS calendar not regenerated")
         
         if not alle_termine and not scrape and not add_new:
-            print("\n💡 Verwenden Sie:")
-            print("  --add DATUM ZEIT HEIM GAST ERGEBNIS  # Termin direkt hinzufügen")
-            print("  -new                                  # Interaktive Eingabe")
-            print("  --list                                # Termine anzeigen")
+            print("\nUsage:")
+            print("  --add DATUM ZEIT HEIM GAST ERGEBNIS  # Add directly")
+            print("  -new                                  # Interactive input")
+            print("  --list                                # Show games")
+        
+        # Return exit code based on changes
+        return 1 if has_changes else 0
 
 def main():
     parser = argparse.ArgumentParser(
@@ -1111,13 +1173,14 @@ Beispiele:
         if deleted_count > 0:
             # Generiere ICS nach dem Löschen
             ics_file = scraper.generate_ics(args.ics)
-            print(f"📅 ICS-Datei aktualisiert: {ics_file}")
-        return
+            print(f"ICS calendar updated: {ics_file}")
+            sys.exit(1)  # Changes made
+        sys.exit(0)  # No changes
     
     # Liste anzeigen
     if args.list:
         scraper.list_termine(limit=args.limit)
-        return
+        sys.exit(0)
     
     # Direkter Termin
     if args.add:
@@ -1130,12 +1193,22 @@ Beispiele:
             'location': location,
             'result': result
         }
-        count = scraper.save_termine([termin])
-    
-        return
+        results = scraper.save_termine([termin])
+        if results['new']:
+            print(f"Added: {results['new'][0]['match']}")
+            ics_file = scraper.generate_ics(args.ics)
+            print(f"ICS calendar updated: {ics_file}")
+            sys.exit(1)  # Changes made
+        elif results['updated']:
+            print(f"Updated: {results['updated'][0]['match']}")
+            ics_file = scraper.generate_ics(args.ics)
+            print(f"ICS calendar updated: {ics_file}")
+            sys.exit(1)  # Changes made
+        sys.exit(0)  # No changes
     
     # Standard oder manuelle Eingabe
-    scraper.run(scrape=args.enable_scraping, add_new=args.add_new, enable_scraping=args.enable_scraping)
+    exit_code = scraper.run(scrape=args.enable_scraping, add_new=args.add_new, enable_scraping=args.enable_scraping)
+    sys.exit(exit_code)
 
 if __name__ == "__main__":
     main()
