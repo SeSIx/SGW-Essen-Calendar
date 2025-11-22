@@ -1133,7 +1133,7 @@ class SGWTermineScraper:
             ics_file = self.generate_ics()
             print(f"\nICS calendar updated: {ics_file}")
         else:
-            print("\nNo changes detected - ICS calendar not regenerated")
+            print("\nICS calendar and database are up to date")
         
         if not alle_termine and not scrape and not add_new:
             print("\nUsage:")
