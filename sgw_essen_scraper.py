@@ -722,51 +722,63 @@ class SGWTermineScraper:
                 # Vergleiche Daten um zu prüfen ob sich etwas geändert hat
                 old_home, old_guest, old_date, old_time, old_location, old_description = existing
                 
-                changes = []
-                if old_date != termin.get('date', ''):
-                    changes.append(f"date: {old_date} -> {termin.get('date', '')}")
-                if old_time != termin.get('time', ''):
-                    changes.append(f"time: {old_time} -> {termin.get('time', '')}")
-                if old_location != final_location:
-                    changes.append("location updated")
-                if old_description != final_description:
-                    # Check if result changed
-                    old_result = ""
-                    new_result = ""
-                    if old_description:
-                        for line in old_description.split('\n'):
-                            if line.startswith('Result:'):
-                                old_result = line.replace('Result:', '').strip()
-                    if final_description:
-                        for line in final_description.split('\n'):
-                            if line.startswith('Result:'):
-                                new_result = line.replace('Result:', '').strip()
-                    if old_result != new_result:
-                        changes.append(f"result: {old_result} -> {new_result}")
+                # Prüfe ob sich irgendwelche Daten geändert haben
+                data_changed = (
+                    old_home != home_clean or
+                    old_guest != guest_clean or
+                    old_date != termin.get('date', '') or
+                    old_time != termin.get('time', '') or
+                    old_location != final_location or
+                    old_description != final_description
+                )
                 
-                # Aktualisiere bestehenden Eintrag
-                cursor.execute('''
-                    UPDATE games 
-                    SET home = ?, guest = ?, date = ?, time = ?, location = ?, description = ?, 
-                        last_change = CURRENT_TIMESTAMP
-                    WHERE event_id = ?
-                ''', (
-                    home_clean,
-                    guest_clean,
-                    termin.get('date', ''),
-                    termin.get('time', ''),
-                    final_location,
-                    final_description,
-                    event_id
-                ))
-                
-                if changes:
+                if data_changed:
+                    # Sammle detaillierte Änderungen für die Ausgabe
+                    changes = []
+                    if old_date != termin.get('date', ''):
+                        changes.append(f"date: {old_date} -> {termin.get('date', '')}")
+                    if old_time != termin.get('time', ''):
+                        changes.append(f"time: {old_time} -> {termin.get('time', '')}")
+                    if old_location != final_location:
+                        changes.append("location updated")
+                    if old_description != final_description:
+                        # Check if result changed
+                        old_result = ""
+                        new_result = ""
+                        if old_description:
+                            for line in old_description.split('\n'):
+                                if line.startswith('Result:'):
+                                    old_result = line.replace('Result:', '').strip()
+                        if final_description:
+                            for line in final_description.split('\n'):
+                                if line.startswith('Result:'):
+                                    new_result = line.replace('Result:', '').strip()
+                        if old_result != new_result:
+                            changes.append(f"result: {old_result} -> {new_result}")
+                    
+                    # Aktualisiere nur wenn sich tatsächlich etwas geändert hat
+                    cursor.execute('''
+                        UPDATE games 
+                        SET home = ?, guest = ?, date = ?, time = ?, location = ?, description = ?, 
+                            last_change = CURRENT_TIMESTAMP
+                        WHERE event_id = ?
+                    ''', (
+                        home_clean,
+                        guest_clean,
+                        termin.get('date', ''),
+                        termin.get('time', ''),
+                        final_location,
+                        final_description,
+                        event_id
+                    ))
+                    
                     updated_games.append({
                         'match': f"{home_clean} vs {guest_clean}",
                         'date': termin.get('date', ''),
                         'changes': changes
                     })
                 else:
+                    # Keine Änderungen - überspringe UPDATE
                     unchanged_games.append(f"{home_clean} vs {guest_clean}")
             else:
                 # Füge neuen Eintrag hinzu
