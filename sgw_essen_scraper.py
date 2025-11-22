@@ -1103,9 +1103,9 @@ class SGWTermineScraper:
             has_changes = bool(results['new'] or results['updated'])
             
             # Print summary
-            print("\n" + "="*60)
+            print("\n" + "="*40)
             print(f"SUMMARY: {len(alle_termine)} games scraped")
-            print("="*60)
+            print("="*40)
             
             # New games
             if results['new']:
@@ -1126,7 +1126,7 @@ class SGWTermineScraper:
             else:
                 print("\nUPDATED GAMES: None (all data unchanged)")
             
-            print("\n" + "="*60)
+            print("\n" + "="*40)
         
         # Generiere ICS nur bei Änderungen
         if has_changes:
