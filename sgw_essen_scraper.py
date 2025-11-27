@@ -735,26 +735,81 @@ class SGWTermineScraper:
                 if data_changed:
                     # Sammle detaillierte Änderungen für die Ausgabe
                     changes = []
+                    
+                    # Check team name changes (rare but possible)
+                    if old_home != home_clean:
+                        changes.append(f"home team: {old_home} -> {home_clean}")
+                    if old_guest != guest_clean:
+                        changes.append(f"guest team: {old_guest} -> {guest_clean}")
+                    
+                    # Check date and time changes
                     if old_date != termin.get('date', ''):
-                        changes.append(f"date: {old_date} -> {termin.get('date', '')}")
+                        old_d = old_date if old_date else '(empty)'
+                        new_d = termin.get('date', '') if termin.get('date', '') else '(empty)'
+                        changes.append(f"date: {old_d} -> {new_d}")
                     if old_time != termin.get('time', ''):
-                        changes.append(f"time: {old_time} -> {termin.get('time', '')}")
+                        old_t = old_time if old_time else '(empty)'
+                        new_t = termin.get('time', '') if termin.get('time', '') else '(empty)'
+                        changes.append(f"time: {old_t} -> {new_t}")
+                    
+                    # Check location changes
                     if old_location != final_location:
-                        changes.append("location updated")
+                        # Show location change with details
+                        old_loc = old_location.split('|')[0].strip() if old_location else '(empty)'
+                        new_loc = final_location.split('|')[0].strip() if final_location else '(empty)'
+                        if old_loc != new_loc:
+                            changes.append(f"location: {old_loc} -> {new_loc}")
+                        elif '|' in old_location and '|' in final_location:
+                            # Location address same, but maps link might differ
+                            changes.append("location: maps link updated")
+                        else:
+                            changes.append("location: additional data added")
                     if old_description != final_description:
-                        # Check if result changed
-                        old_result = ""
-                        new_result = ""
-                        if old_description:
-                            for line in old_description.split('\n'):
-                                if line.startswith('Result:'):
-                                    old_result = line.replace('Result:', '').strip()
-                        if final_description:
-                            for line in final_description.split('\n'):
-                                if line.startswith('Result:'):
-                                    new_result = line.replace('Result:', '').strip()
-                        if old_result != new_result:
-                            changes.append(f"result: {old_result} -> {new_result}")
+                        # Parse both descriptions to compare individual fields
+                        def parse_description(desc):
+                            fields = {}
+                            if desc:
+                                for line in desc.split('\n'):
+                                    if line.startswith('Result:'):
+                                        fields['result'] = line.replace('Result:', '').strip()
+                                    elif line.startswith('Ref 1:'):
+                                        fields['ref1'] = line.replace('Ref 1:', '').strip()
+                                    elif line.startswith('Ref 2:'):
+                                        fields['ref2'] = line.replace('Ref 2:', '').strip()
+                            return fields
+                        
+                        old_fields = parse_description(old_description)
+                        new_fields = parse_description(final_description)
+                        
+                        # Compare each field
+                        if old_fields.get('result', '') != new_fields.get('result', ''):
+                            old_res = old_fields.get('result', '-')
+                            new_res = new_fields.get('result', '-')
+                            changes.append(f"result: {old_res} -> {new_res}")
+                        
+                        if old_fields.get('ref1', '') != new_fields.get('ref1', ''):
+                            old_ref = old_fields.get('ref1', 'none')
+                            new_ref = new_fields.get('ref1', 'none')
+                            if old_ref == 'none' and new_ref != 'none':
+                                changes.append(f"referee 1 added: {new_ref}")
+                            elif old_ref != 'none' and new_ref == 'none':
+                                changes.append(f"referee 1 removed")
+                            else:
+                                changes.append(f"referee 1: {old_ref} -> {new_ref}")
+                        
+                        if old_fields.get('ref2', '') != new_fields.get('ref2', ''):
+                            old_ref = old_fields.get('ref2', 'none')
+                            new_ref = new_fields.get('ref2', 'none')
+                            if old_ref == 'none' and new_ref != 'none':
+                                changes.append(f"referee 2 added: {new_ref}")
+                            elif old_ref != 'none' and new_ref == 'none':
+                                changes.append(f"referee 2 removed")
+                            else:
+                                changes.append(f"referee 2: {old_ref} -> {new_ref}")
+                    
+                    # Fallback: If description changed but no specific changes detected, note it
+                    if not changes and old_description != final_description:
+                        changes.append("description updated (unknown field)")
                     
                     # Aktualisiere nur wenn sich tatsächlich etwas geändert hat
                     cursor.execute('''
