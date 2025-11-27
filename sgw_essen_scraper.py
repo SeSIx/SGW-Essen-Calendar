@@ -1025,6 +1025,87 @@ class SGWTermineScraper:
         ics_lines.append("END:VCALENDAR")
         return "\n".join(ics_lines)
     
+    def list_next_termine(self, limit: int = 10):
+        """Zeigt die nächsten anstehenden Termine (ab heute)"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        # Get current date
+        today_dt = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        cursor.execute('''
+            SELECT id, date, time, home, guest, location, description, last_change
+            FROM games
+        ''')
+        
+        all_termine = cursor.fetchall()
+        conn.close()
+        
+        # Filter for future games and parse dates
+        future_termine_with_dt = []
+        
+        for termin in all_termine:
+            (id, date, time, home, guest, location, description, last_change) = termin
+            try:
+                if '.' in date:
+                    game_dt = datetime.strptime(date, '%d.%m.%Y')
+                else:
+                    game_dt = datetime.strptime(date, '%Y-%m-%d')
+                
+                # Add time if available for better sorting
+                if time:
+                    time_parts = time.split(':')
+                    game_dt = game_dt.replace(hour=int(time_parts[0]), minute=int(time_parts[1]))
+                
+                # Include games from today onwards
+                if game_dt >= today_dt:
+                    future_termine_with_dt.append((game_dt, termin))
+            except:
+                continue
+        
+        # Sort by datetime and take first N
+        future_termine_with_dt.sort(key=lambda x: x[0])
+        future_termine = [termin for dt, termin in future_termine_with_dt[:limit]]
+        
+        if not future_termine:
+            print("No upcoming games found.")
+            return
+        
+        print(f"\n=== Next {len(future_termine)} Upcoming Games ===")
+        print("-" * 80)
+        
+        for termin in future_termine:
+            (id, date, time, home, guest, location, description, last_change) = termin
+            time_str = f" {time}" if time else ""
+            
+            # Competition indicator aus Description extrahieren
+            comp_str = ""
+            if description:
+                if description.startswith("[VERBANDSLIGA]"):
+                    comp_str = "[VERBANDSLIGA] "
+                elif description.startswith("[RUHRGEBIETSLIGA]"):
+                    comp_str = "[RUHRGEBIETSLIGA] "
+                elif description.startswith("[POKAL]"):
+                    comp_str = "[POKAL] "
+                elif description.startswith("[LIGA]"):
+                    comp_str = "[LIGA] "
+            
+            # Location: Zeige nur Adress-Teil
+            display_location = location.split('|')[0].strip() if location else ""
+            location_str = f" @ {display_location}" if display_location else ""
+            
+            print(f"ID {id:3d} | {comp_str}{date}{time_str}{location_str}")
+            print(f"      | {home} vs {guest}")
+            
+            # Zeige Description (Result/Refs) wenn vorhanden
+            if description and description.strip():
+                desc_lines = description.split('\n')
+                for desc_line in desc_lines:
+                    if not desc_line.startswith('['):  # Skip competition tag
+                        print(f"      | {desc_line}")
+            
+            print("-" * 80)
+    
     def list_termine(self, limit: int = 10):
         """Zeigt Termine aus der Datenbank"""
         conn = sqlite3.connect(self.db_path)
@@ -1032,13 +1113,37 @@ class SGWTermineScraper:
         
         cursor.execute('''
             SELECT id, date, time, home, guest, location, description, last_change
-            FROM games 
-            ORDER BY date DESC, time DESC
-            LIMIT ?
-        ''', (limit,))
+            FROM games
+        ''')
         
-        termine = cursor.fetchall()
+        all_termine = cursor.fetchall()
         conn.close()
+        
+        if not all_termine:
+            print("No games found in database.")
+            print("Use --add to add games")
+            return
+        
+        # Sort by actual date in Python (not as string)
+        def get_sort_key(termin):
+            (id, date, time, home, guest, location, description, last_change) = termin
+            try:
+                if '.' in date:
+                    dt = datetime.strptime(date, '%d.%m.%Y')
+                else:
+                    dt = datetime.strptime(date, '%Y-%m-%d')
+                
+                # Add time if available
+                if time:
+                    time_parts = time.split(':')
+                    dt = dt.replace(hour=int(time_parts[0]), minute=int(time_parts[1]))
+                
+                return dt
+            except:
+                return datetime.max  # Put invalid dates at the end
+        
+        # Sort and limit
+        termine = sorted(all_termine, key=get_sort_key)[:limit]
         
         if not termine:
             print("No games found in database.")
@@ -1208,6 +1313,7 @@ Beispiele:
   python sgw_essen_scraper.py --add "20.12.2025" "15:00" "SGW Essen" "Weihnachtsfeier" ""
   python sgw_essen_scraper.py -new
   python sgw_essen_scraper.py --list
+  python sgw_essen_scraper.py --list-next 5
   python sgw_essen_scraper.py --delete 5 7 9
   python sgw_essen_scraper.py --enable-scraping
         """
@@ -1225,6 +1331,8 @@ Beispiele:
                        help='Ausgabedatei für ICS-Kalender')
     parser.add_argument('--list', action='store_true',
                        help='Zeigt Termine aus der Datenbank')
+    parser.add_argument('--list-next', type=int, metavar='N',
+                       help='Zeigt die nächsten N anstehenden Termine (ab heute)')
     parser.add_argument('--limit', type=int, default=10,
                        help='Anzahl der anzuzeigenden Termine')
     parser.add_argument('--delete', nargs='+', type=int, metavar='ID',
@@ -1247,6 +1355,11 @@ Beispiele:
     # Liste anzeigen
     if args.list:
         scraper.list_termine(limit=args.limit)
+        sys.exit(0)
+    
+    # Nächste Termine anzeigen
+    if args.list_next:
+        scraper.list_next_termine(limit=args.list_next)
         sys.exit(0)
     
     # Direkter Termin
