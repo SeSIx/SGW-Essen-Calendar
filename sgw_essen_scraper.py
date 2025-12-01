@@ -1173,7 +1173,7 @@ class SGWTermineScraper:
             location_str = f" @ {display_location}" if display_location else ""
             maps_str = f" [Maps]" if '|' in location else ""
             
-            print(f"ID {id:3d} | {comp_str}{date}{time_str}{location_str}{maps_str}")
+            print(f"{comp_str}{date}{time_str}{location_str}{maps_str}")
             print(f"      | {home} vs {guest}")
             
             # Zeige Description (Result/Refs) wenn vorhanden
