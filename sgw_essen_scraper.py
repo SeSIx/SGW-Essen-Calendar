@@ -1072,7 +1072,7 @@ class SGWTermineScraper:
             return
         
         print(f"\n=== Next {len(future_termine)} Upcoming Games ===")
-        print("-" * 36)
+        print("-" * 69)
         
         for termin in future_termine:
             (id, date, time, home, guest, location, description, last_change) = termin
@@ -1104,7 +1104,7 @@ class SGWTermineScraper:
                     if not desc_line.startswith('['):  # Skip competition tag
                         print(f"      | {desc_line}")
             
-            print("-" * 36)
+            print("-" * 69)
     
     def list_termine(self, limit: int = 10):
         """Zeigt Termine aus der Datenbank"""
@@ -1151,7 +1151,7 @@ class SGWTermineScraper:
             return
         
         print(f"\n=== {len(termine)} Termine ===")
-        print("-" * 36)
+        print("-" * 69)
         for termin in termine:
             (id, date, time, home, guest, location, description, last_change) = termin
             time_str = f" {time}" if time else ""
@@ -1189,8 +1189,7 @@ class SGWTermineScraper:
                     print(f"      | Maps: {maps_link}")
             
             print(f"      | Updated: {last_change}")
-            print("-" * 36)
-    
+            print("-" * 69)    
     def add_manual_termine(self) -> List[Dict]:
         """Interaktive Eingabe neuer Termine"""
         print("\n=== Manuelle Termineingabe ===")
