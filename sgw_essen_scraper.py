@@ -1072,7 +1072,7 @@ class SGWTermineScraper:
             return
         
         print(f"\n=== Next {len(future_termine)} Upcoming Games ===")
-        print("-" * 80)
+        print("-" * 36)
         
         for termin in future_termine:
             (id, date, time, home, guest, location, description, last_change) = termin
@@ -1104,7 +1104,7 @@ class SGWTermineScraper:
                     if not desc_line.startswith('['):  # Skip competition tag
                         print(f"      | {desc_line}")
             
-            print("-" * 80)
+            print("-" * 36)
     
     def list_termine(self, limit: int = 10):
         """Zeigt Termine aus der Datenbank"""
@@ -1151,7 +1151,7 @@ class SGWTermineScraper:
             return
         
         print(f"\n=== {len(termine)} Termine ===")
-        print("-" * 80)
+        print("-" * 36)
         for termin in termine:
             (id, date, time, home, guest, location, description, last_change) = termin
             time_str = f" {time}" if time else ""
@@ -1189,7 +1189,7 @@ class SGWTermineScraper:
                     print(f"      | Maps: {maps_link}")
             
             print(f"      | Updated: {last_change}")
-            print("-" * 80)
+            print("-" * 36)
     
     def add_manual_termine(self) -> List[Dict]:
         """Interaktive Eingabe neuer Termine"""
@@ -1263,9 +1263,9 @@ class SGWTermineScraper:
             has_changes = bool(results['new'] or results['updated'])
             
             # Print summary
-            print("\n" + "="*40)
+            print("\n" + "="*36)
             print(f"SUMMARY: {len(alle_termine)} games scraped")
-            print("="*40)
+            print("="*36)
             
             # New games
             if results['new']:
@@ -1286,7 +1286,7 @@ class SGWTermineScraper:
             else:
                 print("\nUPDATED GAMES: None (all data unchanged)")
             
-            print("\n" + "="*40)
+            print("\n" + "="*36)
         
         # Generiere ICS nur bei Änderungen
         if has_changes:
