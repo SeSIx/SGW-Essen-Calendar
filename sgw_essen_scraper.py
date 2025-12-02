@@ -33,6 +33,15 @@ class SGWTermineScraper:
                     'LeagueKind': 'C'
                 }
             },
+            'nrw_pokal': {
+                'name': 'NRW Pokal',
+                'params': {
+                    'Season': '2025',
+                    'LeagueID': '132',
+                    'Group': '',
+                    'LeagueKind': 'C'
+                }
+            },
             'verbandsliga': {
                 'name': 'Verbandsliga',
                 'params': {
@@ -700,6 +709,8 @@ class SGWTermineScraper:
             # Bestimme Competition-Prefix basierend auf dem tatsächlichen Wettbewerb
             if competition_type == 'pokal':
                 comp_prefix = "[POKAL]"
+            elif competition_type == 'nrw_pokal':
+                comp_prefix = "[NRW POKAL]"
             elif competition_type == 'verbandsliga':
                 comp_prefix = "[VERBANDSLIGA]"
             elif competition_type == 'ruhrgebietsliga':
@@ -708,7 +719,7 @@ class SGWTermineScraper:
                 comp_prefix = f"[{competition_type.upper()}]"
             
             # Prüfe ob Competition-Info bereits vorhanden ist
-            existing_prefixes = ["[LIGA]", "[POKAL]", "[VERBANDSLIGA]", "[RUHRGEBIETSLIGA]"]
+            existing_prefixes = ["[LIGA]", "[POKAL]", "[NRW POKAL]", "[VERBANDSLIGA]", "[RUHRGEBIETSLIGA]"]
             has_prefix = any(final_description.startswith(prefix) for prefix in existing_prefixes)
             
             if not has_prefix:
@@ -1085,6 +1096,8 @@ class SGWTermineScraper:
                     comp_str = "[VERBANDSLIGA] "
                 elif description.startswith("[RUHRGEBIETSLIGA]"):
                     comp_str = "[RUHRGEBIETSLIGA] "
+                elif description.startswith("[NRW POKAL]"):
+                    comp_str = "[NRW POKAL] "
                 elif description.startswith("[POKAL]"):
                     comp_str = "[POKAL] "
                 elif description.startswith("[LIGA]"):
@@ -1163,6 +1176,8 @@ class SGWTermineScraper:
                     comp_str = "[VERBANDSLIGA] "
                 elif description.startswith("[RUHRGEBIETSLIGA]"):
                     comp_str = "[RUHRGEBIETSLIGA] "
+                elif description.startswith("[NRW POKAL]"):
+                    comp_str = "[NRW POKAL] "
                 elif description.startswith("[POKAL]"):
                     comp_str = "[POKAL] "
                 elif description.startswith("[LIGA]"):  # Fallback für alte Einträge
