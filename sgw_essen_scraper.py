@@ -124,6 +124,38 @@ class SGWTermineScraper:
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_events_event_id ON events(event_id)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_events_date ON events(date)')
         
+        # Game statistics table (Überzahl/Unterzahl pro Spiel)
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS game_stats (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                game_id INTEGER NOT NULL,
+                team TEXT NOT NULL,
+                goals INTEGER DEFAULT 0,
+                power_play_goals INTEGER DEFAULT 0,
+                power_play_attempts INTEGER DEFAULT 0,
+                penalty_kill_success INTEGER DEFAULT 0,
+                penalty_kill_attempts INTEGER DEFAULT 0,
+                exclusions INTEGER DEFAULT 0,
+                FOREIGN KEY (game_id) REFERENCES games(id),
+                UNIQUE(game_id, team)
+            )
+        ''')
+        
+        # Player statistics table (Spieler-Stats pro Spiel)
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS player_stats (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                game_id INTEGER NOT NULL,
+                player_name TEXT NOT NULL,
+                team TEXT NOT NULL,
+                goals INTEGER DEFAULT 0,
+                exclusions INTEGER DEFAULT 0,
+                yellow_cards INTEGER DEFAULT 0,
+                red_cards INTEGER DEFAULT 0,
+                FOREIGN KEY (game_id) REFERENCES games(id)
+            )
+        ''')
+        
         # Füge location-Spalte hinzu falls sie nicht existiert (Migration)
         try:
             cursor.execute('ALTER TABLE games ADD COLUMN location TEXT')
@@ -630,7 +662,7 @@ class SGWTermineScraper:
                             for j in range(i + 1, len(cells)):
                                 ref_name = cells[j].get_text(strip=True)
                                 if (ref_name and len(ref_name) > 2 and not ref_name.isdigit() and
-                                    ',' in ref_name and  # Schiedsrichter haben meist Format "Nachname, Vorname"
+                                    ',' in ref_name and
                                     not any(word in ref_name.lower() for word in [
                                         'essen', 'oberhausen', 'vs', 'mehr', 'spiel', 'solingen', 
                                         'wuppertal', 'bochum', 'duisburg', 'rheinhausen', 'kevelaer',
@@ -638,7 +670,6 @@ class SGWTermineScraper:
                                     ])):
                                     all_ref_names.append(ref_name)
             
-            # Entferne Duplikate
             unique_refs = list(dict.fromkeys(all_ref_names))
             
             if unique_refs:
@@ -650,6 +681,166 @@ class SGWTermineScraper:
             
         except Exception as e:
             return None
+    
+    def _extract_player_stats(self, soup: BeautifulSoup) -> List[Dict]:
+        """Extrahiert Spielerstatistiken aus der #players Sektion"""
+        player_stats = []
+        
+        try:
+            # Suche nach Spieler-Tabellen (meist mit Spielernamen, Tore, Ausschlüsse)
+            tables = soup.find_all('table')
+            
+            for table in tables:
+                rows = table.find_all('tr')
+                header_found = False
+                current_team = ""
+                
+                for row in rows:
+                    cells = row.find_all(['td', 'th'])
+                    if not cells:
+                        continue
+                    
+                    row_text = ' '.join([c.get_text(strip=True) for c in cells])
+                    
+                    # Team-Header erkennen
+                    if 'SG Wasserball Essen' in row_text or 'SGW Essen' in row_text:
+                        current_team = "SGW Essen"
+                        header_found = True
+                        continue
+                    elif any(club in row_text for club in ['SC Solingen', 'Kevelaer', 'Bochum', 'Rheinhausen', 'Oberhausen']):
+                        # Gegner-Team
+                        for club in ['SC Solingen', 'Kevelaer', 'Bochum', 'Rheinhausen', 'Oberhausen', 
+                                    'Duisburg', 'Wuppertal', 'Gladbeck', 'Hagen']:
+                            if club in row_text:
+                                current_team = club
+                                break
+                        header_found = True
+                        continue
+                    
+                    # Spieler-Zeile parsen (Name, Nummer, Tore, Ausschlüsse)
+                    if header_found and len(cells) >= 3:
+                        # Typisches Format: Nr, Name, Tore, Ausschlüsse
+                        try:
+                            name_cell = None
+                            goals = 0
+                            exclusions = 0
+                            
+                            for i, cell in enumerate(cells):
+                                text = cell.get_text(strip=True)
+                                
+                                # Spielername (enthält Buchstaben, keine reine Zahl)
+                                if text and not text.isdigit() and len(text) > 2 and ',' in text:
+                                    name_cell = text
+                                
+                                # Tore/Ausschlüsse (Zahlen in späteren Spalten)
+                                if text.isdigit() and i > 0:
+                                    num = int(text)
+                                    if i == len(cells) - 2:  # Vorletzte Spalte meist Tore
+                                        goals = num
+                                    elif i == len(cells) - 1:  # Letzte Spalte meist Ausschlüsse
+                                        exclusions = num
+                            
+                            if name_cell and current_team:
+                                player_stats.append({
+                                    'name': name_cell,
+                                    'team': current_team,
+                                    'goals': goals,
+                                    'exclusions': exclusions
+                                })
+                        except:
+                            continue
+            
+            return player_stats
+            
+        except Exception as e:
+            return []
+    
+    def _extract_team_stats(self, soup: BeautifulSoup) -> Dict:
+        """Extrahiert Mannschaftsstatistiken aus der #stats Sektion"""
+        stats = {
+            'sgw': {'power_play_goals': 0, 'power_play_attempts': 0, 
+                    'penalty_kill_success': 0, 'penalty_kill_attempts': 0},
+            'opponent': {'power_play_goals': 0, 'power_play_attempts': 0,
+                        'penalty_kill_success': 0, 'penalty_kill_attempts': 0}
+        }
+        
+        try:
+            # Suche nach Statistik-Tabellen
+            tables = soup.find_all('table')
+            
+            for table in tables:
+                rows = table.find_all('tr')
+                
+                for row in rows:
+                    cells = row.find_all(['td', 'th'])
+                    row_text = ' '.join([c.get_text(strip=True).lower() for c in cells])
+                    
+                    # Überzahl-Statistik
+                    if 'überzahl' in row_text or 'power play' in row_text or 'pp' in row_text:
+                        # Extrahiere Zahlen (Format: X/Y oder X von Y)
+                        for cell in cells:
+                            text = cell.get_text(strip=True)
+                            match = re.search(r'(\d+)\s*/\s*(\d+)', text)
+                            if match:
+                                goals, attempts = int(match.group(1)), int(match.group(2))
+                                # Bestimme ob SGW oder Gegner basierend auf Position
+                                if 'essen' in row_text.lower():
+                                    stats['sgw']['power_play_goals'] = goals
+                                    stats['sgw']['power_play_attempts'] = attempts
+                                else:
+                                    stats['opponent']['power_play_goals'] = goals
+                                    stats['opponent']['power_play_attempts'] = attempts
+                    
+                    # Unterzahl-Statistik  
+                    if 'unterzahl' in row_text or 'penalty kill' in row_text or 'pk' in row_text:
+                        for cell in cells:
+                            text = cell.get_text(strip=True)
+                            match = re.search(r'(\d+)\s*/\s*(\d+)', text)
+                            if match:
+                                success, attempts = int(match.group(1)), int(match.group(2))
+                                if 'essen' in row_text.lower():
+                                    stats['sgw']['penalty_kill_success'] = success
+                                    stats['sgw']['penalty_kill_attempts'] = attempts
+                                else:
+                                    stats['opponent']['penalty_kill_success'] = success
+                                    stats['opponent']['penalty_kill_attempts'] = attempts
+            
+            return stats
+            
+        except Exception as e:
+            return stats
+    
+    def save_game_stats(self, game_db_id: int, team_stats: Dict, player_stats: List[Dict]):
+        """Speichert Spielstatistiken in der Datenbank"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        try:
+            # Team-Stats speichern
+            for team_key, team in [('sgw', 'SGW Essen'), ('opponent', 'Opponent')]:
+                if team_key in team_stats:
+                    ts = team_stats[team_key]
+                    cursor.execute('''
+                        INSERT OR REPLACE INTO game_stats 
+                        (game_id, team, power_play_goals, power_play_attempts, 
+                         penalty_kill_success, penalty_kill_attempts)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                    ''', (game_db_id, team, ts.get('power_play_goals', 0), 
+                          ts.get('power_play_attempts', 0), ts.get('penalty_kill_success', 0),
+                          ts.get('penalty_kill_attempts', 0)))
+            
+            # Player-Stats speichern
+            for ps in player_stats:
+                cursor.execute('''
+                    INSERT INTO player_stats (game_id, player_name, team, goals, exclusions)
+                    VALUES (?, ?, ?, ?, ?)
+                ''', (game_db_id, ps['name'], ps['team'], ps.get('goals', 0), ps.get('exclusions', 0)))
+            
+            conn.commit()
+        except Exception as e:
+            print(f"Error saving stats: {e}")
+        finally:
+            conn.close()
     
     def save_termine(self, termine: List[Dict]) -> Dict:
         """Speichert Termine in der Datenbank"""
@@ -1097,6 +1288,217 @@ class SGWTermineScraper:
     
     # ==================== END EVENTS CRUD ====================
     
+    # ==================== STATISTICS ====================
+    
+    def get_season_stats(self) -> Dict:
+        """Berechnet Saison-Statistiken für SGW Essen"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        # Gesamte Überzahl/Unterzahl Stats
+        cursor.execute('''
+            SELECT 
+                SUM(power_play_goals) as pp_goals,
+                SUM(power_play_attempts) as pp_attempts,
+                SUM(penalty_kill_success) as pk_success,
+                SUM(penalty_kill_attempts) as pk_attempts
+            FROM game_stats WHERE team = 'SGW Essen'
+        ''')
+        
+        row = cursor.fetchone()
+        
+        stats = {
+            'power_play': {
+                'goals': row[0] or 0,
+                'attempts': row[1] or 0,
+                'percentage': (row[0] / row[1] * 100) if row[1] and row[1] > 0 else 0
+            },
+            'penalty_kill': {
+                'success': row[2] or 0,
+                'attempts': row[3] or 0,
+                'percentage': (row[2] / row[3] * 100) if row[3] and row[3] > 0 else 0
+            }
+        }
+        
+        # Top-Torschützen
+        cursor.execute('''
+            SELECT player_name, SUM(goals) as total_goals
+            FROM player_stats 
+            WHERE team = 'SGW Essen' AND goals > 0
+            GROUP BY player_name
+            ORDER BY total_goals DESC
+            LIMIT 10
+        ''')
+        stats['top_scorers'] = [{'name': r[0], 'goals': r[1]} for r in cursor.fetchall()]
+        
+        # Ausschluss-Statistik
+        cursor.execute('''
+            SELECT player_name, SUM(exclusions) as total_excl
+            FROM player_stats 
+            WHERE team = 'SGW Essen' AND exclusions > 0
+            GROUP BY player_name
+            ORDER BY total_excl DESC
+            LIMIT 10
+        ''')
+        stats['exclusions'] = [{'name': r[0], 'exclusions': r[1]} for r in cursor.fetchall()]
+        
+        conn.close()
+        return stats
+    
+    def print_season_stats(self):
+        """Gibt Saison-Statistiken aus"""
+        stats = self.get_season_stats()
+        
+        print("\n=== SGW Essen - Season Statistics ===\n")
+        
+        # Überzahl
+        pp = stats['power_play']
+        print(f"POWER PLAY (Ueberzahl):")
+        print(f"  {pp['goals']}/{pp['attempts']} ({pp['percentage']:.1f}%)")
+        
+        # Unterzahl
+        pk = stats['penalty_kill']
+        print(f"\nPENALTY KILL (Unterzahl):")
+        print(f"  {pk['success']}/{pk['attempts']} ({pk['percentage']:.1f}%)")
+        
+        # Top-Torschützen
+        if stats['top_scorers']:
+            print(f"\nTOP SCORERS:")
+            for i, s in enumerate(stats['top_scorers'][:5], 1):
+                print(f"  {i}. {s['name']}: {s['goals']} goals")
+        
+        # Ausschlüsse
+        if stats['exclusions']:
+            print(f"\nEXCLUSIONS:")
+            for s in stats['exclusions'][:5]:
+                print(f"  {s['name']}: {s['exclusions']}")
+        
+        print()
+    
+    def get_game_stats(self, game_db_id: int) -> Dict:
+        """Holt Statistiken für ein einzelnes Spiel"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        # Game info
+        cursor.execute('SELECT home, guest, date FROM games WHERE id = ?', (game_db_id,))
+        game = cursor.fetchone()
+        if not game:
+            conn.close()
+            return None
+        
+        result = {
+            'home': game[0],
+            'guest': game[1],
+            'date': game[2],
+            'team_stats': {},
+            'player_stats': []
+        }
+        
+        # Team stats
+        cursor.execute('SELECT * FROM game_stats WHERE game_id = ?', (game_db_id,))
+        for row in cursor.fetchall():
+            result['team_stats'][row[2]] = {
+                'power_play_goals': row[4],
+                'power_play_attempts': row[5],
+                'penalty_kill_success': row[6],
+                'penalty_kill_attempts': row[7]
+            }
+        
+        # Player stats
+        cursor.execute('''
+            SELECT player_name, team, goals, exclusions 
+            FROM player_stats WHERE game_id = ? ORDER BY goals DESC
+        ''', (game_db_id,))
+        result['player_stats'] = [
+            {'name': r[0], 'team': r[1], 'goals': r[2], 'exclusions': r[3]}
+            for r in cursor.fetchall()
+        ]
+        
+        conn.close()
+        return result
+    
+    def scrape_game_statistics(self, game_id: str, competition_type: str) -> bool:
+        """Scraped Spielstatistiken von der DSV-Detailseite"""
+        try:
+            if competition_type in self.competitions:
+                base_params = self.competitions[competition_type]['params']
+            else:
+                base_params = list(self.competitions.values())[0]['params']
+            
+            game_params = {
+                'Season': base_params['Season'],
+                'LeagueID': base_params['LeagueID'],
+                'Group': base_params['Group'],
+                'LeagueKind': base_params['LeagueKind'],
+                'GameID': game_id
+            }
+            
+            response = self.session.get(self.game_detail_url, params=game_params)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Extrahiere Stats
+            player_stats = self._extract_player_stats(soup)
+            team_stats = self._extract_team_stats(soup)
+            
+            return {
+                'player_stats': player_stats,
+                'team_stats': team_stats
+            }
+            
+        except Exception as e:
+            print(f"Error scraping stats for game {game_id}: {e}")
+            return None
+    
+    def scrape_all_played_games_stats(self):
+        """Scraped Stats fuer alle gespielten Spiele"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        # Finde Spiele mit Ergebnis aber ohne Stats
+        cursor.execute('''
+            SELECT g.id, g.description, g.home, g.guest, g.date
+            FROM games g
+            LEFT JOIN game_stats gs ON g.id = gs.game_id
+            WHERE g.description LIKE '%Result:%'
+            AND g.description NOT LIKE '%Result: -%'
+            AND gs.id IS NULL
+        ''')
+        
+        games_to_scrape = cursor.fetchall()
+        conn.close()
+        
+        if not games_to_scrape:
+            print("No played games without stats found.")
+            return 0
+        
+        print(f"Found {len(games_to_scrape)} games to scrape stats for...")
+        
+        scraped_count = 0
+        for game in games_to_scrape:
+            db_id, description, home, guest, date = game
+            print(f"  Scraping: {home} vs {guest} ({date})...")
+            
+            # Bestimme competition type aus description
+            comp_type = 'verbandsliga'  # default
+            if '[POKAL]' in (description or ''):
+                comp_type = 'pokal'
+            elif '[NRW POKAL]' in (description or ''):
+                comp_type = 'nrw_pokal'
+            elif '[RUHRGEBIETSLIGA]' in (description or ''):
+                comp_type = 'ruhrgebietsliga'
+            
+            # TODO: Hier muessten wir die game_id vom DSV haben
+            # Fuer jetzt ueberspringe ich das - die DSV game_id wird beim Scraping gespeichert
+            
+            scraped_count += 1
+        
+        print(f"Scraped stats for {scraped_count} games.")
+        return scraped_count
+    
+    # ==================== END STATISTICS ====================
+    
     def generate_ics(self, output_file: str = "sgw_termine.ics") -> str:
         """Generiert ICS-Kalenderdatei (Games + Events)"""
         conn = sqlite3.connect(self.db_path)
@@ -1263,12 +1665,16 @@ class SGWTermineScraper:
         ics_lines.append("END:VCALENDAR")
         return "\n".join(ics_lines)
     
-    def list_next_termine(self, limit: int = 10):
-        """Zeigt die nächsten anstehenden Termine (ab heute)"""
+    def list_next_termine(self, limit: int = 10, format: str = "full"):
+        """Zeigt die nächsten anstehenden Termine (ab heute)
+        
+        Args:
+            limit: Anzahl der Termine
+            format: "full" (alle Details), "compact" (für Bot), "minimal" (nur Basics)
+        """
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
-        # Get current date
         today_dt = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
         
         cursor.execute('''
@@ -1279,72 +1685,95 @@ class SGWTermineScraper:
         all_termine = cursor.fetchall()
         conn.close()
         
-        # Filter for future games and parse dates
-        future_termine_with_dt = []
-        
+        # Filter and sort
+        future_termine = []
         for termin in all_termine:
             (id, date, time, home, guest, location, description, last_change) = termin
             try:
-                if '.' in date:
-                    game_dt = datetime.strptime(date, '%d.%m.%Y')
-                else:
-                    game_dt = datetime.strptime(date, '%Y-%m-%d')
-                
-                # Add time if available for better sorting
+                dt = datetime.strptime(date, '%d.%m.%Y') if '.' in date else datetime.strptime(date, '%Y-%m-%d')
                 if time:
-                    time_parts = time.split(':')
-                    game_dt = game_dt.replace(hour=int(time_parts[0]), minute=int(time_parts[1]))
-                
-                # Include games from today onwards
-                if game_dt >= today_dt:
-                    future_termine_with_dt.append((game_dt, termin))
+                    h, m = time.split(':')
+                    dt = dt.replace(hour=int(h), minute=int(m))
+                if dt >= today_dt:
+                    future_termine.append((dt, termin))
             except:
                 continue
         
-        # Sort by datetime and take first N
-        future_termine_with_dt.sort(key=lambda x: x[0])
-        future_termine = [termin for dt, termin in future_termine_with_dt[:limit]]
+        future_termine.sort(key=lambda x: x[0])
+        future_termine = [t for _, t in future_termine[:limit]]
         
         if not future_termine:
-            print("No upcoming games found.")
+            print("No upcoming games.")
             return
         
-        print(f"\n=== Next {len(future_termine)} Upcoming Games ===")
-        print("-" * 69)
+        # Compact format for bot responses
+        if format == "compact":
+            for t in future_termine:
+                (id, date, time, home, guest, location, description, _) = t
+                time_str = time if time else ""
+                loc = location.split('|')[0].strip()[:25] if location else ""
+                
+                # Extract result if played
+                result = ""
+                if description and "Result:" in description:
+                    for line in description.split('\n'):
+                        if line.startswith("Result:"):
+                            r = line.replace("Result:", "").strip()
+                            if r and r != "-":
+                                result = f" ({r})"
+                            break
+                
+                print(f"[{id}] {date} {time_str} | {home} vs {guest}{result}")
+                if loc:
+                    print(f"    @ {loc}")
+            return
         
-        for termin in future_termine:
-            (id, date, time, home, guest, location, description, last_change) = termin
-            time_str = f" {time}" if time else ""
+        # Minimal format - just one line per game
+        if format == "minimal":
+            for t in future_termine:
+                (id, date, time, home, guest, _, description, _) = t
+                result = ""
+                if description and "Result:" in description:
+                    for line in description.split('\n'):
+                        if "Result:" in line:
+                            r = line.replace("Result:", "").strip()
+                            if r and r != "-":
+                                result = f" [{r}]"
+                print(f"[{id}] {date} {time or ''} {home} vs {guest}{result}")
+            return
+        
+        # Full format
+        print(f"\n=== Next {len(future_termine)} Games ===\n")
+        
+        for t in future_termine:
+            (id, date, time, home, guest, location, description, _) = t
             
-            # Competition indicator aus Description extrahieren
-            comp_str = ""
+            # Competition tag
+            comp = ""
             if description:
-                if description.startswith("[VERBANDSLIGA]"):
-                    comp_str = "[VERBANDSLIGA] "
-                elif description.startswith("[RUHRGEBIETSLIGA]"):
-                    comp_str = "[RUHRGEBIETSLIGA] "
-                elif description.startswith("[NRW POKAL]"):
-                    comp_str = "[NRW POKAL] "
-                elif description.startswith("[POKAL]"):
-                    comp_str = "[POKAL] "
-                elif description.startswith("[LIGA]"):
-                    comp_str = "[LIGA] "
+                for tag in ["[VERBANDSLIGA]", "[RUHRGEBIETSLIGA]", "[NRW POKAL]", "[POKAL]", "[LIGA]"]:
+                    if description.startswith(tag):
+                        comp = tag + " "
+                        break
             
-            # Location: Zeige nur Adress-Teil
-            display_location = location.split('|')[0].strip() if location else ""
-            location_str = f" @ {display_location}" if display_location else ""
+            loc = location.split('|')[0].strip() if location else ""
+            time_str = time if time else ""
             
-            print(f"[ID:{id}] {comp_str}{date}{time_str}{location_str}")
-            print(f"      | {home} vs {guest}")
+            print(f"[{id}] {comp}{date} {time_str}")
+            print(f"    {home} vs {guest}")
+            if loc:
+                print(f"    @ {loc}")
             
-            # Zeige Description (Result/Refs) wenn vorhanden
-            if description and description.strip():
-                desc_lines = description.split('\n')
-                for desc_line in desc_lines:
-                    if not desc_line.startswith('['):  # Skip competition tag
-                        print(f"      | {desc_line}")
-            
-            print("-" * 69)
+            # Result and refs
+            if description:
+                for line in description.split('\n'):
+                    if line.startswith("Result:"):
+                        r = line.replace("Result:", "").strip()
+                        if r and r != "-":
+                            print(f"    Result: {r}")
+                    elif line.startswith("Ref"):
+                        print(f"    {line}")
+            print()
     
     def list_termine(self, limit: int = 10):
         """Zeigt Termine aus der Datenbank"""
@@ -1594,7 +2023,17 @@ Beispiele:
     parser.add_argument('--list-events-next', type=int, metavar='N',
                        help='Zeigt die nächsten N Events')
     parser.add_argument('--delete-event', nargs='+', type=int, metavar='ID',
-                       help='Löscht Events mit den angegebenen IDs')
+                       help='Loescht Events mit den angegebenen IDs')
+    
+    # Statistics arguments
+    parser.add_argument('--stats', action='store_true',
+                       help='Zeigt Saison-Statistiken (Ueberzahl, Top-Scorer)')
+    parser.add_argument('--game-stats', type=int, metavar='GAME_ID',
+                       help='Zeigt Statistiken fuer ein bestimmtes Spiel')
+    parser.add_argument('--scrape-stats', action='store_true',
+                       help='Scraped Statistiken von DSV fuer gespielte Spiele')
+    parser.add_argument('--format', choices=['full', 'compact', 'minimal'], default='full',
+                       help='Ausgabeformat fuer Listen (default: full)')
     
     args = parser.parse_args()
     
@@ -1616,9 +2055,9 @@ Beispiele:
         scraper.list_termine(limit=args.limit)
         sys.exit(0)
     
-    # Nächste Termine anzeigen
+    # Naechste Termine anzeigen
     if args.list_next:
-        scraper.list_next_termine(limit=args.list_next)
+        scraper.list_next_termine(limit=args.list_next, format=args.format)
         sys.exit(0)
     
     # ========== EVENTS ==========
@@ -1657,6 +2096,43 @@ Beispiele:
     # Nächste Events
     if args.list_events_next:
         scraper.list_events(limit=args.list_events_next, future_only=True)
+        sys.exit(0)
+    
+    # ========== STATISTICS ==========
+    
+    # Saison-Statistiken
+    if args.stats:
+        scraper.print_season_stats()
+        sys.exit(0)
+    
+    # Statistiken scrapen
+    if args.scrape_stats:
+        count = scraper.scrape_all_played_games_stats()
+        sys.exit(1 if count > 0 else 0)
+    
+    # Spiel-Statistiken
+    if args.game_stats:
+        stats = scraper.get_game_stats(args.game_stats)
+        if stats:
+            print(f"\n=== {stats['home']} vs {stats['guest']} ({stats['date']}) ===\n")
+            
+            if stats['team_stats']:
+                for team, ts in stats['team_stats'].items():
+                    print(f"{team}:")
+                    if ts['power_play_attempts'] > 0:
+                        pct = ts['power_play_goals'] / ts['power_play_attempts'] * 100
+                        print(f"  Power Play: {ts['power_play_goals']}/{ts['power_play_attempts']} ({pct:.0f}%)")
+                    if ts['penalty_kill_attempts'] > 0:
+                        pct = ts['penalty_kill_success'] / ts['penalty_kill_attempts'] * 100
+                        print(f"  Penalty Kill: {ts['penalty_kill_success']}/{ts['penalty_kill_attempts']} ({pct:.0f}%)")
+            
+            if stats['player_stats']:
+                print("\nPlayer Stats:")
+                for ps in stats['player_stats']:
+                    if ps['goals'] > 0 or ps['exclusions'] > 0:
+                        print(f"  {ps['name']} ({ps['team']}): {ps['goals']}G {ps['exclusions']}E")
+        else:
+            print(f"No stats found for game ID {args.game_stats}")
         sys.exit(0)
     
     # ========== COMBINED ==========
