@@ -88,6 +88,7 @@ class SGWTermineScraper:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
+        # Games table (Spiele mit Heim/Gast)
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS games (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -102,8 +103,26 @@ class SGWTermineScraper:
             )
         ''')
         
+        # Events table (Termine ohne Heim/Gast - z.B. Weihnachtsmarkt)
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                event_id TEXT UNIQUE NOT NULL,
+                title TEXT NOT NULL,
+                date TEXT NOT NULL,
+                time TEXT,
+                location TEXT,
+                description TEXT,
+                last_change TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_event_id ON games(event_id)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_date ON games(date)')
+        
+        # Indexes for events table
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_events_event_id ON events(event_id)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_events_date ON events(date)')
         
         # Füge location-Spalte hinzu falls sie nicht existiert (Migration)
         try:
@@ -927,29 +946,189 @@ class SGWTermineScraper:
         
         return deleted_count
     
-    def generate_ics(self, output_file: str = "sgw_termine.ics") -> str:
-        """Generiert ICS-Kalenderdatei"""
+    # ==================== EVENTS CRUD ====================
+    
+    def generate_event_id_for_event(self, title: str, date: str) -> str:
+        """Generiert eindeutige Event-ID für Events (nicht Spiele)"""
+        content = f"event_{title}_{date}".strip()
+        return hashlib.md5(content.encode('utf-8')).hexdigest()
+    
+    def add_event(self, title: str, date: str, time: str = "", location: str = "", description: str = "") -> Dict:
+        """Fügt ein neues Event hinzu (z.B. Weihnachtsmarkt)"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
+        event_id = self.generate_event_id_for_event(title, date)
+        
+        # Prüfe ob Event bereits existiert
+        cursor.execute('SELECT id FROM events WHERE event_id = ?', (event_id,))
+        existing = cursor.fetchone()
+        
+        result = {'status': 'unchanged', 'title': title, 'date': date}
+        
+        if existing:
+            # Update existing event
+            cursor.execute('''
+                UPDATE events 
+                SET title = ?, date = ?, time = ?, location = ?, description = ?, 
+                    last_change = CURRENT_TIMESTAMP
+                WHERE event_id = ?
+            ''', (title, date, time, location, description, event_id))
+            result['status'] = 'updated'
+            result['id'] = existing[0]
+        else:
+            # Insert new event
+            cursor.execute('''
+                INSERT INTO events (event_id, title, date, time, location, description)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (event_id, title, date, time, location, description))
+            result['status'] = 'new'
+            result['id'] = cursor.lastrowid
+        
+        conn.commit()
+        conn.close()
+        
+        return result
+    
+    def delete_events(self, ids_to_delete: List[int]) -> int:
+        """Löscht Events mit den angegebenen IDs und berechnet IDs neu"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        # Prüfe welche IDs existieren
+        placeholders = ','.join(['?' for _ in ids_to_delete])
+        cursor.execute(f'SELECT id FROM events WHERE id IN ({placeholders})', ids_to_delete)
+        existing_ids = [row[0] for row in cursor.fetchall()]
+        
+        if not existing_ids:
+            print("No events found with specified IDs")
+            conn.close()
+            return 0
+        
+        print(f"Deleting {len(existing_ids)} events with IDs: {existing_ids}")
+        
+        # Lösche die Events
+        cursor.execute(f'DELETE FROM events WHERE id IN ({placeholders})', ids_to_delete)
+        deleted_count = cursor.rowcount
+        
+        # Hole alle verbleibenden Events und sortiere sie nach ID
+        cursor.execute('SELECT * FROM events ORDER BY id')
+        remaining = cursor.fetchall()
+        
+        # Lösche alle und füge mit neuen IDs ein
+        cursor.execute('DELETE FROM events')
+        
+        for i, event in enumerate(remaining, 1):
+            (old_id, event_id, title, date, time, location, description, last_change) = event
+            cursor.execute('''
+                INSERT INTO events 
+                (id, event_id, title, date, time, location, description, last_change)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (i, event_id, title, date, time, location, description, last_change))
+        
+        # Setze Auto-Increment Counter
+        max_id = len(remaining)
+        cursor.execute('DELETE FROM sqlite_sequence WHERE name="events"')
+        if max_id > 0:
+            cursor.execute('INSERT INTO sqlite_sequence (name, seq) VALUES ("events", ?)', (max_id,))
+        
+        conn.commit()
+        conn.close()
+        
+        print(f"{deleted_count} events deleted")
+        return deleted_count
+    
+    def list_events(self, limit: int = 20, future_only: bool = False):
+        """Zeigt Events aus der Datenbank"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT id, title, date, time, location, description, last_change FROM events')
+        all_events = cursor.fetchall()
+        conn.close()
+        
+        if not all_events:
+            print("No events found in database.")
+            print("Use --add-event to add events")
+            return
+        
+        today_dt = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        # Sort and filter
+        def get_sort_key(event):
+            (id, title, date, time, location, description, last_change) = event
+            try:
+                if '.' in date:
+                    dt = datetime.strptime(date, '%d.%m.%Y')
+                else:
+                    dt = datetime.strptime(date, '%Y-%m-%d')
+                if time:
+                    time_parts = time.split(':')
+                    dt = dt.replace(hour=int(time_parts[0]), minute=int(time_parts[1]))
+                return dt
+            except:
+                return datetime.max
+        
+        sorted_events = sorted(all_events, key=get_sort_key)
+        
+        if future_only:
+            sorted_events = [e for e in sorted_events if get_sort_key(e) >= today_dt]
+        
+        events = sorted_events[:limit]
+        
+        if not events:
+            print("No upcoming events found.")
+            return
+        
+        title_str = "Upcoming Events" if future_only else "All Events"
+        print(f"\n=== {title_str} ({len(events)}) ===")
+        print("-" * 50)
+        
+        for event in events:
+            (id, title, date, time, location, description, last_change) = event
+            time_str = f" {time}" if time else ""
+            location_str = f" @ {location}" if location else ""
+            
+            print(f"[ID:{id}] {date}{time_str}{location_str}")
+            print(f"      | {title}")
+            if description:
+                print(f"      | {description}")
+            print("-" * 50)
+    
+    # ==================== END EVENTS CRUD ====================
+    
+    def generate_ics(self, output_file: str = "sgw_termine.ics") -> str:
+        """Generiert ICS-Kalenderdatei (Games + Events)"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        # Hole Games
         cursor.execute('''
             SELECT id, event_id, home, guest, date, time, location, description
             FROM games 
             ORDER BY date, time
         ''')
+        games = cursor.fetchall()
         
-        termine = cursor.fetchall()
+        # Hole Events
+        cursor.execute('''
+            SELECT id, event_id, title, date, time, location, description
+            FROM events 
+            ORDER BY date, time
+        ''')
+        events = cursor.fetchall()
+        
         conn.close()
         
-        ics_content = self._create_ics_content(termine)
+        ics_content = self._create_ics_content(games, events)
         
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(ics_content)
         
         return output_file
     
-    def _create_ics_content(self, termine: List) -> str:
-        """Erstellt ICS-Inhalt"""
+    def _create_ics_content(self, games: List, events: List = None) -> str:
+        """Erstellt ICS-Inhalt (Games + Events)"""
         now = datetime.now()
         
         ics_lines = [
@@ -963,13 +1142,12 @@ class SGWTermineScraper:
             "X-WR-TIMEZONE:Europe/Berlin"
         ]
         
-        for termin in termine:
+        # === GAMES ===
+        for termin in games:
             (id, event_id, home, guest, date, time, location, description) = termin
             
-            uid = f"sgw-{event_id}@essen.de"
-            # Extrahiere Competition-Info aus Description für Titel
-            # Kalender-Titel ohne Competition-Tags
-            title = f"{home} vs {guest}"
+                uid = f"sgw-game-{event_id}@essen.de"
+                title = f"{home} vs {guest}"
             
             # Parse Datum
             try:
@@ -999,17 +1177,14 @@ class SGWTermineScraper:
             dtend = end_time.strftime('%Y%m%dT%H%M%S')
             dtstamp = now.strftime('%Y%m%dT%H%M%SZ')
             
-            # Verwende Description direkt (bereits formatiert mit Result/Refs)
-            # Ersetze \n durch \\n für korrekte ICS-Formatierung
             ics_description = description.replace('\n', '\\n') if description else ""
             
-            # Location: Kombiniere Adresse und Google Maps Link für bessere Kalender-Integration
+            # Location
             if location and '|' in location:
                 parts = location.split('|', 1)
                 address = parts[0].strip()
                 maps_link = parts[1].strip()
                 if address and maps_link:
-                    # Format: "Address\nGoogle Maps: Link" für bessere Darstellung in Kalendern
                     location_text = f"{address}\\nGoogle Maps: {maps_link}"
                 else:
                     location_text = address if address else maps_link
@@ -1018,7 +1193,6 @@ class SGWTermineScraper:
             
             location_text = location_text if location_text else "TBA"
             
-            # Event
             ics_lines.extend([
                 "BEGIN:VEVENT",
                 f"UID:{uid}",
@@ -1032,6 +1206,59 @@ class SGWTermineScraper:
                 "TRANSP:OPAQUE",
                 "END:VEVENT"
             ])
+        
+        # === EVENTS (Weihnachtsmarkt etc.) ===
+        if events:
+            for event in events:
+                (id, event_id, title, date, time, location, description) = event
+                
+                uid = f"sgw-event-{event_id}@essen.de"
+                summary = f"[EVENT] {title}"
+                
+                # Parse Datum
+                try:
+                    if '.' in date:
+                        dt = datetime.strptime(date, '%d.%m.%Y')
+                    else:
+                        dt = datetime.strptime(date, '%Y-%m-%d')
+                except:
+                    continue
+                
+                # Parse Zeit
+                start_time = dt
+                if time and ':' in time:
+                    try:
+                        time_parts = time.split(':')
+                        start_time = dt.replace(
+                            hour=int(time_parts[0]),
+                            minute=int(time_parts[1])
+                        )
+                    except:
+                        pass
+                
+                # Events dauern standardmäßig 3 Stunden
+                end_time = start_time + timedelta(hours=3)
+                
+                dtstart = start_time.strftime('%Y%m%dT%H%M%S')
+                dtend = end_time.strftime('%Y%m%dT%H%M%S')
+                dtstamp = now.strftime('%Y%m%dT%H%M%SZ')
+                
+                ics_description = description.replace('\n', '\\n') if description else ""
+                location_text = location.strip() if location else "TBA"
+                
+                ics_lines.extend([
+                    "BEGIN:VEVENT",
+                    f"UID:{uid}",
+                    f"DTSTAMP:{dtstamp}",
+                    f"DTSTART:{dtstart}",
+                    f"DTEND:{dtend}",
+                    f"SUMMARY:{summary}",
+                    f"DESCRIPTION:{ics_description}",
+                    f"LOCATION:{location_text}",
+                    "STATUS:CONFIRMED",
+                    "TRANSP:OPAQUE",
+                    "END:VEVENT"
+                ])
         
         ics_lines.append("END:VCALENDAR")
         return "\n".join(ics_lines)
@@ -1324,11 +1551,18 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Beispiele:
-  python sgw_essen_scraper.py --add "20.12.2025" "15:00" "SGW Essen" "Weihnachtsfeier" ""
-  python sgw_essen_scraper.py -new
+  # Games (Spiele mit Heim/Gast)
+  python sgw_essen_scraper.py --add "20.12.2025" "15:00" "SGW Essen" "Gegner" "Halle" "Beschreibung"
   python sgw_essen_scraper.py --list
   python sgw_essen_scraper.py --list-next 5
   python sgw_essen_scraper.py --delete 5 7 9
+  
+  # Events (Termine ohne Heim/Gast)
+  python sgw_essen_scraper.py --add-event "20.12.2025" "18:00" "Weihnachtsmarkt" "Grugahalle" "Glühwein!"
+  python sgw_essen_scraper.py --list-events
+  python sgw_essen_scraper.py --list-events-next 5
+  python sgw_essen_scraper.py --delete-event 1 2
+  
   python sgw_essen_scraper.py --enable-scraping
         """
     )
@@ -1350,17 +1584,28 @@ Beispiele:
     parser.add_argument('--limit', type=int, default=10,
                        help='Anzahl der anzuzeigenden Termine')
     parser.add_argument('--delete', nargs='+', type=int, metavar='ID',
-                       help='Löscht Termine mit den angegebenen IDs und berechnet IDs neu')
+                       help='Löscht Spiele mit den angegebenen IDs')
+    
+    # Event arguments (Termine ohne Heim/Gast)
+    parser.add_argument('--add-event', nargs=5, metavar=('DATE', 'TIME', 'TITLE', 'LOCATION', 'DESC'),
+                       help='Event hinzufügen (z.B. Weihnachtsmarkt)')
+    parser.add_argument('--list-events', action='store_true',
+                       help='Zeigt alle Events')
+    parser.add_argument('--list-events-next', type=int, metavar='N',
+                       help='Zeigt die nächsten N Events')
+    parser.add_argument('--delete-event', nargs='+', type=int, metavar='ID',
+                       help='Löscht Events mit den angegebenen IDs')
     
     args = parser.parse_args()
     
     scraper = SGWTermineScraper(db_path=args.db)
     
+    # ========== GAMES ==========
+    
     # Spiele löschen
     if args.delete:
         deleted_count = scraper.delete_games_and_recalculate_ids(args.delete)
         if deleted_count > 0:
-            # Generiere ICS nach dem Löschen
             ics_file = scraper.generate_ics(args.ics)
             print(f"ICS calendar updated: {ics_file}")
             sys.exit(1)  # Changes made
@@ -1375,6 +1620,46 @@ Beispiele:
     if args.list_next:
         scraper.list_next_termine(limit=args.list_next)
         sys.exit(0)
+    
+    # ========== EVENTS ==========
+    
+    # Event hinzufügen
+    if args.add_event:
+        date, time, title, location, description = args.add_event
+        result = scraper.add_event(title, date, time, location, description)
+        if result['status'] == 'new':
+            print(f"Event added: {title} on {date}")
+        elif result['status'] == 'updated':
+            print(f"Event updated: {title} on {date}")
+        else:
+            print(f"Event unchanged: {title}")
+        
+        if result['status'] in ['new', 'updated']:
+            ics_file = scraper.generate_ics(args.ics)
+            print(f"ICS calendar updated: {ics_file}")
+            sys.exit(1)  # Changes made
+        sys.exit(0)
+    
+    # Events löschen
+    if args.delete_event:
+        deleted_count = scraper.delete_events(args.delete_event)
+        if deleted_count > 0:
+            ics_file = scraper.generate_ics(args.ics)
+            print(f"ICS calendar updated: {ics_file}")
+            sys.exit(1)  # Changes made
+        sys.exit(0)
+    
+    # Events auflisten
+    if args.list_events:
+        scraper.list_events(limit=args.limit, future_only=False)
+        sys.exit(0)
+    
+    # Nächste Events
+    if args.list_events_next:
+        scraper.list_events(limit=args.list_events_next, future_only=True)
+        sys.exit(0)
+    
+    # ========== COMBINED ==========
     
     # Direkter Termin
     if args.add:
