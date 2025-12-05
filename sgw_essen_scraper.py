@@ -1069,7 +1069,12 @@ class SGWTermineScraper:
                         'changes': changes
                     })
                 else:
-                    # Keine Änderungen - überspringe UPDATE
+                    # Keine Aenderungen - aber dsv_game_id updaten falls vorhanden
+                    if termin.get('game_id'):
+                        cursor.execute('''
+                            UPDATE games SET dsv_game_id = ?, competition_type = ?
+                            WHERE event_id = ? AND (dsv_game_id IS NULL OR dsv_game_id = '')
+                        ''', (termin.get('game_id'), termin.get('competition', ''), event_id))
                     unchanged_games.append(f"{home_clean} vs {guest_clean}")
             else:
                 # Füge neuen Eintrag hinzu
