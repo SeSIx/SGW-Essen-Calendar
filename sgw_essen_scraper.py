@@ -695,72 +695,65 @@ class SGWTermineScraper:
             return None
     
     def _extract_player_stats(self, soup: BeautifulSoup) -> List[Dict]:
-        """Extrahiert Spielerstatistiken aus der #players Sektion"""
+        """Extrahiert Spielerstatistiken aus der DSV-Spielseite"""
         player_stats = []
         
         try:
-            # Suche nach Spieler-Tabellen (meist mit Spielernamen, Tore, Ausschlüsse)
             tables = soup.find_all('table')
             
+            # Finde Spieler-Tabellen (Format: Nr, Name/Vorname, Jg., Tore, 1, 2, 3, 4)
             for table in tables:
                 rows = table.find_all('tr')
-                header_found = False
-                current_team = ""
+                if len(rows) < 2:
+                    continue
                 
-                for row in rows:
+                # Pruefe Header
+                header = rows[0] if rows else None
+                if not header:
+                    continue
+                
+                header_text = ' '.join([c.get_text(strip=True) for c in header.find_all(['td', 'th'])])
+                
+                # Spieler-Tabelle hat "Name / Vorname" und "Tore" Header
+                if 'Name' not in header_text or 'Tore' not in header_text:
+                    continue
+                
+                # Bestimme Team (Heim oder Gast basierend auf Tabellenreihenfolge)
+                table_index = tables.index(table)
+                team = "SGW Essen" if table_index == 2 else "Opponent"
+                
+                for row in rows[2:]:  # Skip header rows
                     cells = row.find_all(['td', 'th'])
-                    if not cells:
+                    if len(cells) < 4:
                         continue
                     
-                    row_text = ' '.join([c.get_text(strip=True) for c in cells])
-                    
-                    # Team-Header erkennen
-                    if 'SG Wasserball Essen' in row_text or 'SGW Essen' in row_text:
-                        current_team = "SGW Essen"
-                        header_found = True
-                        continue
-                    elif any(club in row_text for club in ['SC Solingen', 'Kevelaer', 'Bochum', 'Rheinhausen', 'Oberhausen']):
-                        # Gegner-Team
-                        for club in ['SC Solingen', 'Kevelaer', 'Bochum', 'Rheinhausen', 'Oberhausen', 
-                                    'Duisburg', 'Wuppertal', 'Gladbeck', 'Hagen']:
-                            if club in row_text:
-                                current_team = club
-                                break
-                        header_found = True
-                        continue
-                    
-                    # Spieler-Zeile parsen (Name, Nummer, Tore, Ausschlüsse)
-                    if header_found and len(cells) >= 3:
-                        # Typisches Format: Nr, Name, Tore, Ausschlüsse
-                        try:
-                            name_cell = None
-                            goals = 0
-                            exclusions = 0
-                            
-                            for i, cell in enumerate(cells):
-                                text = cell.get_text(strip=True)
-                                
-                                # Spielername (enthält Buchstaben, keine reine Zahl)
-                                if text and not text.isdigit() and len(text) > 2 and ',' in text:
-                                    name_cell = text
-                                
-                                # Tore/Ausschlüsse (Zahlen in späteren Spalten)
-                                if text.isdigit() and i > 0:
-                                    num = int(text)
-                                    if i == len(cells) - 2:  # Vorletzte Spalte meist Tore
-                                        goals = num
-                                    elif i == len(cells) - 1:  # Letzte Spalte meist Ausschlüsse
-                                        exclusions = num
-                            
-                            if name_cell and current_team:
-                                player_stats.append({
-                                    'name': name_cell,
-                                    'team': current_team,
-                                    'goals': goals,
-                                    'exclusions': exclusions
-                                })
-                        except:
+                    try:
+                        nr = cells[0].get_text(strip=True)
+                        name = cells[1].get_text(strip=True)
+                        goals_text = cells[3].get_text(strip=True)
+                        
+                        if not name or not nr.isdigit():
                             continue
+                        
+                        # Parse goals (can be empty or number)
+                        goals = int(goals_text) if goals_text.isdigit() else 0
+                        
+                        # Count exclusions (columns 5-8 contain exclusion markers)
+                        exclusions = 0
+                        for cell in cells[4:8]:
+                            excl_text = cell.get_text(strip=True)
+                            if excl_text and excl_text != '':
+                                exclusions += len([x for x in excl_text.split() if x])
+                        
+                        if goals > 0 or exclusions > 0:
+                            player_stats.append({
+                                'name': name,
+                                'team': team,
+                                'goals': goals,
+                                'exclusions': exclusions
+                            })
+                    except:
+                        continue
             
             return player_stats
             
@@ -768,7 +761,7 @@ class SGWTermineScraper:
             return []
     
     def _extract_team_stats(self, soup: BeautifulSoup) -> Dict:
-        """Extrahiert Mannschaftsstatistiken aus der #stats Sektion"""
+        """Extrahiert Mannschaftsstatistiken aus der DSV-Spielseite"""
         stats = {
             'sgw': {'power_play_goals': 0, 'power_play_attempts': 0, 
                     'penalty_kill_success': 0, 'penalty_kill_attempts': 0},
@@ -777,45 +770,42 @@ class SGWTermineScraper:
         }
         
         try:
-            # Suche nach Statistik-Tabellen
             tables = soup.find_all('table')
             
+            # Finde Ueberzahl-Tabellen (Format: "Ueberzahl", "Tore in Ueberzahl", "Torquote")
+            stats_tables = []
             for table in tables:
+                rows = table.find_all('tr')
+                if len(rows) >= 3:
+                    first_row = rows[0].get_text(strip=True).lower()
+                    if 'überzahl' in first_row:
+                        stats_tables.append(table)
+            
+            # Erste Stats-Tabelle = Heim (SGW), Zweite = Gast
+            for i, table in enumerate(stats_tables[:2]):
+                team_key = 'sgw' if i == 0 else 'opponent'
                 rows = table.find_all('tr')
                 
                 for row in rows:
                     cells = row.find_all(['td', 'th'])
-                    row_text = ' '.join([c.get_text(strip=True).lower() for c in cells])
-                    
-                    # Überzahl-Statistik
-                    if 'überzahl' in row_text or 'power play' in row_text or 'pp' in row_text:
-                        # Extrahiere Zahlen (Format: X/Y oder X von Y)
-                        for cell in cells:
-                            text = cell.get_text(strip=True)
-                            match = re.search(r'(\d+)\s*/\s*(\d+)', text)
-                            if match:
-                                goals, attempts = int(match.group(1)), int(match.group(2))
-                                # Bestimme ob SGW oder Gegner basierend auf Position
-                                if 'essen' in row_text.lower():
-                                    stats['sgw']['power_play_goals'] = goals
-                                    stats['sgw']['power_play_attempts'] = attempts
-                                else:
-                                    stats['opponent']['power_play_goals'] = goals
-                                    stats['opponent']['power_play_attempts'] = attempts
-                    
-                    # Unterzahl-Statistik  
-                    if 'unterzahl' in row_text or 'penalty kill' in row_text or 'pk' in row_text:
-                        for cell in cells:
-                            text = cell.get_text(strip=True)
-                            match = re.search(r'(\d+)\s*/\s*(\d+)', text)
-                            if match:
-                                success, attempts = int(match.group(1)), int(match.group(2))
-                                if 'essen' in row_text.lower():
-                                    stats['sgw']['penalty_kill_success'] = success
-                                    stats['sgw']['penalty_kill_attempts'] = attempts
-                                else:
-                                    stats['opponent']['penalty_kill_success'] = success
-                                    stats['opponent']['penalty_kill_attempts'] = attempts
+                    if len(cells) >= 2:
+                        label = cells[0].get_text(strip=True).lower()
+                        value = cells[1].get_text(strip=True)
+                        
+                        try:
+                            if 'überzahl' == label or label == 'ueberzahl':
+                                stats[team_key]['power_play_attempts'] = int(value) if value.isdigit() else 0
+                            elif 'tore in überzahl' in label or 'tore in ueberzahl' in label:
+                                stats[team_key]['power_play_goals'] = int(value) if value.isdigit() else 0
+                            elif 'unterzahl' == label:
+                                stats[team_key]['penalty_kill_attempts'] = int(value) if value.isdigit() else 0
+                            elif 'gegentore in unterzahl' in label:
+                                # Gegentore in Unterzahl = erfolgreiche Penalty Kills
+                                gegentore = int(value) if value.isdigit() else 0
+                                attempts = stats[team_key]['penalty_kill_attempts']
+                                stats[team_key]['penalty_kill_success'] = attempts - gegentore if attempts > 0 else 0
+                        except:
+                            continue
             
             return stats
             
