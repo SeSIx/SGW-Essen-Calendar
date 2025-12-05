@@ -99,9 +99,21 @@ class SGWTermineScraper:
                 time TEXT,
                 location TEXT,
                 description TEXT,
+                dsv_game_id TEXT,
+                competition_type TEXT,
                 last_change TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
+        
+        # Migration: Add dsv_game_id column if not exists
+        try:
+            cursor.execute('ALTER TABLE games ADD COLUMN dsv_game_id TEXT')
+        except sqlite3.OperationalError:
+            pass
+        try:
+            cursor.execute('ALTER TABLE games ADD COLUMN competition_type TEXT')
+        except sqlite3.OperationalError:
+            pass
         
         # Events table (Termine ohne Heim/Gast - z.B. Weihnachtsmarkt)
         cursor.execute('''
@@ -1035,7 +1047,8 @@ class SGWTermineScraper:
                     # Aktualisiere nur wenn sich tatsächlich etwas geändert hat
                     cursor.execute('''
                         UPDATE games 
-                        SET home = ?, guest = ?, date = ?, time = ?, location = ?, description = ?, 
+                        SET home = ?, guest = ?, date = ?, time = ?, location = ?, description = ?,
+                            dsv_game_id = COALESCE(?, dsv_game_id), competition_type = COALESCE(?, competition_type),
                             last_change = CURRENT_TIMESTAMP
                         WHERE event_id = ?
                     ''', (
@@ -1045,6 +1058,8 @@ class SGWTermineScraper:
                         termin.get('time', ''),
                         final_location,
                         final_description,
+                        termin.get('game_id', None),
+                        termin.get('competition', None),
                         event_id
                     ))
                     
@@ -1060,8 +1075,8 @@ class SGWTermineScraper:
                 # Füge neuen Eintrag hinzu
                 cursor.execute('''
                     INSERT INTO games 
-                    (event_id, home, guest, date, time, location, description)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    (event_id, home, guest, date, time, location, description, dsv_game_id, competition_type)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
                     event_id,
                     home_clean,
@@ -1069,7 +1084,9 @@ class SGWTermineScraper:
                     termin.get('date', ''),
                     termin.get('time', ''),
                     final_location,
-                    final_description
+                    final_description,
+                    termin.get('game_id', ''),
+                    termin.get('competition', '')
                 ))
                 new_games.append({
                     'match': f"{home_clean} vs {guest_clean}",
@@ -1456,13 +1473,15 @@ class SGWTermineScraper:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
-        # Finde Spiele mit Ergebnis aber ohne Stats
+        # Finde Spiele mit Ergebnis und DSV Game-ID aber ohne Stats
         cursor.execute('''
-            SELECT g.id, g.description, g.home, g.guest, g.date
+            SELECT g.id, g.dsv_game_id, g.competition_type, g.home, g.guest, g.date
             FROM games g
             LEFT JOIN game_stats gs ON g.id = gs.game_id
             WHERE g.description LIKE '%Result:%'
             AND g.description NOT LIKE '%Result: -%'
+            AND g.dsv_game_id IS NOT NULL
+            AND g.dsv_game_id != ''
             AND gs.id IS NULL
         ''')
         
@@ -1470,29 +1489,25 @@ class SGWTermineScraper:
         conn.close()
         
         if not games_to_scrape:
-            print("No played games without stats found.")
+            print("No played games with DSV game_id without stats found.")
+            print("Run --enable-scraping first to fetch DSV game IDs.")
             return 0
         
         print(f"Found {len(games_to_scrape)} games to scrape stats for...")
         
         scraped_count = 0
         for game in games_to_scrape:
-            db_id, description, home, guest, date = game
-            print(f"  Scraping: {home} vs {guest} ({date})...")
+            db_id, dsv_game_id, comp_type, home, guest, date = game
+            print(f"  Scraping: {home} vs {guest} ({date}) [DSV:{dsv_game_id}]...")
             
-            # Bestimme competition type aus description
-            comp_type = 'verbandsliga'  # default
-            if '[POKAL]' in (description or ''):
-                comp_type = 'pokal'
-            elif '[NRW POKAL]' in (description or ''):
-                comp_type = 'nrw_pokal'
-            elif '[RUHRGEBIETSLIGA]' in (description or ''):
-                comp_type = 'ruhrgebietsliga'
+            stats = self.scrape_game_statistics(dsv_game_id, comp_type or 'verbandsliga')
             
-            # TODO: Hier muessten wir die game_id vom DSV haben
-            # Fuer jetzt ueberspringe ich das - die DSV game_id wird beim Scraping gespeichert
-            
-            scraped_count += 1
+            if stats:
+                self.save_game_stats(db_id, stats.get('team_stats', {}), stats.get('player_stats', []))
+                scraped_count += 1
+                print(f"    -> Stats saved")
+            else:
+                print(f"    -> No stats found")
         
         print(f"Scraped stats for {scraped_count} games.")
         return scraped_count
