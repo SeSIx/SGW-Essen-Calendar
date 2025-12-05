@@ -1548,8 +1548,8 @@ class SGWTermineScraper:
         for termin in games:
             (id, event_id, home, guest, date, time, location, description) = termin
             
-                uid = f"sgw-game-{event_id}@essen.de"
-                title = f"{home} vs {guest}"
+            uid = f"sgw-game-{event_id}@essen.de"
+            title = f"{home} vs {guest}"
             
             # Parse Datum
             try:
