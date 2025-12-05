@@ -1107,7 +1107,7 @@ class SGWTermineScraper:
             display_location = location.split('|')[0].strip() if location else ""
             location_str = f" @ {display_location}" if display_location else ""
             
-            print(f"{comp_str}{date}{time_str}{location_str}")
+            print(f"[ID:{id}] {comp_str}{date}{time_str}{location_str}")
             print(f"      | {home} vs {guest}")
             
             # Zeige Description (Result/Refs) wenn vorhanden
@@ -1188,7 +1188,7 @@ class SGWTermineScraper:
             location_str = f" @ {display_location}" if display_location else ""
             maps_str = f" [Maps]" if '|' in location else ""
             
-            print(f"{comp_str}{date}{time_str}{location_str}{maps_str}")
+            print(f"[ID:{id}] {comp_str}{date}{time_str}{location_str}{maps_str}")
             print(f"      | {home} vs {guest}")
             
             # Zeige Description (Result/Refs) wenn vorhanden
