@@ -701,28 +701,24 @@ class SGWTermineScraper:
         try:
             tables = soup.find_all('table')
             
-            # Finde Spieler-Tabellen (Format: Nr, Name/Vorname, Jg., Tore, 1, 2, 3, 4)
-            for table in tables:
+            # Finde Spieler-Tabellen (haben "Nr." und "Name / Vorname" in Row 1)
+            player_table_indices = []
+            for i, table in enumerate(tables):
                 rows = table.find_all('tr')
-                if len(rows) < 2:
-                    continue
+                if len(rows) >= 3:
+                    # Check row 1 for header (row 0 is often "persoenl. Fehler")
+                    header_row = rows[1] if len(rows) > 1 else rows[0]
+                    header_text = ' '.join([c.get_text(strip=True) for c in header_row.find_all(['td', 'th'])])
+                    if 'Name' in header_text and 'Tore' in header_text:
+                        player_table_indices.append(i)
+            
+            # Process player tables (first = Heim, second = Gast)
+            for idx, table_idx in enumerate(player_table_indices[:2]):
+                table = tables[table_idx]
+                team = "SGW Essen" if idx == 0 else "Opponent"
                 
-                # Pruefe Header
-                header = rows[0] if rows else None
-                if not header:
-                    continue
-                
-                header_text = ' '.join([c.get_text(strip=True) for c in header.find_all(['td', 'th'])])
-                
-                # Spieler-Tabelle hat "Name / Vorname" und "Tore" Header
-                if 'Name' not in header_text or 'Tore' not in header_text:
-                    continue
-                
-                # Bestimme Team (Heim oder Gast basierend auf Tabellenreihenfolge)
-                table_index = tables.index(table)
-                team = "SGW Essen" if table_index == 2 else "Opponent"
-                
-                for row in rows[2:]:  # Skip header rows
+                rows = table.find_all('tr')
+                for row in rows[2:]:  # Skip header rows (0 and 1)
                     cells = row.find_all(['td', 'th'])
                     if len(cells) < 4:
                         continue
@@ -738,12 +734,13 @@ class SGWTermineScraper:
                         # Parse goals (can be empty or number)
                         goals = int(goals_text) if goals_text.isdigit() else 0
                         
-                        # Count exclusions (columns 5-8 contain exclusion markers)
+                        # Count exclusions (columns 4-7 contain exclusion markers like 'S', 'B')
                         exclusions = 0
                         for cell in cells[4:8]:
                             excl_text = cell.get_text(strip=True)
-                            if excl_text and excl_text != '':
-                                exclusions += len([x for x in excl_text.split() if x])
+                            if excl_text:
+                                # Each character/marker is one exclusion
+                                exclusions += len(excl_text.replace(' ', ''))
                         
                         if goals > 0 or exclusions > 0:
                             player_stats.append({
