@@ -1113,6 +1113,59 @@ class SGWTermineScraper:
             'unchanged': unchanged_games
         }
     
+    def search_entries(self, search_term: str) -> List[Dict]:
+        """Sucht nach Spielen und Events anhand von Name, Datum oder Teams"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        results = []
+        search_lower = search_term.lower()
+        
+        # Suche in Games
+        cursor.execute('SELECT id, date, time, home, guest, location, description FROM games')
+        for row in cursor.fetchall():
+            (id, date, time, home, guest, location, description) = row
+            searchable = f"{date} {home} {guest} {location or ''} {description or ''}".lower()
+            if search_lower in searchable or search_lower in f"{home} vs {guest}".lower():
+                results.append({
+                    'type': 'game',
+                    'id': id,
+                    'date': date,
+                    'time': time,
+                    'title': f"{home} vs {guest}",
+                    'location': location
+                })
+        
+        # Suche in Events
+        cursor.execute('SELECT id, date, time, title, location, description FROM events')
+        for row in cursor.fetchall():
+            (id, date, time, title, location, description) = row
+            searchable = f"{date} {title} {location or ''} {description or ''}".lower()
+            if search_lower in searchable:
+                results.append({
+                    'type': 'event',
+                    'id': id,
+                    'date': date,
+                    'time': time,
+                    'title': title,
+                    'location': location
+                })
+        
+        conn.close()
+        return results
+    
+    def print_search_results(self, search_term: str):
+        """Gibt Suchergebnisse aus"""
+        results = self.search_entries(search_term)
+        if not results:
+            print(f"Keine Treffer fuer: {search_term}")
+            return
+        
+        print(f"Gefunden ({len(results)} Treffer):")
+        for r in results:
+            type_tag = "[EVENT]" if r['type'] == 'event' else "[GAME]"
+            time_str = r['time'] if r['time'] else ""
+            print(f"  [{r['id']}] {type_tag} {r['date']} {time_str} - {r['title']}")
+    
     def delete_games_and_recalculate_ids(self, ids_to_delete: List[int]) -> int:
         """Löscht Spiele mit den angegebenen IDs und berechnet IDs neu"""
         conn = sqlite3.connect(self.db_path)
@@ -2210,6 +2263,8 @@ Beispiele:
                        help='Zeigt die nächsten N Events')
     parser.add_argument('--delete-event', nargs='+', type=int, metavar='ID',
                        help='Loescht Events mit den angegebenen IDs')
+    parser.add_argument('--search', type=str, metavar='TERM',
+                       help='Sucht nach Spielen/Events (Name, Datum, Teams)')
     
     # Statistics arguments
     parser.add_argument('--stats', nargs='?', const='verbandsliga', default=None,
@@ -2277,6 +2332,11 @@ Beispiele:
             ics_file = scraper.generate_ics(args.ics)
             print(f"ICS calendar updated: {ics_file}")
             sys.exit(1)  # Changes made
+    
+    # Suche
+    if args.search:
+        scraper.print_search_results(args.search)
+        sys.exit(0)
         sys.exit(0)
     
     # Events auflisten
