@@ -1385,57 +1385,92 @@ class SGWTermineScraper:
         conn.close()
         return comps
     
-    def print_season_stats(self):
-        """Gibt Saison-Statistiken aus (nach Wettbewerb gruppiert)"""
-        competitions = self.get_all_competitions()
+    def print_season_stats(self, competition_filter: str = None):
+        """Gibt Saison-Statistiken aus (optional gefiltert nach Wettbewerb)
         
-        print("\n=== SGW Essen - Saison Statistiken ===\n")
+        Args:
+            competition_filter: None/leer = verbandsliga (default)
+                               'gesamt' = alle Wettbewerbe
+                               'pokal', 'verbandsliga', etc. = spezifischer Wettbewerb
+        """
+        # Default = verbandsliga
+        if not competition_filter:
+            competition_filter = 'verbandsliga'
         
-        # Stats pro Wettbewerb
-        for comp in competitions:
-            stats = self.get_season_stats(comp)
-            comp_name = comp.upper() if comp else 'UNBEKANNT'
+        competition_filter = competition_filter.lower().strip()
+        
+        if competition_filter == 'gesamt' or competition_filter == 'all':
+            # Alle Wettbewerbe + Gesamt
+            competitions = self.get_all_competitions()
+            
+            print("\n=== SGW Essen - Saison Statistiken (Gesamt) ===\n")
+            
+            for comp in competitions:
+                stats = self.get_season_stats(comp)
+                comp_name = comp.upper() if comp else 'UNBEKANNT'
+                pp = stats['power_play']
+                pk = stats['penalty_kill']
+                
+                print(f"[{comp_name}]")
+                print(f"  Überzahl: {pp['goals']}/{pp['attempts']} ({pp['percentage']:.1f}%)")
+                print(f"  Unterzahl: {pk['success']}/{pk['attempts']} ({pk['percentage']:.1f}%)")
+                
+                if stats['top_scorers']:
+                    print(f"  Torschützen:")
+                    for i, s in enumerate(stats['top_scorers'][:5], 1):
+                        print(f"    {i}. {s['name']}: {s['goals']} Tore")
+                
+                if stats['exclusions']:
+                    print(f"  Ausschlüsse:")
+                    for s in stats['exclusions'][:3]:
+                        print(f"    {s['name']}: {s['exclusions']}")
+                print()
+            
+            # Gesamt-Summe
+            total = self.get_season_stats()
+            pp = total['power_play']
+            pk = total['penalty_kill']
+            
+            print(f"[GESAMT]")
+            print(f"  Überzahl: {pp['goals']}/{pp['attempts']} ({pp['percentage']:.1f}%)")
+            print(f"  Unterzahl: {pk['success']}/{pk['attempts']} ({pk['percentage']:.1f}%)")
+            
+            if total['top_scorers']:
+                print(f"  Torschützen:")
+                for i, s in enumerate(total['top_scorers'][:5], 1):
+                    print(f"    {i}. {s['name']}: {s['goals']} Tore")
+            
+            if total['exclusions']:
+                print(f"  Ausschlüsse:")
+                for s in total['exclusions'][:5]:
+                    print(f"    {s['name']}: {s['exclusions']}")
+        else:
+            # Einzelner Wettbewerb
+            stats = self.get_season_stats(competition_filter)
+            comp_name = competition_filter.upper()
+            
+            print(f"\n=== SGW Essen - {comp_name} ===\n")
             
             pp = stats['power_play']
             pk = stats['penalty_kill']
             
-            print(f"[{comp_name}]")
-            print(f"  Überzahl: {pp['goals']}/{pp['attempts']} ({pp['percentage']:.1f}%)")
-            print(f"  Unterzahl: {pk['success']}/{pk['attempts']} ({pk['percentage']:.1f}%)")
+            if pp['attempts'] == 0 and pk['attempts'] == 0:
+                print(f"Keine Stats für '{competition_filter}' gefunden.")
+                print(f"Verfügbare Wettbewerbe: {', '.join(self.get_all_competitions())}")
+                return
             
-            # Top-Torschützen pro Wettbewerb (als Liste)
+            print(f"Überzahl: {pp['goals']}/{pp['attempts']} ({pp['percentage']:.1f}%)")
+            print(f"Unterzahl: {pk['success']}/{pk['attempts']} ({pk['percentage']:.1f}%)")
+            
             if stats['top_scorers']:
-                print(f"  Torschützen:")
+                print(f"\nTorschützen:")
                 for i, s in enumerate(stats['top_scorers'][:5], 1):
-                    print(f"    {i}. {s['name']}: {s['goals']} Tore")
+                    print(f"  {i}. {s['name']}: {s['goals']} Tore")
             
-            # Ausschlüsse pro Wettbewerb
             if stats['exclusions']:
-                print(f"  Ausschlüsse:")
-                for s in stats['exclusions'][:3]:
-                    print(f"    {s['name']}: {s['exclusions']}")
-            print()
-        
-        # Gesamt-Statistiken
-        total = self.get_season_stats()
-        pp = total['power_play']
-        pk = total['penalty_kill']
-        
-        print(f"[GESAMT]")
-        print(f"  Überzahl: {pp['goals']}/{pp['attempts']} ({pp['percentage']:.1f}%)")
-        print(f"  Unterzahl: {pk['success']}/{pk['attempts']} ({pk['percentage']:.1f}%)")
-        
-        # Top-Torschützen (gesamt)
-        if total['top_scorers']:
-            print(f"  Torschützen:")
-            for i, s in enumerate(total['top_scorers'][:5], 1):
-                print(f"    {i}. {s['name']}: {s['goals']} Tore")
-        
-        # Ausschlüsse (gesamt)
-        if total['exclusions']:
-            print(f"  Ausschlüsse:")
-            for s in total['exclusions'][:5]:
-                print(f"    {s['name']}: {s['exclusions']}")
+                print(f"\nAusschlüsse:")
+                for s in stats['exclusions'][:5]:
+                    print(f"  {s['name']}: {s['exclusions']}")
         
         print()
     
@@ -2092,8 +2127,8 @@ Beispiele:
                        help='Loescht Events mit den angegebenen IDs')
     
     # Statistics arguments
-    parser.add_argument('--stats', action='store_true',
-                       help='Zeigt Saison-Statistiken (Ueberzahl, Top-Scorer)')
+    parser.add_argument('--stats', nargs='?', const='verbandsliga', default=None,
+                       help='Zeigt Saison-Statistiken. Optional: pokal, verbandsliga, ruhrgebietsliga, gesamt')
     parser.add_argument('--game-stats', type=int, metavar='GAME_ID',
                        help='Zeigt Statistiken fuer ein bestimmtes Spiel')
     parser.add_argument('--scrape-stats', action='store_true',
@@ -2167,8 +2202,8 @@ Beispiele:
     # ========== STATISTICS ==========
     
     # Saison-Statistiken
-    if args.stats:
-        scraper.print_season_stats()
+    if args.stats is not None:
+        scraper.print_season_stats(args.stats)
         sys.exit(0)
     
     # Statistiken scrapen
