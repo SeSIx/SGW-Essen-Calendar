@@ -1425,7 +1425,8 @@ class SGWTermineScraper:
                     print(f"  Ausschlüsse:")
                     for s in stats['exclusions'][:3]:
                         print(f"    {s['name']}: {s['exclusions']}")
-                print()
+                print()  # Leerzeile nach jedem Wettbewerb
+                print()  # Extra Leerzeile für bessere Trennung
             
             # Gesamt-Summe
             total = self.get_season_stats()
@@ -1450,7 +1451,9 @@ class SGWTermineScraper:
             stats = self.get_season_stats(competition_filter)
             comp_name = competition_filter.upper()
             
-            print(f"\n=== SGW Essen - {comp_name} ===\n")
+            # Verbandsliga = 1. Mannschaft
+            team_info = " (1. Mannschaft)" if competition_filter.lower() == 'verbandsliga' else ""
+            print(f"\n=== SGW Essen - {comp_name}{team_info} ===\n")
             
             pp = stats['power_play']
             pk = stats['penalty_kill']
