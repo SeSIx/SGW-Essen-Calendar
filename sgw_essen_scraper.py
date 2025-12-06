@@ -1877,6 +1877,75 @@ class SGWTermineScraper:
                         print(f"    {line}")
             print()
     
+    def list_all_next(self, limit: int = 10, format: str = "compact"):
+        """Zeigt die nächsten Termine (Spiele + Events kombiniert, sortiert nach Datum)"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        today_dt = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        combined = []
+        
+        # Hole Spiele
+        cursor.execute('SELECT id, date, time, home, guest, location, description FROM games')
+        for row in cursor.fetchall():
+            (id, date, time, home, guest, location, description) = row
+            try:
+                dt = datetime.strptime(date, '%d.%m.%Y') if '.' in date else datetime.strptime(date, '%Y-%m-%d')
+                if time:
+                    h, m = time.split(':')
+                    dt = dt.replace(hour=int(h), minute=int(m))
+                if dt >= today_dt:
+                    combined.append({
+                        'type': 'game', 'id': id, 'dt': dt, 'date': date, 'time': time,
+                        'title': f"{home} vs {guest}", 'location': location, 'description': description
+                    })
+            except:
+                continue
+        
+        # Hole Events
+        cursor.execute('SELECT id, date, time, title, location, description FROM events')
+        for row in cursor.fetchall():
+            (id, date, time, title, location, description) = row
+            try:
+                dt = datetime.strptime(date, '%d.%m.%Y') if '.' in date else datetime.strptime(date, '%Y-%m-%d')
+                if time:
+                    h, m = time.split(':')
+                    dt = dt.replace(hour=int(h), minute=int(m))
+                if dt >= today_dt:
+                    combined.append({
+                        'type': 'event', 'id': id, 'dt': dt, 'date': date, 'time': time,
+                        'title': title, 'location': location, 'description': description
+                    })
+            except:
+                continue
+        
+        conn.close()
+        
+        # Sortieren nach Datum
+        combined.sort(key=lambda x: x['dt'])
+        combined = combined[:limit]
+        
+        if not combined:
+            print("Keine anstehenden Termine.")
+            return
+        
+        # Output
+        for item in combined:
+            time_str = item['time'] if item['time'] else ""
+            loc = item['location'].split('|')[0].strip()[:30] if item['location'] else ""
+            type_tag = "" if item['type'] == 'game' else "[EVENT] "
+            
+            if format == "compact":
+                print(f"[{item['id']}] {item['date']} {time_str} | {type_tag}{item['title']}")
+                if loc:
+                    print(f"    @ {loc}")
+            else:
+                print(f"[{item['id']}] {type_tag}{item['date']} {time_str}")
+                print(f"    {item['title']}")
+                if loc:
+                    print(f"    @ {loc}")
+                print()
+    
     def list_termine(self, limit: int = 10):
         """Zeigt Termine aus der Datenbank"""
         conn = sqlite3.connect(self.db_path)
@@ -2111,7 +2180,9 @@ Beispiele:
     parser.add_argument('--list', action='store_true',
                        help='Zeigt Termine aus der Datenbank')
     parser.add_argument('--list-next', type=int, metavar='N',
-                       help='Zeigt die nächsten N anstehenden Termine (ab heute)')
+                       help='Zeigt die nächsten N anstehenden Spiele (ab heute)')
+    parser.add_argument('--list-all-next', type=int, metavar='N',
+                       help='Zeigt die nächsten N Termine (Spiele + Events kombiniert)')
     parser.add_argument('--limit', type=int, default=10,
                        help='Anzahl der anzuzeigenden Termine')
     parser.add_argument('--delete', nargs='+', type=int, metavar='ID',
@@ -2160,6 +2231,11 @@ Beispiele:
     # Naechste Termine anzeigen
     if args.list_next:
         scraper.list_next_termine(limit=args.list_next, format=args.format)
+        sys.exit(0)
+    
+    # Kombinierte Liste (Spiele + Events)
+    if args.list_all_next:
+        scraper.list_all_next(limit=args.list_all_next, format=args.format)
         sys.exit(0)
     
     # ========== EVENTS ==========
