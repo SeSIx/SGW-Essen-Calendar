@@ -1932,18 +1932,28 @@ class SGWTermineScraper:
         # Output
         for item in combined:
             time_str = item['time'] if item['time'] else ""
-            loc = item['location'].split('|')[0].strip()[:30] if item['location'] else ""
             type_tag = "" if item['type'] == 'game' else "[EVENT] "
+            
+            # Location: Adresse | Maps-Link
+            loc_parts = item['location'].split('|') if item['location'] else []
+            address = loc_parts[0].strip()[:30] if len(loc_parts) > 0 else ""
+            maps_link = loc_parts[1].strip() if len(loc_parts) > 1 else ""
             
             if format == "compact":
                 print(f"[{item['id']}] {item['date']} {time_str} | {type_tag}{item['title']}")
-                if loc:
-                    print(f"    @ {loc}")
+                if address:
+                    if maps_link:
+                        print(f"    @ {address} (maps: {maps_link})")
+                    else:
+                        print(f"    @ {address}")
             else:
                 print(f"[{item['id']}] {type_tag}{item['date']} {time_str}")
                 print(f"    {item['title']}")
-                if loc:
-                    print(f"    @ {loc}")
+                if address:
+                    if maps_link:
+                        print(f"    @ {address} (maps: {maps_link})")
+                    else:
+                        print(f"    @ {address}")
                 print()
     
     def list_termine(self, limit: int = 10):
