@@ -175,6 +175,18 @@ class SGWTermineScraper:
             # Spalte existiert bereits
             pass
         
+        # Füge competition-Spalte zu game_stats hinzu (Migration)
+        try:
+            cursor.execute('ALTER TABLE game_stats ADD COLUMN competition TEXT')
+        except sqlite3.OperationalError:
+            pass
+        
+        # Füge competition-Spalte zu player_stats hinzu (Migration)
+        try:
+            cursor.execute('ALTER TABLE player_stats ADD COLUMN competition TEXT')
+        except sqlite3.OperationalError:
+            pass
+        
         # Füge description-Spalte hinzu und migriere result-Daten (Migration)
         try:
             cursor.execute('ALTER TABLE games ADD COLUMN description TEXT')
@@ -814,7 +826,7 @@ class SGWTermineScraper:
         except Exception as e:
             return stats
     
-    def save_game_stats(self, game_db_id: int, team_stats: Dict, player_stats: List[Dict]):
+    def save_game_stats(self, game_db_id: int, team_stats: Dict, player_stats: List[Dict], competition: str = ""):
         """Speichert Spielstatistiken in der Datenbank (nur SGW Essen)"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -826,19 +838,19 @@ class SGWTermineScraper:
                 cursor.execute('''
                     INSERT OR REPLACE INTO game_stats 
                     (game_id, team, power_play_goals, power_play_attempts, 
-                     penalty_kill_success, penalty_kill_attempts)
-                    VALUES (?, ?, ?, ?, ?, ?)
+                     penalty_kill_success, penalty_kill_attempts, competition)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
                 ''', (game_db_id, 'SGW Essen', ts.get('power_play_goals', 0), 
                       ts.get('power_play_attempts', 0), ts.get('penalty_kill_success', 0),
-                      ts.get('penalty_kill_attempts', 0)))
+                      ts.get('penalty_kill_attempts', 0), competition))
             
             # Nur SGW Essen Player-Stats speichern
             for ps in player_stats:
                 if ps.get('team') == 'SGW Essen':
                     cursor.execute('''
-                        INSERT INTO player_stats (game_id, player_name, team, goals, exclusions)
-                        VALUES (?, ?, ?, ?, ?)
-                    ''', (game_db_id, ps['name'], ps['team'], ps.get('goals', 0), ps.get('exclusions', 0)))
+                        INSERT INTO player_stats (game_id, player_name, team, goals, exclusions, competition)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                    ''', (game_db_id, ps['name'], ps['team'], ps.get('goals', 0), ps.get('exclusions', 0), competition))
             
             conn.commit()
         except Exception as e:
@@ -1304,24 +1316,29 @@ class SGWTermineScraper:
     
     # ==================== STATISTICS ====================
     
-    def get_season_stats(self) -> Dict:
-        """Berechnet Saison-Statistiken für SGW Essen"""
+    def get_season_stats(self, competition: str = None) -> Dict:
+        """Berechnet Saison-Statistiken für SGW Essen (optional nach Wettbewerb)"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
-        # Gesamte Überzahl/Unterzahl Stats
-        cursor.execute('''
+        # Filter für Wettbewerb
+        comp_filter = "AND competition = ?" if competition else ""
+        comp_params = (competition,) if competition else ()
+        
+        # Überzahl/Unterzahl Stats
+        cursor.execute(f'''
             SELECT 
                 SUM(power_play_goals) as pp_goals,
                 SUM(power_play_attempts) as pp_attempts,
                 SUM(penalty_kill_success) as pk_success,
                 SUM(penalty_kill_attempts) as pk_attempts
-            FROM game_stats WHERE team = 'SGW Essen'
-        ''')
+            FROM game_stats WHERE team = 'SGW Essen' {comp_filter}
+        ''', comp_params)
         
         row = cursor.fetchone()
         
         stats = {
+            'competition': competition or 'Gesamt',
             'power_play': {
                 'goals': row[0] or 0,
                 'attempts': row[1] or 0,
@@ -1335,57 +1352,90 @@ class SGWTermineScraper:
         }
         
         # Top-Torschützen
-        cursor.execute('''
+        cursor.execute(f'''
             SELECT player_name, SUM(goals) as total_goals
             FROM player_stats 
-            WHERE team = 'SGW Essen' AND goals > 0
+            WHERE team = 'SGW Essen' AND goals > 0 {comp_filter}
             GROUP BY player_name
             ORDER BY total_goals DESC
             LIMIT 10
-        ''')
+        ''', comp_params)
         stats['top_scorers'] = [{'name': r[0], 'goals': r[1]} for r in cursor.fetchall()]
         
         # Ausschluss-Statistik
-        cursor.execute('''
+        cursor.execute(f'''
             SELECT player_name, SUM(exclusions) as total_excl
             FROM player_stats 
-            WHERE team = 'SGW Essen' AND exclusions > 0
+            WHERE team = 'SGW Essen' AND exclusions > 0 {comp_filter}
             GROUP BY player_name
             ORDER BY total_excl DESC
             LIMIT 10
-        ''')
+        ''', comp_params)
         stats['exclusions'] = [{'name': r[0], 'exclusions': r[1]} for r in cursor.fetchall()]
         
         conn.close()
         return stats
     
+    def get_all_competitions(self) -> List[str]:
+        """Gibt alle Wettbewerbe mit Stats zurück"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute('SELECT DISTINCT competition FROM game_stats WHERE competition IS NOT NULL ORDER BY competition')
+        comps = [r[0] for r in cursor.fetchall()]
+        conn.close()
+        return comps
+    
     def print_season_stats(self):
-        """Gibt Saison-Statistiken aus"""
-        stats = self.get_season_stats()
+        """Gibt Saison-Statistiken aus (nach Wettbewerb gruppiert)"""
+        competitions = self.get_all_competitions()
         
         print("\n=== SGW Essen - Saison Statistiken ===\n")
         
-        # Überzahl
-        pp = stats['power_play']
-        print(f"Überzahl:")
-        print(f"  {pp['goals']}/{pp['attempts']} ({pp['percentage']:.1f}%)")
+        # Stats pro Wettbewerb
+        for comp in competitions:
+            stats = self.get_season_stats(comp)
+            comp_name = comp.upper() if comp else 'UNBEKANNT'
+            
+            pp = stats['power_play']
+            pk = stats['penalty_kill']
+            
+            print(f"[{comp_name}]")
+            print(f"  Überzahl: {pp['goals']}/{pp['attempts']} ({pp['percentage']:.1f}%)")
+            print(f"  Unterzahl: {pk['success']}/{pk['attempts']} ({pk['percentage']:.1f}%)")
+            
+            # Top-Torschützen pro Wettbewerb (als Liste)
+            if stats['top_scorers']:
+                print(f"  Torschützen:")
+                for i, s in enumerate(stats['top_scorers'][:5], 1):
+                    print(f"    {i}. {s['name']}: {s['goals']} Tore")
+            
+            # Ausschlüsse pro Wettbewerb
+            if stats['exclusions']:
+                print(f"  Ausschlüsse:")
+                for s in stats['exclusions'][:3]:
+                    print(f"    {s['name']}: {s['exclusions']}")
+            print()
         
-        # Unterzahl
-        pk = stats['penalty_kill']
-        print(f"\nUnterzahl:")
-        print(f"  {pk['success']}/{pk['attempts']} ({pk['percentage']:.1f}%)")
+        # Gesamt-Statistiken
+        total = self.get_season_stats()
+        pp = total['power_play']
+        pk = total['penalty_kill']
         
-        # Top-Torschützen
-        if stats['top_scorers']:
-            print(f"\nTop Torschützen:")
-            for i, s in enumerate(stats['top_scorers'][:5], 1):
-                print(f"  {i}. {s['name']}: {s['goals']} Tore")
+        print(f"[GESAMT]")
+        print(f"  Überzahl: {pp['goals']}/{pp['attempts']} ({pp['percentage']:.1f}%)")
+        print(f"  Unterzahl: {pk['success']}/{pk['attempts']} ({pk['percentage']:.1f}%)")
         
-        # Ausschlüsse
-        if stats['exclusions']:
-            print(f"\nAusschlüsse:")
-            for s in stats['exclusions'][:5]:
-                print(f"  {s['name']}: {s['exclusions']}")
+        # Top-Torschützen (gesamt)
+        if total['top_scorers']:
+            print(f"  Torschützen:")
+            for i, s in enumerate(total['top_scorers'][:5], 1):
+                print(f"    {i}. {s['name']}: {s['goals']} Tore")
+        
+        # Ausschlüsse (gesamt)
+        if total['exclusions']:
+            print(f"  Ausschlüsse:")
+            for s in total['exclusions'][:5]:
+                print(f"    {s['name']}: {s['exclusions']}")
         
         print()
     
@@ -1504,9 +1554,9 @@ class SGWTermineScraper:
             stats = self.scrape_game_statistics(dsv_game_id, comp_type or 'verbandsliga', home)
             
             if stats:
-                self.save_game_stats(db_id, stats.get('team_stats', {}), stats.get('player_stats', []))
+                self.save_game_stats(db_id, stats.get('team_stats', {}), stats.get('player_stats', []), comp_type or 'unknown')
                 scraped_count += 1
-                print(f"    -> Stats saved")
+                print(f"    -> Stats saved ({comp_type})")
             else:
                 print(f"    -> No stats found")
         
