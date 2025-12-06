@@ -1143,12 +1143,13 @@ class SGWTermineScraper:
         
         for i, game in enumerate(remaining_games, 1):
             # Neue ID ist i, restliche Daten bleiben gleich
-            (old_id, event_id, home, guest, date, time, location, description, last_change) = game
+            # Tabelle hat: id, event_id, home, guest, date, time, location, description, dsv_game_id, competition_type, last_change
+            (old_id, event_id, home, guest, date, time, location, description, dsv_game_id, competition_type, last_change) = game
             cursor.execute('''
                 INSERT INTO games 
-                (id, event_id, home, guest, date, time, location, description, last_change)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (i, event_id, home, guest, date, time, location, description, last_change))
+                (id, event_id, home, guest, date, time, location, description, dsv_game_id, competition_type, last_change)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (i, event_id, home, guest, date, time, location, description, dsv_game_id, competition_type, last_change))
         
         # Setze den Auto-Increment Counter
         max_id = len(remaining_games)
