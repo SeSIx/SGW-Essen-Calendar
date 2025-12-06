@@ -694,8 +694,8 @@ class SGWTermineScraper:
         except Exception as e:
             return None
     
-    def _extract_player_stats(self, soup: BeautifulSoup) -> List[Dict]:
-        """Extrahiert Spielerstatistiken aus der DSV-Spielseite"""
+    def _extract_player_stats(self, soup: BeautifulSoup, is_sgw_home: bool = True) -> List[Dict]:
+        """Extrahiert Spielerstatistiken aus der DSV-Spielseite (nur SGW Essen)"""
         player_stats = []
         
         try:
@@ -712,10 +712,14 @@ class SGWTermineScraper:
                     if 'Name' in header_text and 'Tore' in header_text:
                         player_table_indices.append(i)
             
-            # Process player tables (first = Heim, second = Gast)
-            for idx, table_idx in enumerate(player_table_indices[:2]):
-                table = tables[table_idx]
-                team = "SGW Essen" if idx == 0 else "Opponent"
+            # Bestimme welche Tabelle SGW Essen ist:
+            # - Erste Tabelle = Heimteam
+            # - Zweite Tabelle = Gastteam
+            sgw_table_idx = 0 if is_sgw_home else 1
+            
+            # Nur SGW Essen Tabelle verarbeiten
+            if len(player_table_indices) > sgw_table_idx:
+                table = tables[player_table_indices[sgw_table_idx]]
                 
                 rows = table.find_all('tr')
                 for row in rows[2:]:  # Skip header rows (0 and 1)
@@ -745,7 +749,7 @@ class SGWTermineScraper:
                         if goals > 0 or exclusions > 0:
                             player_stats.append({
                                 'name': name,
-                                'team': team,
+                                'team': 'SGW Essen',
                                 'goals': goals,
                                 'exclusions': exclusions
                             })
@@ -757,14 +761,15 @@ class SGWTermineScraper:
         except Exception as e:
             return []
     
-    def _extract_team_stats(self, soup: BeautifulSoup) -> Dict:
-        """Extrahiert Mannschaftsstatistiken aus der DSV-Spielseite"""
+    def _extract_team_stats(self, soup: BeautifulSoup, is_sgw_home: bool = True) -> Dict:
+        """Extrahiert Mannschaftsstatistiken aus der DSV-Spielseite (nur SGW Essen)"""
         stats = {
             'sgw': {'power_play_goals': 0, 'power_play_attempts': 0, 
-                    'penalty_kill_success': 0, 'penalty_kill_attempts': 0},
-            'opponent': {'power_play_goals': 0, 'power_play_attempts': 0,
-                        'penalty_kill_success': 0, 'penalty_kill_attempts': 0}
+                    'penalty_kill_success': 0, 'penalty_kill_attempts': 0}
         }
+        
+        # Index: 0 = Heim, 1 = Gast
+        sgw_idx = 0 if is_sgw_home else 1
         
         try:
             tables = soup.find_all('table')
@@ -778,9 +783,9 @@ class SGWTermineScraper:
                     if 'überzahl' in first_row:
                         stats_tables.append(table)
             
-            # Erste Stats-Tabelle = Heim (SGW), Zweite = Gast
-            for i, table in enumerate(stats_tables[:2]):
-                team_key = 'sgw' if i == 0 else 'opponent'
+            # Nur SGW Essen Stats-Tabelle verarbeiten (basierend auf Heim/Gast)
+            if len(stats_tables) > sgw_idx:
+                table = stats_tables[sgw_idx]
                 rows = table.find_all('tr')
                 
                 for row in rows:
@@ -791,16 +796,16 @@ class SGWTermineScraper:
                         
                         try:
                             if 'überzahl' == label or label == 'ueberzahl':
-                                stats[team_key]['power_play_attempts'] = int(value) if value.isdigit() else 0
+                                stats['sgw']['power_play_attempts'] = int(value) if value.isdigit() else 0
                             elif 'tore in überzahl' in label or 'tore in ueberzahl' in label:
-                                stats[team_key]['power_play_goals'] = int(value) if value.isdigit() else 0
+                                stats['sgw']['power_play_goals'] = int(value) if value.isdigit() else 0
                             elif 'unterzahl' == label:
-                                stats[team_key]['penalty_kill_attempts'] = int(value) if value.isdigit() else 0
+                                stats['sgw']['penalty_kill_attempts'] = int(value) if value.isdigit() else 0
                             elif 'gegentore in unterzahl' in label:
                                 # Gegentore in Unterzahl = erfolgreiche Penalty Kills
                                 gegentore = int(value) if value.isdigit() else 0
-                                attempts = stats[team_key]['penalty_kill_attempts']
-                                stats[team_key]['penalty_kill_success'] = attempts - gegentore if attempts > 0 else 0
+                                attempts = stats['sgw']['penalty_kill_attempts']
+                                stats['sgw']['penalty_kill_success'] = attempts - gegentore if attempts > 0 else 0
                         except:
                             continue
             
@@ -810,30 +815,30 @@ class SGWTermineScraper:
             return stats
     
     def save_game_stats(self, game_db_id: int, team_stats: Dict, player_stats: List[Dict]):
-        """Speichert Spielstatistiken in der Datenbank"""
+        """Speichert Spielstatistiken in der Datenbank (nur SGW Essen)"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
         try:
-            # Team-Stats speichern
-            for team_key, team in [('sgw', 'SGW Essen'), ('opponent', 'Opponent')]:
-                if team_key in team_stats:
-                    ts = team_stats[team_key]
-                    cursor.execute('''
-                        INSERT OR REPLACE INTO game_stats 
-                        (game_id, team, power_play_goals, power_play_attempts, 
-                         penalty_kill_success, penalty_kill_attempts)
-                        VALUES (?, ?, ?, ?, ?, ?)
-                    ''', (game_db_id, team, ts.get('power_play_goals', 0), 
-                          ts.get('power_play_attempts', 0), ts.get('penalty_kill_success', 0),
-                          ts.get('penalty_kill_attempts', 0)))
-            
-            # Player-Stats speichern
-            for ps in player_stats:
+            # Nur SGW Essen Team-Stats speichern (nicht Gegner)
+            if 'sgw' in team_stats:
+                ts = team_stats['sgw']
                 cursor.execute('''
-                    INSERT INTO player_stats (game_id, player_name, team, goals, exclusions)
-                    VALUES (?, ?, ?, ?, ?)
-                ''', (game_db_id, ps['name'], ps['team'], ps.get('goals', 0), ps.get('exclusions', 0)))
+                    INSERT OR REPLACE INTO game_stats 
+                    (game_id, team, power_play_goals, power_play_attempts, 
+                     penalty_kill_success, penalty_kill_attempts)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ''', (game_db_id, 'SGW Essen', ts.get('power_play_goals', 0), 
+                      ts.get('power_play_attempts', 0), ts.get('penalty_kill_success', 0),
+                      ts.get('penalty_kill_attempts', 0)))
+            
+            # Nur SGW Essen Player-Stats speichern
+            for ps in player_stats:
+                if ps.get('team') == 'SGW Essen':
+                    cursor.execute('''
+                        INSERT INTO player_stats (game_id, player_name, team, goals, exclusions)
+                        VALUES (?, ?, ?, ?, ?)
+                    ''', (game_db_id, ps['name'], ps['team'], ps.get('goals', 0), ps.get('exclusions', 0)))
             
             conn.commit()
         except Exception as e:
@@ -1358,27 +1363,27 @@ class SGWTermineScraper:
         """Gibt Saison-Statistiken aus"""
         stats = self.get_season_stats()
         
-        print("\n=== SGW Essen - Season Statistics ===\n")
+        print("\n=== SGW Essen - Saison Statistiken ===\n")
         
         # Überzahl
         pp = stats['power_play']
-        print(f"POWER PLAY (Ueberzahl):")
+        print(f"Überzahl:")
         print(f"  {pp['goals']}/{pp['attempts']} ({pp['percentage']:.1f}%)")
         
         # Unterzahl
         pk = stats['penalty_kill']
-        print(f"\nPENALTY KILL (Unterzahl):")
+        print(f"\nUnterzahl:")
         print(f"  {pk['success']}/{pk['attempts']} ({pk['percentage']:.1f}%)")
         
         # Top-Torschützen
         if stats['top_scorers']:
-            print(f"\nTOP SCORERS:")
+            print(f"\nTop Torschützen:")
             for i, s in enumerate(stats['top_scorers'][:5], 1):
-                print(f"  {i}. {s['name']}: {s['goals']} goals")
+                print(f"  {i}. {s['name']}: {s['goals']} Tore")
         
         # Ausschlüsse
         if stats['exclusions']:
-            print(f"\nEXCLUSIONS:")
+            print(f"\nAusschlüsse:")
             for s in stats['exclusions'][:5]:
                 print(f"  {s['name']}: {s['exclusions']}")
         
@@ -1427,8 +1432,8 @@ class SGWTermineScraper:
         conn.close()
         return result
     
-    def scrape_game_statistics(self, game_id: str, competition_type: str) -> bool:
-        """Scraped Spielstatistiken von der DSV-Detailseite"""
+    def scrape_game_statistics(self, game_id: str, competition_type: str, home_team: str = "") -> dict:
+        """Scraped Spielstatistiken von der DSV-Detailseite (nur SGW Essen)"""
         try:
             if competition_type in self.competitions:
                 base_params = self.competitions[competition_type]['params']
@@ -1447,9 +1452,12 @@ class SGWTermineScraper:
             response.raise_for_status()
             soup = BeautifulSoup(response.content, 'html.parser')
             
-            # Extrahiere Stats
-            player_stats = self._extract_player_stats(soup)
-            team_stats = self._extract_team_stats(soup)
+            # Bestimme ob SGW Essen Heimteam ist
+            is_sgw_home = 'SGW' in home_team or 'Essen' in home_team or 'Wasserball' in home_team
+            
+            # Extrahiere Stats (nur SGW Essen)
+            player_stats = self._extract_player_stats(soup, is_sgw_home)
+            team_stats = self._extract_team_stats(soup, is_sgw_home)
             
             return {
                 'player_stats': player_stats,
@@ -1492,7 +1500,8 @@ class SGWTermineScraper:
             db_id, dsv_game_id, comp_type, home, guest, date = game
             print(f"  Scraping: {home} vs {guest} ({date}) [DSV:{dsv_game_id}]...")
             
-            stats = self.scrape_game_statistics(dsv_game_id, comp_type or 'verbandsliga')
+            # Übergebe home_team um zu bestimmen ob SGW Essen Heim oder Gast ist
+            stats = self.scrape_game_statistics(dsv_game_id, comp_type or 'verbandsliga', home)
             
             if stats:
                 self.save_game_stats(db_id, stats.get('team_stats', {}), stats.get('player_stats', []))
