@@ -2172,6 +2172,81 @@ class SGWTermineScraper:
                         print(f"    @ {address}")
                 print()
     
+    def list_all(self, format: str = "compact"):
+        """Zeigt alle Termine (Spiele + Events kombiniert, sortiert nach Datum, ohne Datumsfilter)"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        combined = []
+        
+        # Hole Spiele
+        cursor.execute('SELECT id, date, time, home, guest, location, description FROM games')
+        for row in cursor.fetchall():
+            (id, date, time, home, guest, location, description) = row
+            try:
+                dt = datetime.strptime(date, '%d.%m.%Y') if '.' in date else datetime.strptime(date, '%Y-%m-%d')
+                if time:
+                    h, m = time.split(':')
+                    dt = dt.replace(hour=int(h), minute=int(m))
+                combined.append({
+                    'type': 'game', 'id': id, 'dt': dt, 'date': date, 'time': time or '',
+                    'title': f"{home} vs {guest}", 'location': location or '', 'description': description or ''
+                })
+            except:
+                continue
+        
+        # Hole Events
+        cursor.execute('SELECT id, date, time, title, location, description FROM events')
+        for row in cursor.fetchall():
+            (id, date, time, title, location, description) = row
+            try:
+                dt = datetime.strptime(date, '%d.%m.%Y') if '.' in date else datetime.strptime(date, '%Y-%m-%d')
+                if time:
+                    h, m = time.split(':')
+                    dt = dt.replace(hour=int(h), minute=int(m))
+                combined.append({
+                    'type': 'event', 'id': id, 'dt': dt, 'date': date, 'time': time or '',
+                    'title': title, 'location': location or '', 'description': description or ''
+                })
+            except:
+                continue
+        
+        conn.close()
+        
+        # Sortieren nach Datum
+        combined.sort(key=lambda x: x['dt'])
+        
+        if not combined:
+            print("Keine Termine gefunden.")
+            return
+        
+        # Output
+        for item in combined:
+            time_str = item['time'] if item['time'] else ""
+            type_tag = "" if item['type'] == 'game' else "[EVENT] "
+            
+            # Location: Adresse | Maps-Link
+            loc_parts = item['location'].split('|') if item['location'] else []
+            address = loc_parts[0].strip()[:30] if len(loc_parts) > 0 else ""
+            maps_link = loc_parts[1].strip() if len(loc_parts) > 1 else ""
+            
+            if format == "compact":
+                print(f"[{item['id']}] {item['date']} {time_str} | {type_tag}{item['title']}")
+                if address:
+                    if maps_link:
+                        print(f"    @ {address} (maps: {maps_link})")
+                    else:
+                        print(f"    @ {address}")
+            else:
+                print(f"[{item['id']}] {type_tag}{item['date']} {time_str}")
+                print(f"    {item['title']}")
+                if address:
+                    if maps_link:
+                        print(f"    @ {address} (maps: {maps_link})")
+                    else:
+                        print(f"    @ {address}")
+                print()
+    
     def list_termine(self, limit: int = 10):
         """Zeigt Termine aus der Datenbank"""
         conn = sqlite3.connect(self.db_path)
@@ -2409,6 +2484,8 @@ Beispiele:
                        help='Zeigt die nächsten N anstehenden Spiele (ab heute)')
     parser.add_argument('--list-all-next', type=int, metavar='N',
                        help='Zeigt die nächsten N Termine (Spiele + Events kombiniert)')
+    parser.add_argument('--list-all', action='store_true',
+                       help='Zeigt alle Termine (Spiele + Events kombiniert, ohne Datumsfilter)')
     parser.add_argument('--limit', type=int, default=10,
                        help='Anzahl der anzuzeigenden Termine')
     parser.add_argument('--delete', nargs='+', type=int, metavar='ID',
@@ -2464,6 +2541,11 @@ Beispiele:
     # Kombinierte Liste (Spiele + Events)
     if args.list_all_next:
         scraper.list_all_next(limit=args.list_all_next, format=args.format)
+        sys.exit(0)
+    
+    # Alle Termine (Spiele + Events, ohne Datumsfilter)
+    if args.list_all:
+        scraper.list_all(format=args.format)
         sys.exit(0)
     
     # ========== EVENTS ==========
