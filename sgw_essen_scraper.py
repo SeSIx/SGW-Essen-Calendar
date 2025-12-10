@@ -1454,32 +1454,8 @@ class SGWTermineScraper:
         competition_filter = competition_filter.lower().strip()
         
         if competition_filter == 'gesamt' or competition_filter == 'all':
-            # Alle Wettbewerbe + Gesamt
-            competitions = self.get_all_competitions()
-            
+            # Nur Gesamt-Summe anzeigen (ohne einzelne Wettbewerbe)
             print("\n=== SGW Essen - Saison Statistiken (Gesamt) ===\n")
-            
-            for comp in competitions:
-                stats = self.get_season_stats(comp)
-                comp_name = comp.upper() if comp else 'UNBEKANNT'
-                pp = stats['power_play']
-                pk = stats['penalty_kill']
-                
-                print(f"[{comp_name}]")
-                print(f"  Überzahl: {pp['goals']}/{pp['attempts']} ({pp['percentage']:.1f}%)")
-                print(f"  Unterzahl: {pk['success']}/{pk['attempts']} ({pk['percentage']:.1f}%)")
-                
-                if stats['top_scorers']:
-                    print(f"  Torschützen:")
-                    for i, s in enumerate(stats['top_scorers'][:5], 1):
-                        print(f"    {i}. {s['name']}: {s['goals']} Tore")
-                
-                if stats['exclusions']:
-                    print(f"  Ausschlüsse:")
-                    for s in stats['exclusions'][:3]:
-                        print(f"    {s['name']}: {s['exclusions']}")
-                print()  # Leerzeile nach jedem Wettbewerb
-                print()  # Extra Leerzeile für bessere Trennung
             
             # Gesamt-Summe
             total = self.get_season_stats()
@@ -1615,42 +1591,73 @@ class SGWTermineScraper:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
-        # Finde Spiele mit Ergebnis und DSV Game-ID aber ohne Stats
+        # Finde Spiele mit Ergebnis und DSV Game-ID aber ohne Stats ODER mit unvollständigen Stats
+        # (z.B. nur team_stats aber keine player_stats)
         cursor.execute('''
-            SELECT g.id, g.dsv_game_id, g.competition_type, g.home, g.guest, g.date
+            SELECT g.id, g.dsv_game_id, g.competition_type, g.home, g.guest, g.date,
+                   CASE WHEN gs.id IS NULL THEN 'no_stats'
+                        WHEN ps.id IS NULL THEN 'incomplete_stats'
+                        ELSE 'has_stats'
+                   END as stat_status
             FROM games g
-            LEFT JOIN game_stats gs ON g.id = gs.game_id
+            LEFT JOIN game_stats gs ON g.id = gs.game_id AND gs.team = 'SGW Essen'
+            LEFT JOIN player_stats ps ON g.id = ps.game_id AND ps.team = 'SGW Essen'
             WHERE g.description LIKE '%Result:%'
             AND g.description NOT LIKE '%Result: -%'
             AND g.dsv_game_id IS NOT NULL
             AND g.dsv_game_id != ''
-            AND gs.id IS NULL
+            AND (gs.id IS NULL OR ps.id IS NULL)
         ''')
         
         games_to_scrape = cursor.fetchall()
+        
+        # Zusätzlich: Finde Spiele mit Ergebnis aber ohne DSV Game-ID (für Diagnose)
+        cursor.execute('''
+            SELECT COUNT(*) 
+            FROM games 
+            WHERE description LIKE '%Result:%'
+            AND description NOT LIKE '%Result: -%'
+            AND (dsv_game_id IS NULL OR dsv_game_id = '')
+        ''')
+        games_without_dsv_id = cursor.fetchone()[0]
+        
         conn.close()
         
         if not games_to_scrape:
             print("No played games with DSV game_id without stats found.")
-            print("Run --enable-scraping first to fetch DSV game IDs.")
+            if games_without_dsv_id > 0:
+                print(f"Note: {games_without_dsv_id} games have results but no DSV game_id.")
+                print("Run --enable-scraping first to fetch DSV game IDs for these games.")
             return 0
         
         print(f"Found {len(games_to_scrape)} games to scrape stats for...")
+        if games_without_dsv_id > 0:
+            print(f"Note: {games_without_dsv_id} additional games have results but no DSV game_id (skipped).")
         
         scraped_count = 0
         for game in games_to_scrape:
-            db_id, dsv_game_id, comp_type, home, guest, date = game
-            print(f"  Scraping: {home} vs {guest} ({date}) [DSV:{dsv_game_id}]...")
+            db_id, dsv_game_id, comp_type, home, guest, date, stat_status = game
+            status_msg = " (no stats)" if stat_status == 'no_stats' else " (incomplete stats)"
+            print(f"  Scraping: {home} vs {guest} ({date}) [DSV:{dsv_game_id}]{status_msg}...")
             
             # Übergebe home_team um zu bestimmen ob SGW Essen Heim oder Gast ist
             stats = self.scrape_game_statistics(dsv_game_id, comp_type or 'verbandsliga', home)
             
             if stats:
+                # Wenn bereits Stats existieren, lösche sie zuerst (für Update)
+                if stat_status == 'incomplete_stats':
+                    conn = sqlite3.connect(self.db_path)
+                    cursor = conn.cursor()
+                    cursor.execute('DELETE FROM game_stats WHERE game_id = ? AND team = ?', (db_id, 'SGW Essen'))
+                    cursor.execute('DELETE FROM player_stats WHERE game_id = ? AND team = ?', (db_id, 'SGW Essen'))
+                    conn.commit()
+                    conn.close()
+                
                 self.save_game_stats(db_id, stats.get('team_stats', {}), stats.get('player_stats', []), comp_type or 'unknown')
                 scraped_count += 1
                 print(f"    -> Stats saved ({comp_type})")
             else:
-                print(f"    -> No stats found")
+                print(f"    -> No stats found (game might not be available on DSV website)")
         
         print(f"Scraped stats for {scraped_count} games.")
         return scraped_count
