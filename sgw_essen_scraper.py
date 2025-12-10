@@ -992,8 +992,9 @@ class SGWTermineScraper:
             event_id = self.generate_event_id(home_clean, guest_clean, termin.get('competition', ''))
             
             # Hole detaillierte Informationen falls nötig
+            # ALWAYS fetch details if game_id exists to ensure we get the latest results
             game_details = None
-            if termin.get('needs_detail_fetch', False) and termin.get('game_id'):
+            if termin.get('game_id'):
                 game_details = self.fetch_game_details(termin['game_id'], termin.get('competition', 'cup'))
             
             # Bestimme finale Werte für Location und Description
