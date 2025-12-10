@@ -706,7 +706,7 @@ class SGWTermineScraper:
         except Exception as e:
             return None
     
-    def _extract_player_stats(self, soup: BeautifulSoup, is_sgw_home: bool = True) -> List[Dict]:
+    def _extract_player_stats(self, soup: BeautifulSoup, is_sgw_home: bool = True, home_team: str = "", guest_team: str = "") -> List[Dict]:
         """Extrahiert Spielerstatistiken aus der DSV-Spielseite (nur SGW Essen)"""
         player_stats = []
         
@@ -714,7 +714,7 @@ class SGWTermineScraper:
             tables = soup.find_all('table')
             
             # Finde Spieler-Tabellen (haben "Nr." und "Name / Vorname" in Row 1)
-            player_table_indices = []
+            player_tables = []
             for i, table in enumerate(tables):
                 rows = table.find_all('tr')
                 if len(rows) >= 3:
@@ -722,18 +722,81 @@ class SGWTermineScraper:
                     header_row = rows[1] if len(rows) > 1 else rows[0]
                     header_text = ' '.join([c.get_text(strip=True) for c in header_row.find_all(['td', 'th'])])
                     if 'Name' in header_text and 'Tore' in header_text:
-                        player_table_indices.append(i)
+                        # Try to find team name in table (look for "SG Wasserball Essen" or "Essen" in table text)
+                        table_text = table.get_text().lower()
+                        if 'essen' in table_text or 'wasserball' in table_text or 'sgw' in table_text:
+                            player_tables.append((i, table))
+                        else:
+                            # If no team name found, keep both tables and check later
+                            player_tables.append((i, table))
             
-            # Bestimme welche Tabelle SGW Essen ist:
-            # - Erste Tabelle = Heimteam
-            # - Zweite Tabelle = Gastteam
-            sgw_table_idx = 0 if is_sgw_home else 1
+            # Find the table that contains SGW Essen by searching for team name in card-header
+            sgw_table = None
             
-            # Nur SGW Essen Tabelle verarbeiten
-            if len(player_table_indices) > sgw_table_idx:
-                table = tables[player_table_indices[sgw_table_idx]]
-                
-                rows = table.find_all('tr')
+            # The structure is: <div class="card"> -> <div class="card-header"> -> <span>Team Name</span>
+            #                                                              -> <table class="table table-sm">
+            # Strategy: Find all card divs, check which one has "SG Wasserball Essen" in card-header, then get its table
+            
+            # Find all card divs (class can be a list or string)
+            card_divs = []
+            for div in soup.find_all('div'):
+                classes = div.get('class', [])
+                if classes:
+                    class_str = ' '.join(classes) if isinstance(classes, list) else str(classes)
+                    if 'card' in class_str:
+                        card_divs.append(div)
+            
+            for card_div in card_divs:
+                # Look for card-header with team name
+                card_header = None
+                for div in card_div.find_all('div'):
+                    classes = div.get('class', [])
+                    if classes:
+                        class_str = ' '.join(classes) if isinstance(classes, list) else str(classes)
+                        if 'card-header' in class_str:
+                            card_header = div
+                            break
+                if card_header:
+                    header_text = card_header.get_text(strip=True).lower()
+                    # Check if header contains SGW Essen team name
+                    if any(keyword in header_text for keyword in [
+                        'sg wasserball essen', 'sgw essen', 'wasserball essen',
+                        'sg wasserball', 'essen wasserball'
+                    ]):
+                        # Found the SGW Essen card, now find the table inside it
+                        table = None
+                        for tbl in card_div.find_all('table'):
+                            classes = tbl.get('class', [])
+                            if classes:
+                                class_str = ' '.join(classes) if isinstance(classes, list) else str(classes)
+                                if 'table' in class_str:
+                                    table = tbl
+                                    break
+                        if not table:
+                            table = card_div.find('table')  # Fallback: any table
+                        if table:
+                            # Verify this is a player table (has Name and Tore headers)
+                            rows = table.find_all('tr')
+                            if len(rows) >= 3:
+                                header_row = rows[1] if len(rows) > 1 else rows[0]
+                                header_text_check = ' '.join([c.get_text(strip=True) for c in header_row.find_all(['td', 'th'])])
+                                if 'Name' in header_text_check and 'Tore' in header_text_check:
+                                    sgw_table = table
+                                    break
+            
+            # Fallback: Use position-based approach if team name/player search failed
+            if not sgw_table and len(player_tables) >= 2:
+                sgw_table_idx = 0 if is_sgw_home else 1
+                if sgw_table_idx < len(player_tables):
+                    sgw_table = player_tables[sgw_table_idx][1]
+            
+            # Last resort: Use first player table if still not found
+            if not sgw_table and len(player_tables) > 0:
+                sgw_table = player_tables[0][1]
+            
+            # Process SGW Essen table
+            if sgw_table:
+                rows = sgw_table.find_all('tr')
                 for row in rows[2:]:  # Skip header rows (0 and 1)
                     cells = row.find_all(['td', 'th'])
                     if len(cells) < 4:
@@ -742,7 +805,7 @@ class SGWTermineScraper:
                     try:
                         nr = cells[0].get_text(strip=True)
                         name = cells[1].get_text(strip=True)
-                        goals_text = cells[3].get_text(strip=True)
+                        goals_text = cells[3].get_text(strip=True) if len(cells) > 3 else '0'
                         
                         if not name or not nr.isdigit():
                             continue
@@ -758,14 +821,15 @@ class SGWTermineScraper:
                                 # Each character/marker is one exclusion
                                 exclusions += len(excl_text.replace(' ', ''))
                         
-                        if goals > 0 or exclusions > 0:
-                            player_stats.append({
-                                'name': name,
-                                'team': 'SGW Essen',
-                                'goals': goals,
-                                'exclusions': exclusions
-                            })
-                    except:
+                        # Include ALL players from SGW Essen, even if they have 0 goals and 0 exclusions
+                        # This ensures we capture all players who played
+                        player_stats.append({
+                            'name': name,
+                            'team': 'SGW Essen',
+                            'goals': goals,
+                            'exclusions': exclusions
+                        })
+                    except Exception as e:
                         continue
             
             return player_stats
@@ -773,15 +837,12 @@ class SGWTermineScraper:
         except Exception as e:
             return []
     
-    def _extract_team_stats(self, soup: BeautifulSoup, is_sgw_home: bool = True) -> Dict:
+    def _extract_team_stats(self, soup: BeautifulSoup, is_sgw_home: bool = True, home_team: str = "", guest_team: str = "") -> Dict:
         """Extrahiert Mannschaftsstatistiken aus der DSV-Spielseite (nur SGW Essen)"""
         stats = {
             'sgw': {'power_play_goals': 0, 'power_play_attempts': 0, 
                     'penalty_kill_success': 0, 'penalty_kill_attempts': 0}
         }
-        
-        # Index: 0 = Heim, 1 = Gast
-        sgw_idx = 0 if is_sgw_home else 1
         
         try:
             tables = soup.find_all('table')
@@ -792,12 +853,66 @@ class SGWTermineScraper:
                 rows = table.find_all('tr')
                 if len(rows) >= 3:
                     first_row = rows[0].get_text(strip=True).lower()
-                    if 'überzahl' in first_row:
+                    if 'überzahl' in first_row or 'ueberzahl' in first_row:
                         stats_tables.append(table)
             
-            # Nur SGW Essen Stats-Tabelle verarbeiten (basierend auf Heim/Gast)
-            if len(stats_tables) > sgw_idx:
-                table = stats_tables[sgw_idx]
+            # Find the table that contains SGW Essen stats by searching for team name in card-header
+            sgw_table = None
+            
+            # The structure is: <div class="card"> -> <div class="card-header"> -> <span>Team Name</span>
+            #                                                              -> <div> -> <table>
+            # Strategy: Find all card divs, check which one has "SG Wasserball Essen" in card-header, then get its table
+            
+            # Find all card divs (class can be a list or string)
+            card_divs = []
+            for div in soup.find_all('div'):
+                classes = div.get('class', [])
+                if classes:
+                    class_str = ' '.join(classes) if isinstance(classes, list) else str(classes)
+                    if 'card' in class_str:
+                        card_divs.append(div)
+            
+            for card_div in card_divs:
+                # Look for card-header with team name
+                card_header = None
+                for div in card_div.find_all('div'):
+                    classes = div.get('class', [])
+                    if classes:
+                        class_str = ' '.join(classes) if isinstance(classes, list) else str(classes)
+                        if 'card-header' in class_str:
+                            card_header = div
+                            break
+                if card_header:
+                    header_text = card_header.get_text(strip=True).lower()
+                    # Check if header contains SGW Essen team name
+                    if any(keyword in header_text for keyword in [
+                        'sg wasserball essen', 'sgw essen', 'wasserball essen',
+                        'sg wasserball', 'essen wasserball'
+                    ]):
+                        # Found the SGW Essen card, now find the stats table inside it (might be nested in a div)
+                        # Look for table with "Überzahl" in first row
+                        table = card_div.find('table')
+                        if table:
+                            rows = table.find_all('tr')
+                            if len(rows) >= 1:
+                                first_row = rows[0].get_text(strip=True).lower()
+                                if 'überzahl' in first_row or 'ueberzahl' in first_row:
+                                    sgw_table = table
+                                    break
+            
+            # Fallback: Use position-based approach if team name search failed
+            if not sgw_table and len(stats_tables) >= 2:
+                sgw_idx = 0 if is_sgw_home else 1
+                if sgw_idx < len(stats_tables):
+                    sgw_table = stats_tables[sgw_idx]
+            
+            # If still no table found, try the first stats table
+            if not sgw_table and len(stats_tables) > 0:
+                sgw_table = stats_tables[0]
+            
+            # Process SGW Essen stats table
+            if sgw_table:
+                table = sgw_table
                 rows = table.find_all('tr')
                 
                 for row in rows:
@@ -844,7 +959,9 @@ class SGWTermineScraper:
                       ts.get('power_play_attempts', 0), ts.get('penalty_kill_success', 0),
                       ts.get('penalty_kill_attempts', 0), competition))
             
-            # Nur SGW Essen Player-Stats speichern
+            # Nur SGW Essen Player-Stats speichern (erst alte löschen, dann neue einfügen)
+            cursor.execute('DELETE FROM player_stats WHERE game_id = ? AND team = ?', (game_db_id, 'SGW Essen'))
+            
             for ps in player_stats:
                 if ps.get('team') == 'SGW Essen':
                     cursor.execute('''
@@ -1550,7 +1667,7 @@ class SGWTermineScraper:
         conn.close()
         return result
     
-    def scrape_game_statistics(self, game_id: str, competition_type: str, home_team: str = "") -> dict:
+    def scrape_game_statistics(self, game_id: str, competition_type: str, home_team: str = "", guest_team: str = "") -> dict:
         """Scraped Spielstatistiken von der DSV-Detailseite (nur SGW Essen)"""
         try:
             if competition_type in self.competitions:
@@ -1573,9 +1690,9 @@ class SGWTermineScraper:
             # Bestimme ob SGW Essen Heimteam ist
             is_sgw_home = 'SGW' in home_team or 'Essen' in home_team or 'Wasserball' in home_team
             
-            # Extrahiere Stats (nur SGW Essen)
-            player_stats = self._extract_player_stats(soup, is_sgw_home)
-            team_stats = self._extract_team_stats(soup, is_sgw_home)
+            # Extrahiere Stats (nur SGW Essen) - pass team names for better identification
+            player_stats = self._extract_player_stats(soup, is_sgw_home, home_team, guest_team)
+            team_stats = self._extract_team_stats(soup, is_sgw_home, home_team, guest_team)
             
             return {
                 'player_stats': player_stats,
@@ -1593,6 +1710,10 @@ class SGWTermineScraper:
         
         # Finde Spiele mit Ergebnis und DSV Game-ID aber ohne Stats ODER mit unvollständigen Stats
         # (z.B. nur team_stats aber keine player_stats)
+        # AUCH: Spiele in der Vergangenheit mit DSV ID (könnten gespielt sein auch ohne Result in description)
+        from datetime import datetime
+        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        
         cursor.execute('''
             SELECT g.id, g.dsv_game_id, g.competition_type, g.home, g.guest, g.date,
                    CASE WHEN gs.id IS NULL THEN 'no_stats'
@@ -1602,14 +1723,45 @@ class SGWTermineScraper:
             FROM games g
             LEFT JOIN game_stats gs ON g.id = gs.game_id AND gs.team = 'SGW Essen'
             LEFT JOIN player_stats ps ON g.id = ps.game_id AND ps.team = 'SGW Essen'
-            WHERE g.description LIKE '%Result:%'
-            AND g.description NOT LIKE '%Result: -%'
-            AND g.dsv_game_id IS NOT NULL
+            WHERE g.dsv_game_id IS NOT NULL
             AND g.dsv_game_id != ''
             AND (gs.id IS NULL OR ps.id IS NULL)
         ''')
         
-        games_to_scrape = cursor.fetchall()
+        all_games = cursor.fetchall()
+        
+        # Get descriptions for all games in one query
+        game_ids = [g[0] for g in all_games]
+        descriptions_map = {}
+        if game_ids:
+            placeholders = ','.join(['?'] * len(game_ids))
+            cursor.execute(f'SELECT id, description FROM games WHERE id IN ({placeholders})', game_ids)
+            for row in cursor.fetchall():
+                descriptions_map[row[0]] = row[1] or ''
+        
+        # Filter: Games with results OR games in the past (might have been played)
+        games_to_scrape = []
+        for game in all_games:
+            db_id, dsv_game_id, comp_type, home, guest, date, stat_status = game
+            
+            # Check if game has result in description
+            desc = descriptions_map.get(db_id, '')
+            has_result = '%Result:%' in desc and '%Result: -%' not in desc
+            
+            # Check if game is in the past
+            is_past = False
+            try:
+                if '.' in date:
+                    game_date = datetime.strptime(date, '%d.%m.%Y')
+                else:
+                    game_date = datetime.strptime(date, '%Y-%m-%d')
+                is_past = game_date < today
+            except:
+                pass
+            
+            # Include if has result OR is in the past
+            if has_result or is_past:
+                games_to_scrape.append(game)
         
         # Zusätzlich: Finde Spiele mit Ergebnis aber ohne DSV Game-ID (für Diagnose)
         cursor.execute('''
@@ -1640,8 +1792,8 @@ class SGWTermineScraper:
             status_msg = " (no stats)" if stat_status == 'no_stats' else " (incomplete stats)"
             print(f"  Scraping: {home} vs {guest} ({date}) [DSV:{dsv_game_id}]{status_msg}...")
             
-            # Übergebe home_team um zu bestimmen ob SGW Essen Heim oder Gast ist
-            stats = self.scrape_game_statistics(dsv_game_id, comp_type or 'verbandsliga', home)
+            # Übergebe home_team und guest_team um zu bestimmen ob SGW Essen Heim oder Gast ist
+            stats = self.scrape_game_statistics(dsv_game_id, comp_type or 'verbandsliga', home, guest)
             
             if stats:
                 # Wenn bereits Stats existieren, lösche sie zuerst (für Update)
