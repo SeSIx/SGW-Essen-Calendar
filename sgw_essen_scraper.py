@@ -2594,7 +2594,6 @@ Beispiele:
                        help='Löscht Spiele mit den angegebenen IDs')
     parser.add_argument('--update-game', nargs='+', metavar=('ID', 'DATE', 'TIME', 'HOME', 'GUEST', 'LOCATION', 'DESC'),
                        help='Aktualisiert ein Spiel anhand der ID. Format: --update-game ID DATE TIME HOME GUEST LOCATION DESC (optional fields: None)')
-                       help='Löscht Spiele mit den angegebenen IDs')
     
     # Event arguments (Termine ohne Heim/Gast)
     parser.add_argument('--add-event', nargs=5, metavar=('DATE', 'TIME', 'TITLE', 'LOCATION', 'DESC'),
