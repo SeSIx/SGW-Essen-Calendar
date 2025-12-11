@@ -2592,7 +2592,7 @@ Beispiele:
                        help='Anzahl der anzuzeigenden Termine')
     parser.add_argument('--delete', nargs='+', type=int, metavar='ID',
                        help='Löscht Spiele mit den angegebenen IDs')
-    parser.add_argument('--update-game', nargs='+', metavar=('ID', 'DATE', 'TIME', 'HOME', 'GUEST', 'LOCATION', 'DESC'),
+    parser.add_argument('--update-game', nargs='+', metavar='ID DATE TIME HOME GUEST LOCATION DESC',
                        help='Aktualisiert ein Spiel anhand der ID. Format: --update-game ID DATE TIME HOME GUEST LOCATION DESC (optional fields: None)')
     
     # Event arguments (Termine ohne Heim/Gast)
@@ -2604,7 +2604,7 @@ Beispiele:
                        help='Zeigt die nächsten N Events')
     parser.add_argument('--delete-event', nargs='+', type=int, metavar='ID',
                        help='Loescht Events mit den angegebenen IDs')
-    parser.add_argument('--update-event', nargs='+', metavar=('ID', 'DATE', 'TIME', 'TITLE', 'LOCATION', 'DESC'),
+    parser.add_argument('--update-event', nargs='+', metavar='ID DATE TIME TITLE LOCATION DESC',
                        help='Aktualisiert ein Event anhand der ID. Format: --update-event ID DATE TIME TITLE LOCATION DESC (optional fields: None)')
     parser.add_argument('--search', type=str, metavar='TERM',
                        help='Sucht nach Spielen/Events (Name, Datum, Teams)')
