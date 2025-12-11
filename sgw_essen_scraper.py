@@ -2603,6 +2603,7 @@ Beispiele:
     parser.add_argument('--list-events-next', type=int, metavar='N',
                        help='Zeigt die nächsten N Events')
     parser.add_argument('--delete-event', nargs='+', type=int, metavar='ID',
+                       help='Loescht Events mit den angegebenen IDs')
     parser.add_argument('--update-event', nargs='+', metavar=('ID', 'DATE', 'TIME', 'TITLE', 'LOCATION', 'DESC'),
                        help='Aktualisiert ein Event anhand der ID. Format: --update-event ID DATE TIME TITLE LOCATION DESC (optional fields: None)')
                            help='Loescht Events mit den angegebenen IDs')
