@@ -2606,7 +2606,6 @@ Beispiele:
                        help='Loescht Events mit den angegebenen IDs')
     parser.add_argument('--update-event', nargs='+', metavar=('ID', 'DATE', 'TIME', 'TITLE', 'LOCATION', 'DESC'),
                        help='Aktualisiert ein Event anhand der ID. Format: --update-event ID DATE TIME TITLE LOCATION DESC (optional fields: None)')
-                           help='Loescht Events mit den angegebenen IDs')
     parser.add_argument('--search', type=str, metavar='TERM',
                        help='Sucht nach Spielen/Events (Name, Datum, Teams)')
     
