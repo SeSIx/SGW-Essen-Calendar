@@ -1426,6 +1426,108 @@ class SGWTermineScraper:
         
         print(f"{deleted_count} events deleted")
         return deleted_count
+
+    def update_game_by_id(self, game_id: int, date: str = None, time: str = None, home: str = None, guest: str = None, location: str = None, description: str = None) -> Dict:
+        """Aktualisiert ein Spiel direkt anhand der ID"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        # Prüfe ob Spiel existiert
+        cursor.execute('SELECT id FROM games WHERE id = ?', (game_id,))
+        existing = cursor.fetchone()
+        
+        if not existing:
+            conn.close()
+            return {'success': False, 'message': f'Game with ID {game_id} not found'}
+        
+        # Baue UPDATE-Query dynamisch auf
+        updates = []
+        params = []
+        
+        if date is not None:
+            updates.append('date = ?')
+            params.append(date)
+        if time is not None:
+            updates.append('time = ?')
+            params.append(time)
+        if home is not None:
+            updates.append('home = ?')
+            params.append(home)
+        if guest is not None:
+            updates.append('guest = ?')
+            params.append(guest)
+        if location is not None:
+            updates.append('location = ?')
+            params.append(location)
+        if description is not None:
+            updates.append('description = ?')
+            params.append(description)
+        
+        if not updates:
+            conn.close()
+            return {'success': False, 'message': 'No fields to update'}
+        
+        # Füge last_change hinzu
+        updates.append('last_change = CURRENT_TIMESTAMP')
+        params.append(game_id)
+        
+        query = f"UPDATE games SET {', '.join(updates)} WHERE id = ?"
+        cursor.execute(query, params)
+        
+        conn.commit()
+        conn.close()
+        
+        return {'success': True, 'message': f'Game {game_id} updated'}
+    
+    def update_event_by_id(self, event_id: int, date: str = None, time: str = None, title: str = None, location: str = None, description: str = None) -> Dict:
+        """Aktualisiert ein Event direkt anhand der ID"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        # Prüfe ob Event existiert
+        cursor.execute('SELECT id FROM events WHERE id = ?', (event_id,))
+        existing = cursor.fetchone()
+        
+        if not existing:
+            conn.close()
+            return {'success': False, 'message': f'Event with ID {event_id} not found'}
+        
+        # Baue UPDATE-Query dynamisch auf
+        updates = []
+        params = []
+        
+        if date is not None:
+            updates.append('date = ?')
+            params.append(date)
+        if time is not None:
+            updates.append('time = ?')
+            params.append(time)
+        if title is not None:
+            updates.append('title = ?')
+            params.append(title)
+        if location is not None:
+            updates.append('location = ?')
+            params.append(location)
+        if description is not None:
+            updates.append('description = ?')
+            params.append(description)
+        
+        if not updates:
+            conn.close()
+            return {'success': False, 'message': 'No fields to update'}
+        
+        # Füge last_change hinzu
+        updates.append('last_change = CURRENT_TIMESTAMP')
+        params.append(event_id)
+        
+        query = f"UPDATE events SET {', '.join(updates)} WHERE id = ?"
+        cursor.execute(query, params)
+        
+        conn.commit()
+        conn.close()
+        
+        return {'success': True, 'message': f'Event {event_id} updated'}
+    
     
     def list_events(self, limit: int = 20, future_only: bool = False):
         """Zeigt Events aus der Datenbank"""
@@ -2490,6 +2592,9 @@ Beispiele:
                        help='Anzahl der anzuzeigenden Termine')
     parser.add_argument('--delete', nargs='+', type=int, metavar='ID',
                        help='Löscht Spiele mit den angegebenen IDs')
+    parser.add_argument('--update-game', nargs='+', metavar=('ID', 'DATE', 'TIME', 'HOME', 'GUEST', 'LOCATION', 'DESC'),
+                       help='Aktualisiert ein Spiel anhand der ID. Format: --update-game ID DATE TIME HOME GUEST LOCATION DESC (optional fields: None)')
+                       help='Löscht Spiele mit den angegebenen IDs')
     
     # Event arguments (Termine ohne Heim/Gast)
     parser.add_argument('--add-event', nargs=5, metavar=('DATE', 'TIME', 'TITLE', 'LOCATION', 'DESC'),
@@ -2499,7 +2604,9 @@ Beispiele:
     parser.add_argument('--list-events-next', type=int, metavar='N',
                        help='Zeigt die nächsten N Events')
     parser.add_argument('--delete-event', nargs='+', type=int, metavar='ID',
-                       help='Loescht Events mit den angegebenen IDs')
+    parser.add_argument('--update-event', nargs='+', metavar=('ID', 'DATE', 'TIME', 'TITLE', 'LOCATION', 'DESC'),
+                       help='Aktualisiert ein Event anhand der ID. Format: --update-event ID DATE TIME TITLE LOCATION DESC (optional fields: None)')
+                           help='Loescht Events mit den angegebenen IDs')
     parser.add_argument('--search', type=str, metavar='TERM',
                        help='Sucht nach Spielen/Events (Name, Datum, Teams)')
     
@@ -2527,6 +2634,30 @@ Beispiele:
             print(f"ICS calendar updated: {ics_file}")
             sys.exit(1)  # Changes made
         sys.exit(0)  # No changes
+
+    # Spiel aktualisieren
+    if args.update_game:
+        if len(args.update_game) < 1:
+            print("Error: --update-game requires at least ID")
+            sys.exit(1)
+        game_id = int(args.update_game[0])
+        date = args.update_game[1] if len(args.update_game) > 1 and args.update_game[1] != 'None' else None
+        time = args.update_game[2] if len(args.update_game) > 2 and args.update_game[2] != 'None' else None
+        home = args.update_game[3] if len(args.update_game) > 3 and args.update_game[3] != 'None' else None
+        guest = args.update_game[4] if len(args.update_game) > 4 and args.update_game[4] != 'None' else None
+        location = args.update_game[5] if len(args.update_game) > 5 and args.update_game[5] != 'None' else None
+        description = args.update_game[6] if len(args.update_game) > 6 and args.update_game[6] != 'None' else None
+        
+        result = scraper.update_game_by_id(game_id, date=date, time=time, home=home, guest=guest, location=location, description=description)
+        if result['success']:
+            print(result['message'])
+            ics_file = scraper.generate_ics(args.ics)
+            print(f"ICS calendar updated: {ics_file}")
+            sys.exit(1)  # Changes made
+        else:
+            print(f"Error: {result['message']}")
+            sys.exit(1)
+    
     
     # Liste anzeigen
     if args.list:
@@ -2574,6 +2705,29 @@ Beispiele:
             ics_file = scraper.generate_ics(args.ics)
             print(f"ICS calendar updated: {ics_file}")
             sys.exit(1)  # Changes made
+
+    # Event aktualisieren
+    if args.update_event:
+        if len(args.update_event) < 1:
+            print("Error: --update-event requires at least ID")
+            sys.exit(1)
+        event_id = int(args.update_event[0])
+        date = args.update_event[1] if len(args.update_event) > 1 and args.update_event[1] != 'None' else None
+        time = args.update_event[2] if len(args.update_event) > 2 and args.update_event[2] != 'None' else None
+        title = args.update_event[3] if len(args.update_event) > 3 and args.update_event[3] != 'None' else None
+        location = args.update_event[4] if len(args.update_event) > 4 and args.update_event[4] != 'None' else None
+        description = args.update_event[5] if len(args.update_event) > 5 and args.update_event[5] != 'None' else None
+        
+        result = scraper.update_event_by_id(event_id, date=date, time=time, title=title, location=location, description=description)
+        if result['success']:
+            print(result['message'])
+            ics_file = scraper.generate_ics(args.ics)
+            print(f"ICS calendar updated: {ics_file}")
+            sys.exit(1)  # Changes made
+        else:
+            print(f"Error: {result['message']}")
+            sys.exit(1)
+    
     
     # Suche
     if args.search:
