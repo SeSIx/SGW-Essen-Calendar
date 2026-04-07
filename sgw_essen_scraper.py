@@ -59,7 +59,16 @@ class SGWTermineScraper:
                     'Group': '',
                     'LeagueKind': 'L'
                 }
-            }
+            },
+            'verbandsliga2': {
+                'name': 'Aufstiegsrunde Verbandsliga',
+                'params': {
+                    'Season': '2025',
+                    'LeagueID': '197',
+                    'Group': 'C',
+                    'LeagueKind': 'L'
+                }
+            },
         }
         self.session = requests.Session()
         self.session.headers.update({
@@ -233,10 +242,33 @@ class SGWTermineScraper:
                 cursor.execute('CREATE INDEX IF NOT EXISTS idx_date ON games(date)')
         except sqlite3.OperationalError as e:
             pass
-        
+
+        # Heal rows corrupted by the old delete_games_and_recalculate_ids bug.
+        # Fingerprint: last_change does not start with 4 digits (YYYY-...).
+        try:
+            cursor.execute("""
+                SELECT id, last_change, dsv_game_id, competition_type
+                FROM games
+                WHERE last_change IS NOT NULL
+                  AND substr(last_change, 1, 4) NOT GLOB '[0-9][0-9][0-9][0-9]'
+            """)
+            for row_id, bad_last, bad_dsv, bad_comp in cursor.fetchall():
+                # The bug rotated the three trailing fields on re-insert.
+                # Invert the rotation to restore correct values:
+                real_last_change = bad_dsv       # was stored under dsv_game_id
+                real_dsv_game_id = bad_comp      # was stored under competition_type
+                real_competition_type = bad_last # was stored under last_change
+                cursor.execute("""
+                    UPDATE games
+                    SET last_change = ?, dsv_game_id = ?, competition_type = ?
+                    WHERE id = ?
+                """, (real_last_change, real_dsv_game_id, real_competition_type, row_id))
+        except sqlite3.OperationalError:
+            pass
+
         conn.commit()
         conn.close()
-    
+
     def generate_event_id(self, home: str, guest: str, competition: str = "") -> str:
         """Generiert eindeutige Event-ID basierend auf Teams und Wettbewerb (normalisiert)"""
         # Normalisiere Teamnamen für konsistente Event-IDs
@@ -572,10 +604,12 @@ class SGWTermineScraper:
                 details.update(referee_info)
             
             return details
-            
+
         except Exception as e:
+            print(f"  WARN: fetch_game_details failed for game_id={game_id} "
+                  f"({competition_type}): {type(e).__name__}: {e}")
             return None
-    
+
     def _extract_location_info(self, soup: BeautifulSoup) -> Optional[Dict]:
         """Extrahiert Adress- und Google Maps-Informationen aus der Spieldetail-Seite"""
         location_info = {
@@ -660,10 +694,11 @@ class SGWTermineScraper:
                                         if first > 23 or second > 59 or (first <= 30 and second <= 30):
                                             return result.replace('-', ':')
             return None
-            
+
         except Exception as e:
+            print(f"  WARN: _extract_detailed_result failed: {type(e).__name__}: {e}")
             return None
-    
+
     def _extract_referee_info(self, soup: BeautifulSoup) -> Optional[Dict]:
         """Extrahiert Schiedsrichter-Informationen aus der Spieldetail-Seite"""
         referee_info = {
@@ -1056,14 +1091,22 @@ class SGWTermineScraper:
             elif competition_type == 'nrw_pokal':
                 comp_prefix = "[NRW POKAL]"
             elif competition_type == 'verbandsliga':
-                comp_prefix = "[VERBANDSLIGA]"
+                comp_prefix = "[VERBANDSLIGA VORRUNDE]"
+            elif competition_type == 'verbandsliga2':
+                comp_prefix = "[VERBANDSLIGA AUFSTIEGSRUNDE]"
             elif competition_type == 'ruhrgebietsliga':
                 comp_prefix = "[RUHRGEBIETSLIGA]"
             else:
                 comp_prefix = f"[{competition_type.upper()}]"
-            
+
             # Prüfe ob Competition-Info bereits vorhanden ist
-            existing_prefixes = ["[LIGA]", "[POKAL]", "[NRW POKAL]", "[VERBANDSLIGA]", "[RUHRGEBIETSLIGA]"]
+            existing_prefixes = [
+                "[LIGA]", "[POKAL]", "[NRW POKAL]",
+                "[VERBANDSLIGA]",               # legacy — still recognised so migration is clean
+                "[VERBANDSLIGA VORRUNDE]",
+                "[VERBANDSLIGA AUFSTIEGSRUNDE]",
+                "[RUHRGEBIETSLIGA]",
+            ]
             has_prefix = any(final_description.startswith(prefix) for prefix in existing_prefixes)
             
             if not has_prefix:
@@ -1306,16 +1349,20 @@ class SGWTermineScraper:
         deleted_count = cursor.rowcount
         
         # Hole alle verbleibenden Spiele und sortiere sie nach ID
-        cursor.execute('SELECT * FROM games ORDER BY id')
+        cursor.execute('''
+            SELECT id, event_id, home, guest, date, time, location, description,
+                   dsv_game_id, competition_type, last_change
+            FROM games ORDER BY id
+        ''')
         remaining_games = cursor.fetchall()
-        
+
         # Lösche alle Spiele und füge sie mit neuen IDs ein
         cursor.execute('DELETE FROM games')
-        
+
         for i, game in enumerate(remaining_games, 1):
             # Neue ID ist i, restliche Daten bleiben gleich
-            # Tabelle hat: id, event_id, home, guest, date, time, location, description, dsv_game_id, competition_type, last_change
-            (old_id, event_id, home, guest, date, time, location, description, dsv_game_id, competition_type, last_change) = game
+            (_old_id, event_id, home, guest, date, time, location, description,
+             dsv_game_id, competition_type, last_change) = game
             cursor.execute('''
                 INSERT INTO games 
                 (id, event_id, home, guest, date, time, location, description, dsv_game_id, competition_type, last_change)
@@ -1926,16 +1973,16 @@ class SGWTermineScraper:
         
         # Hole Games
         cursor.execute('''
-            SELECT id, event_id, home, guest, date, time, location, description
-            FROM games 
+            SELECT id, event_id, home, guest, date, time, location, description, last_change
+            FROM games
             ORDER BY date, time
         ''')
         games = cursor.fetchall()
-        
+
         # Hole Events
         cursor.execute('''
-            SELECT id, event_id, title, date, time, location, description
-            FROM events 
+            SELECT id, event_id, title, date, time, location, description, last_change
+            FROM events
             ORDER BY date, time
         ''')
         events = cursor.fetchall()
@@ -1966,7 +2013,7 @@ class SGWTermineScraper:
         
         # === GAMES ===
         for termin in games:
-            (id, event_id, home, guest, date, time, location, description) = termin
+            (id, event_id, home, guest, date, time, location, description, last_change) = termin
             
             uid = f"sgw-game-{event_id}@essen.de"
             title = f"{home} vs {guest}"
@@ -1997,10 +2044,13 @@ class SGWTermineScraper:
             # ICS Format
             dtstart = start_time.strftime('%Y%m%dT%H%M%S')
             dtend = end_time.strftime('%Y%m%dT%H%M%S')
-            dtstamp = now.strftime('%Y%m%dT%H%M%SZ')
-            
+            try:
+                dtstamp = datetime.strptime(last_change, '%Y-%m-%d %H:%M:%S').strftime('%Y%m%dT%H%M%SZ')
+            except (TypeError, ValueError):
+                dtstamp = now.strftime('%Y%m%dT%H%M%SZ')
+
             ics_description = description.replace('\n', '\\n') if description else ""
-            
+
             # Location
             if location and '|' in location:
                 parts = location.split('|', 1)
@@ -2032,7 +2082,7 @@ class SGWTermineScraper:
         # === EVENTS (Weihnachtsmarkt etc.) ===
         if events:
             for event in events:
-                (id, event_id, title, date, time, location, description) = event
+                (id, event_id, title, date, time, location, description, last_change) = event
                 
                 uid = f"sgw-event-{event_id}@essen.de"
                 summary = f"[EVENT] {title}"
@@ -2063,8 +2113,11 @@ class SGWTermineScraper:
                 
                 dtstart = start_time.strftime('%Y%m%dT%H%M%S')
                 dtend = end_time.strftime('%Y%m%dT%H%M%S')
-                dtstamp = now.strftime('%Y%m%dT%H%M%SZ')
-                
+                try:
+                    dtstamp = datetime.strptime(last_change, '%Y-%m-%d %H:%M:%S').strftime('%Y%m%dT%H%M%SZ')
+                except (TypeError, ValueError):
+                    dtstamp = now.strftime('%Y%m%dT%H%M%SZ')
+
                 ics_description = description.replace('\n', '\\n') if description else ""
                 location_text = location.strip() if location else "TBA"
                 
@@ -2477,7 +2530,7 @@ class SGWTermineScraper:
         
         return termine
     
-    def run(self, scrape=True, add_new=False, enable_scraping=False) -> int:
+    def run(self, scrape=True, add_new=False, enable_scraping=False, ics_path="sgw_termine.ics") -> int:
         """Hauptausführung
         
         Returns:
@@ -2532,9 +2585,25 @@ class SGWTermineScraper:
             
             print("\n" + "="*36)
         
-        # Generiere ICS nur bei Änderungen
-        if has_changes:
-            ics_file = self.generate_ics()
+        # Always regenerate ICS so it can never drift from the DB, and so the
+        # next run recovers even if an earlier run had a silent fetch failure.
+        old_ics_content = None
+        if os.path.exists(ics_path):
+            try:
+                with open(ics_path, "r", encoding="utf-8") as f:
+                    old_ics_content = f.read()
+            except Exception:
+                old_ics_content = None
+
+        ics_file = self.generate_ics(ics_path)
+        with open(ics_file, "r", encoding="utf-8") as f:
+            new_ics_content = f.read()
+
+        # Content-level change signal (authoritative, survives missed DB-level diffs).
+        ics_changed = old_ics_content != new_ics_content
+        has_changes = has_changes or ics_changed
+
+        if ics_changed:
             print(f"\nICS calendar updated: {ics_file}")
         else:
             print("\nICS calendar and database are up to date")
@@ -2808,7 +2877,7 @@ Beispiele:
         sys.exit(0)  # No changes
     
     # Standard oder manuelle Eingabe
-    exit_code = scraper.run(scrape=args.enable_scraping, add_new=args.add_new, enable_scraping=args.enable_scraping)
+    exit_code = scraper.run(scrape=args.enable_scraping, add_new=args.add_new, enable_scraping=args.enable_scraping, ics_path=args.ics)
     sys.exit(exit_code)
 
 if __name__ == "__main__":
