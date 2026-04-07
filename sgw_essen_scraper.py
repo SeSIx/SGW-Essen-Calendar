@@ -10,7 +10,6 @@ import argparse
 import re
 import os
 import sys
-import time
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
@@ -593,18 +592,8 @@ class SGWTermineScraper:
                 'GameID': game_id
             }
 
-            # Retry with backoff on 429 rate-limit responses
-            for attempt in range(3):
-                response = self.session.get(self.game_detail_url, params=game_params)
-                if response.status_code == 429:
-                    wait = 10 * (attempt + 1)
-                    print(f"  Rate limited (429), waiting {wait}s before retry {attempt + 1}/3...")
-                    time.sleep(wait)
-                    continue
-                response.raise_for_status()
-                break
-            else:
-                response.raise_for_status()  # raise after all retries exhausted
+            response = self.session.get(self.game_detail_url, params=game_params)
+            response.raise_for_status()
             
             soup = BeautifulSoup(response.content, 'html.parser')
             
