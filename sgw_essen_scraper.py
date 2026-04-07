@@ -10,6 +10,7 @@ import argparse
 import re
 import os
 import sys
+import time
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
@@ -243,6 +244,23 @@ class SGWTermineScraper:
         except sqlite3.OperationalError as e:
             pass
 
+        # Migrate event_ids to use dsv_game_id for uniqueness (prevents rematch collisions).
+        try:
+            cursor.execute('''
+                SELECT id, competition_type, dsv_game_id, event_id
+                FROM games
+                WHERE dsv_game_id IS NOT NULL AND dsv_game_id != ''
+            ''')
+            for row_id, comp_type, dsv_id, old_eid in cursor.fetchall():
+                new_eid = hashlib.md5(f"{comp_type}_{dsv_id}".encode('utf-8')).hexdigest()
+                if new_eid != old_eid:
+                    # Only update if the new event_id is not already taken
+                    cursor.execute('SELECT id FROM games WHERE event_id = ?', (new_eid,))
+                    if not cursor.fetchone():
+                        cursor.execute('UPDATE games SET event_id = ? WHERE id = ?', (new_eid, row_id))
+        except sqlite3.OperationalError:
+            pass
+
         # Heal rows corrupted by the old delete_games_and_recalculate_ids bug.
         # Fingerprint: last_change does not start with 4 digits (YYYY-...).
         try:
@@ -269,12 +287,14 @@ class SGWTermineScraper:
         conn.commit()
         conn.close()
 
-    def generate_event_id(self, home: str, guest: str, competition: str = "") -> str:
-        """Generiert eindeutige Event-ID basierend auf Teams und Wettbewerb (normalisiert)"""
-        # Normalisiere Teamnamen für konsistente Event-IDs
-        home_norm = self._normalize_team_name(home)
-        guest_norm = self._normalize_team_name(guest)
-        content = f"{competition}_{home_norm}_vs_{guest_norm}".strip()
+    def generate_event_id(self, home: str, guest: str, competition: str = "", dsv_game_id: str = None) -> str:
+        """Generiert eindeutige Event-ID basierend auf DSV-GameID (wenn vorhanden) oder Teams+Wettbewerb"""
+        if dsv_game_id:
+            content = f"{competition}_{dsv_game_id}"
+        else:
+            home_norm = self._normalize_team_name(home)
+            guest_norm = self._normalize_team_name(guest)
+            content = f"{competition}_{home_norm}_vs_{guest_norm}".strip()
         return hashlib.md5(content.encode('utf-8')).hexdigest()
     
     def _normalize_team_name(self, team_name: str) -> str:
@@ -381,7 +401,8 @@ class SGWTermineScraper:
                     game = self._parse_simple_game_row(cells, current_round, competition_type)
                     if game and self._is_valid_game(game):
                         termine.append(game)
-            
+
+            print(f"  {competition_type}: {len(termine)} games found")
             return termine
             
         except Exception as e:
@@ -563,7 +584,7 @@ class SGWTermineScraper:
             else:
                 # Fallback auf ersten Wettbewerb
                 base_params = list(self.competitions.values())[0]['params']
-                
+
             game_params = {
                 'Season': base_params['Season'],
                 'LeagueID': base_params['LeagueID'],
@@ -571,9 +592,19 @@ class SGWTermineScraper:
                 'LeagueKind': base_params['LeagueKind'],
                 'GameID': game_id
             }
-            
-            response = self.session.get(self.game_detail_url, params=game_params)
-            response.raise_for_status()
+
+            # Retry with backoff on 429 rate-limit responses
+            for attempt in range(3):
+                response = self.session.get(self.game_detail_url, params=game_params)
+                if response.status_code == 429:
+                    wait = 10 * (attempt + 1)
+                    print(f"  Rate limited (429), waiting {wait}s before retry {attempt + 1}/3...")
+                    time.sleep(wait)
+                    continue
+                response.raise_for_status()
+                break
+            else:
+                response.raise_for_status()  # raise after all retries exhausted
             
             soup = BeautifulSoup(response.content, 'html.parser')
             
@@ -1024,8 +1055,11 @@ class SGWTermineScraper:
             home_clean = termin.get('home', '').replace("SG Wasserball Essen", "SGW Essen")
             guest_clean = termin.get('guest', '').replace("SG Wasserball Essen", "SGW Essen")
             
-            event_id = self.generate_event_id(home_clean, guest_clean, termin.get('competition', ''))
-            
+            event_id = self.generate_event_id(
+                home_clean, guest_clean, termin.get('competition', ''),
+                dsv_game_id=termin.get('game_id')
+            )
+
             # Hole detaillierte Informationen falls nötig
             # ALWAYS fetch details if game_id exists to ensure we get the latest results
             game_details = None
