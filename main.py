@@ -5,6 +5,7 @@ import sqlite3
 import time
 from pathlib import Path
 
+import combine
 import config
 import db
 import ics
@@ -145,6 +146,12 @@ def cmd_scrape(season_year: str, fetch_details: bool, write_ics_files: bool) -> 
             )
             ics_counts[slug] = count
             print(f"[Main] {slug}.ics: {count} event(s)")
+
+    # --- Build combined sgw_termine.db + sgw_termine.ics ---
+    if write_ics_files:
+        print("[Main] Building sgw_termine.db + sgw_termine.ics...")
+        combine.build_termine_db(OUTPUT_DIR)
+        combine.write_termine_ics(OUTPUT_DIR)
 
     # --- Final summary ---
     print(f"\n{'Team':<30} {'Games':>6} {'ICS events':>12}")

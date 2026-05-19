@@ -32,4 +32,14 @@ Thumbs.db
 *.log
 *.tmp
 
-# Database and ICS files werden committed für direkten Zugang
+# Per-team DB/ICS outputs (not committed — use combine.py to build sgw_termine.*)
+output/*.db
+output/*.db-shm
+output/*.db-wal
+output/*.ics
+
+# Keep combined calendar in version control so subscribers get updates
+# (sgw_termine.db and sgw_termine.ics are committed at repo root)
+
+# Virtual env
+.venv/
