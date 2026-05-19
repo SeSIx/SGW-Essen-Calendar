@@ -1,67 +1,81 @@
 # SGW Essen Wasserball Kalender
 
-🏊‍♂️ Einfacher Kalender für SG Wasserball Essen Termine
+Automatischer Kalender für alle SGW Essen Mannschaften — Spiele, Ergebnisse, Schiedsrichter und Spielorte direkt aus dem DSV-Portal.
 
-## 📱 Kalender abonnieren
+## Kalender abonnieren
 
-**Direkt in Ihrer Kalender-App:**
-
+**Herren I + Herren II (alle Pflichtspiele):**
 ```
-https://github.com/SeSIx/SGW-Essen-Calendar/raw/main/sgw_termine.ics
+https://github.com/SeSIx/SGW-Essen-Calendar/raw/sgw-scraper-rewrite/sgw_termine.ics
 ```
 
 ### So geht's:
 - **Android**: Google Calendar → ☰ → Einstellungen → Kalender hinzufügen → Über URL
-- **iOS**: Kalender → Kalender hinzufügen → Abonnement
-- **Desktop**: Outlook/Thunderbird → Internetkalender hinzufügen
+- **iOS**: Einstellungen → Kalender → Accounts → Account hinzufügen → Andere → Kalenderabo
+- **Outlook**: Kalender → Kalender hinzufügen → Aus dem Internet
 
-## 🎯 Termine hinzufügen
+## Benutzung
 
-### Einzelner Termin:
-```bash
-python sgw_essen_scraper.py --add "20.12.2025" "15:00" "SGW Essen" "Weihnachtsfeier" "Weihnachtsmarkt" ""
-```
-*Format: DATUM ZEIT HEIM GAST ORT ERGEBNIS*
-
-### Interaktive Eingabe:
-```bash
-python sgw_essen_scraper.py -new
-```
-
-### Termine anzeigen:
-```bash
-python sgw_essen_scraper.py --list
-```
-
-### Web-Scraping testen:
-```bash
-python sgw_essen_scraper.py --enable-scraping
-```
-*(Sobald die neue DSV-Website für 2025 online ist)*
-
-## 🔄 Kalender aktualisieren
-
-1. Termine hinzufügen (siehe oben)
-2. Zu GitHub pushen:
-   ```bash
-   git add .
-   git commit -m "Add new games"
-   git push
-   ```
-3. **Fertig!** Kalender wird automatisch aktualisiert
-
-## ⚙️ Installation
-
+### Spiele scrapen (DSV-Daten aktualisieren)
 ```bash
 pip install -r requirements.txt
+python main.py
 ```
 
-## 📋 Aktueller Status
+Erstellt/aktualisiert eine SQLite-DB pro Mannschaft in `output/` und schreibt anschließend automatisch `sgw_termine.ics`.
 
-- ✅ **Weihnachtsfeier**: 20.12.2025, 15:00 Uhr
-- ✅ **Neue Saison**: Spiele ab November 2026
-- ℹ️ **DSV-Website**: Noch nicht für neue Saison verfügbar
+### Nur den kombinierten Kalender neu bauen
+```bash
+python combine.py
+```
 
----
+### Eigene Termine hinzufügen (Weihnachtsfeier, Trainingsausfall, …)
+```bash
+# Termin hinzufügen (interaktiv)
+python combine.py --add-event
 
-*Einfach und funktional! 🎉*
+# Alle eigenen Termine anzeigen
+python combine.py --list-events
+```
+
+Nach dem Hinzufügen einmal `python combine.py` ausführen, dann committen und pushen.
+
+## Projektstruktur
+
+| Datei | Zweck |
+|---|---|
+| `main.py` | Orchestrator: scrapt DSV, befüllt DBs, ruft combine auf |
+| `scraper.py` | HTTP-Requests + HTML-Parsing (DSV-Portal) |
+| `db.py` | SQLite-Schema + Upsert-Helfer |
+| `ics.py` | RFC-5545-VCALENDAR-Generator (pro Mannschaft) |
+| `combine.py` | Herren I + II + eigene Termine → `sgw_termine.db` + `sgw_termine.ics` |
+| `config.py` | URLs, Club-ID, Season-Konstanten |
+
+**Output (gitignored):**
+
+| Datei | Inhalt |
+|---|---|
+| `output/sgw_essen_herren_1.db` | Herren I (NRW Verbandsliga + NRW Pokal) |
+| `output/sgw_essen_herren_2.db` | Herren II (Ruhrgebietsliga) |
+| `output/sgw_essen_damen.db` | Damen |
+| `output/sgw_essen_u12.db` | U12 |
+| `output/sgw_essen_u14.db` | U14 |
+| `output/sgw_essen_u16.db` | U16 |
+| `output/custom_events.db` | Eigene Termine (persistent, manuell gepflegt) |
+
+**Committet (damit Abonnements aktuell bleiben):**
+
+| Datei | Inhalt |
+|---|---|
+| `sgw_termine.ics` | Kombinierter Kalender (Herren I + II + eigene Termine) |
+
+## Kalender aktualisieren
+
+```bash
+python main.py               # scrapen + alle ICS aktualisieren
+git add sgw_termine.ics
+git commit -m "Update Spielplan"
+git push
+```
+
+Der abonnierte Kalender aktualisiert sich beim nächsten Sync der Kalender-App automatisch.
