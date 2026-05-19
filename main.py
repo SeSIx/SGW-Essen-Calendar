@@ -91,15 +91,15 @@ def cmd_scrape(season_year: str, fetch_details: bool, write_ics_files: bool) -> 
                 db.upsert_game(conn, _clean_game_dict(game))
             print(f"[Main] {slug}: upserted {len(bucket)} game(s)")
 
-        # --- Fetch details for played games ---
+        # --- Fetch details for all games (venue/location needed before kickoff too) ---
         if fetch_details:
             detail_queue = [
                 (slug, game)
                 for slug, bucket in buckets.items()
                 for game in bucket
-                if game.get("status") == "played" and game.get("detail_url")
+                if game.get("detail_url")
             ]
-            print(f"[Main] Fetching details for {len(detail_queue)} played game(s)...")
+            print(f"[Main] Fetching details for {len(detail_queue)} game(s)...")
             for i, (slug, game) in enumerate(detail_queue):
                 if i > 0:
                     time.sleep(config.REQUEST_DELAY)
