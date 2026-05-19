@@ -46,7 +46,13 @@ CREATE TABLE IF NOT EXISTS team_stats (
     penalty_throws         INTEGER
 );
 
-CREATE VIEW IF NOT EXISTS v_games AS
+"""
+
+# Views are always dropped and recreated so schema changes take effect on existing DBs.
+# cap_number is intentionally excluded from aggregated views — players don't wear the
+# same number every game, so it cannot be meaningfully aggregated.
+_VIEWS = """
+CREATE VIEW v_games AS
 SELECT game_date, game_time, competition, home_team, away_team,
        CASE WHEN home_score IS NULL THEN '—'
             ELSE home_score || ':' || away_score END AS result,
@@ -54,35 +60,36 @@ SELECT game_date, game_time, competition, home_team, away_team,
        google_maps_url, status
 FROM games ORDER BY game_date, game_time;
 
--- Aggregated player stats across all competitions (one row per player)
-CREATE VIEW IF NOT EXISTS v_player_totals AS
+-- One row per player — birth_year is stable across games, cap_number is not
+CREATE VIEW v_player_totals AS
 SELECT
-    player_name,
-    SUM(goals)          AS total_goals,
-    SUM(exclusions)     AS total_exclusions,
-    SUM(penalty_throws) AS total_penalty_throws,
-    COUNT(DISTINCT game_id) AS games_played
-FROM player_stats
-GROUP BY player_name
-ORDER BY total_goals DESC, player_name;
+    ps.player_name,
+    MAX(ps.birth_year)      AS birth_year,
+    SUM(ps.goals)           AS total_goals,
+    SUM(ps.exclusions)      AS total_exclusions,
+    SUM(ps.penalty_throws)  AS total_penalty_throws,
+    COUNT(DISTINCT ps.game_id) AS games_played
+FROM player_stats ps
+GROUP BY ps.player_name
+ORDER BY total_goals DESC, ps.player_name;
 
--- Aggregated player stats per competition (one row per player per competition)
--- Filter with: SELECT * FROM v_player_by_competition WHERE competition = 'NRW Verbandsliga ...'
-CREATE VIEW IF NOT EXISTS v_player_by_competition AS
+-- One row per player per competition
+CREATE VIEW v_player_by_competition AS
 SELECT
     g.competition,
     ps.player_name,
-    SUM(ps.goals)          AS goals,
-    SUM(ps.exclusions)     AS exclusions,
-    SUM(ps.penalty_throws) AS penalty_throws,
+    MAX(ps.birth_year)      AS birth_year,
+    SUM(ps.goals)           AS goals,
+    SUM(ps.exclusions)      AS exclusions,
+    SUM(ps.penalty_throws)  AS penalty_throws,
     COUNT(DISTINCT ps.game_id) AS games_played
 FROM player_stats ps
 JOIN games g ON g.id = ps.game_id
 GROUP BY g.competition, ps.player_name
 ORDER BY g.competition, goals DESC, ps.player_name;
 
--- Aggregated team stats per competition (Essen-only)
-CREATE VIEW IF NOT EXISTS v_team_by_competition AS
+-- Essen team stats per competition
+CREATE VIEW v_team_by_competition AS
 SELECT
     g.competition,
     COUNT(DISTINCT ts.game_id) AS games_with_stats,
@@ -112,6 +119,9 @@ def init_db(path: str) -> sqlite3.Connection:
     conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA journal_mode = WAL")
     conn.executescript(_SCHEMA)
+    for view in ("v_games", "v_player_totals", "v_player_by_competition", "v_team_by_competition"):
+        conn.execute(f"DROP VIEW IF EXISTS {view}")
+    conn.executescript(_VIEWS)
     conn.commit()
     return conn
 

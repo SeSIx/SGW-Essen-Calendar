@@ -44,7 +44,8 @@ fi
 if [ "$CHANGED" = "true" ]; then
     echo "[Git] sgw_termine.ics changed — committing and pushing..."
     git add sgw_termine.ics
-    git commit -m "Auto-update: sgw_termine.ics $(date '+%Y-%m-%d %H:%M')"
+    git -c user.name="SGW Bot" -c user.email="bot@sgw-essen.local" \
+        commit -m "Auto-update: sgw_termine.ics $(date '+%Y-%m-%d %H:%M')"
     git push origin "$GIT_BRANCH"
     echo "[Git] Push successful."
 else
