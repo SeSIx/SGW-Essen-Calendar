@@ -72,8 +72,7 @@ def cmd_scrape(season_year: str, fetch_details: bool, write_ics_files: bool) -> 
     for game in games:
         essen_name = _essen_side(game)
         if essen_name is None:
-            print(f"[Main] WARNING: no Essen side in game {game.get('id')} — skipping")
-            continue
+            continue  # DSV returns full group schedules; non-Essen fixtures are expected
         slug = db.slug_for_team(essen_name, game.get("competition", ""))
         game["_essen_team_name"] = essen_name
         buckets.setdefault(slug, []).append(game)
