@@ -138,7 +138,7 @@ def cmd_scrape(season_year: str, fetch_details: bool, write_ics_files: bool) -> 
     if write_ics_files:
         for slug in buckets:
             db_path = OUTPUT_DIR / f"{slug}.db"
-            ics_path = OUTPUT_DIR / f"{slug}.ics"
+            ics_path = Path(__file__).parent / f"{slug}.ics"  # repo root — tracked by git
             count = ics.write_ics(
                 str(db_path), str(ics_path),
                 calendar_name=f"SGW Essen — {slug}",
@@ -148,7 +148,7 @@ def cmd_scrape(season_year: str, fetch_details: bool, write_ics_files: bool) -> 
 
     # --- Build combined sgw_termine.db + sgw_termine.ics ---
     if write_ics_files:
-        print("[Main] Building sgw_termine.db + sgw_termine.ics...")
+        print("[Main] Building sgw_termine.db + sgw_newScraper.ics...")
         combine.build_termine_db(OUTPUT_DIR)
         combine.write_termine_ics(OUTPUT_DIR)
 

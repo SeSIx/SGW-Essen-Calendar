@@ -30,26 +30,17 @@ git pull --ff-only origin "$GIT_BRANCH" || {
 echo "[Scraper] Running main.py..."
 "$PYTHON" main.py
 
-# Check if the committed calendar file changed
-if git diff --quiet HEAD -- sgw_termine.ics && \
-   git ls-files --others --exclude-standard sgw_termine.ics | grep -q .; then
-    # File is untracked (first run)
-    CHANGED=true
-elif ! git diff --quiet HEAD -- sgw_termine.ics; then
-    CHANGED=true
-else
-    CHANGED=false
-fi
+# Stage all ICS files at repo root (per-team + combined)
+git add -- *.ics 2>/dev/null || true
 
-if [ "$CHANGED" = "true" ]; then
-    echo "[Git] sgw_termine.ics changed — committing and pushing..."
-    git add sgw_termine.ics
+if ! git diff --cached --quiet; then
+    echo "[Git] ICS files changed — committing and pushing..."
     git -c user.name="SGW Bot" -c user.email="bot@sgw-essen.local" \
-        commit -m "Auto-update: sgw_termine.ics $(date '+%Y-%m-%d %H:%M')"
+        commit -m "Auto-update: calendars $(date '+%Y-%m-%d %H:%M')"
     git push origin "$GIT_BRANCH"
     echo "[Git] Push successful."
 else
-    echo "[Git] No changes to sgw_termine.ics — nothing to push."
+    echo "[Git] No changes to ICS files — nothing to push."
 fi
 
 echo "=== $(date '+%Y-%m-%d %H:%M:%S') DONE ==="
