@@ -148,7 +148,7 @@ def cmd_scrape(season_year: str, fetch_details: bool, write_ics_files: bool) -> 
 
     # --- Build combined sgw_termine.db + sgw_termine.ics ---
     if write_ics_files:
-        print("[Main] Building sgw_termine.db + sgw_newScraper.ics...")
+        print("[Main] Building sgw_termine.db + sgw_termine.ics...")
         combine.build_termine_db(OUTPUT_DIR)
         combine.write_termine_ics(OUTPUT_DIR)
 

@@ -275,7 +275,7 @@ def _build_custom_vevent(row: dict, dtstamp: str) -> str:
 
 def write_termine_ics(output_dir: Path) -> int:
     termine_path = output_dir / "sgw_termine.db"
-    ics_path = output_dir.parent / "sgw_newScraper.ics"
+    ics_path = output_dir.parent / "sgw_termine.ics"
 
     dtstamp = datetime.now(tz=timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     conn = sqlite3.connect(str(termine_path))
@@ -306,7 +306,7 @@ def write_termine_ics(output_dir: Path) -> int:
     ]) + "\r\n"
 
     ics_path.write_bytes(cal.encode("utf-8"))
-    print(f"[Combine] sgw_newScraper.ics: {len(vevents)} event(s) written to {ics_path}")
+    print(f"[Combine] sgw_termine.ics: {len(vevents)} event(s) written to {ics_path}")
     return len(vevents)
 
 
