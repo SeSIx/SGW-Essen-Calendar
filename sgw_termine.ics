@@ -23,7 +23,7 @@ END:DAYLIGHT
 END:VTIMEZONE
 BEGIN:VEVENT
 UID:2025_197_B_3@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SG Wasserball Essen 22:8 TPSK 1925 (NRW Verbandsliga - Gruppe B mä
  )
 STATUS:CONFIRMED
@@ -39,7 +39,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_B_28@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SG Wasserball Essen 18:6 SV Blau-Weiß Bochum II (NRW Verbandsliga 
  - Gruppe B mä)
 STATUS:CONFIRMED
@@ -55,7 +55,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_B_8@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SGW SC Solingen/Wfr. Wuppertal II 17:15 SG Wasserball Essen (NRW Ve
  rbandsliga - Gruppe B mä)
 STATUS:CONFIRMED
@@ -71,7 +71,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_132__10@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SG Wasserball Essen 10:0 Uerdinger Schwimmverein 08 II (NRW Pokal m
  ännlich)
 STATUS:CONFIRMED
@@ -86,7 +86,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=132&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_B_12@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SG Wasserball Essen 10:0 Kevelaerer SV (NRW Verbandsliga - Gruppe B
   mä)
 STATUS:CONFIRMED
@@ -102,7 +102,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__49@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SG Wasserball Essen II 21:10 Wfr. 1912 Mülheim Masters (Ruhrgebiet
  sliga männlich)
 STATUS:CONFIRMED
@@ -118,7 +118,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_B_15@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SG Wasserball Essen 25:9 SV Rheinhausen 1913 II (NRW Verbandsliga -
   Gruppe B mä)
 STATUS:CONFIRMED
@@ -134,7 +134,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__68@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:Duisburger SV 1898 III 8:15 SG Wasserball Essen II (Ruhrgebietsliga
   männlich)
 STATUS:CONFIRMED
@@ -150,7 +150,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_B_17@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SG Wasserball Essen 12:6 SGW SC Solingen/Wfr. Wuppertal II (NRW Ver
  bandsliga - Gruppe B mä)
 STATUS:CONFIRMED
@@ -166,7 +166,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_B_20@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SV Rheinhausen 1913 II 10:26 SG Wasserball Essen (NRW Verbandsliga 
  - Gruppe B mä)
 STATUS:CONFIRMED
@@ -182,7 +182,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_B_24@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:TPSK 1925 12:16 SG Wasserball Essen (NRW Verbandsliga - Gruppe B m
  ä)
 STATUS:CONFIRMED
@@ -198,7 +198,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_132__22@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SG Wassersport Iserlohn II 12:23 SG Wasserball Essen (NRW Pokal mä
  nnlich)
 STATUS:CONFIRMED
@@ -213,7 +213,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=132&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__21@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:Wfr. 1912 Mülheim Masters 10:11 SG Wasserball Essen II (Ruhrgebiet
  sliga männlich)
 STATUS:CONFIRMED
@@ -228,7 +228,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__36@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:WSG Oberhausen 97/27 14:23 SG Wasserball Essen II (Ruhrgebietsliga 
  männlich)
 STATUS:CONFIRMED
@@ -244,7 +244,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_B_27@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:Kevelaerer SV 10:23 SG Wasserball Essen (NRW Verbandsliga - Gruppe 
  B mä)
 STATUS:CONFIRMED
@@ -260,7 +260,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_B_4@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SV Blau-Weiß Bochum II 8:23 SG Wasserball Essen (NRW Verbandsliga 
  - Gruppe B mä)
 STATUS:CONFIRMED
@@ -276,7 +276,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_132__28@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SG Wasserball Essen 16:25 SV Krefeld 1972 II (NRW Pokal männlich)
 STATUS:CONFIRMED
 DTSTART;TZID=Europe/Berlin:20260420T202000
@@ -290,7 +290,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=132&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_C_1@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:Bocholter WSV 1920 11:17 SG Wasserball Essen (NRW Verbandsliga - Gr
  uppe C mä)
 STATUS:CONFIRMED
@@ -306,7 +306,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__50@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SG Wasserball Essen II 27:0 Kevelaerer SV Masters (Ruhrgebietsliga 
  männlich)
 STATUS:CONFIRMED
@@ -322,7 +322,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_C_21@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SG Wasserball Essen 27:16 SV Rheinhausen 1913 II (NRW Verbandsliga 
  - Gruppe C mä)
 STATUS:CONFIRMED
@@ -338,7 +338,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__31@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:WSG Oberhausen Masters 13:15 SG Wasserball Essen II (Ruhrgebietslig
  a männlich)
 STATUS:CONFIRMED
@@ -354,7 +354,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_C_17@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SV Lünen 08 11:13 SG Wasserball Essen (NRW Verbandsliga - Gruppe C
   mä)
 STATUS:CONFIRMED
@@ -370,7 +370,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__51@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SG Wasserball Essen II 12:14 Wassersportverein Schermbeck II (Ruhrg
  ebietsliga männlich)
 STATUS:CONFIRMED
@@ -386,7 +386,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_C_7@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SVg Münster von 1891 10:12 SG Wasserball Essen (NRW Verbandsliga -
   Gruppe C mä)
 STATUS:CONFIRMED
@@ -402,7 +402,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_C_28@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SGW SC Solingen/Wfr. Wuppertal II 12:16 SG Wasserball Essen (NRW Ve
  rbandsliga - Gruppe C mä)
 STATUS:CONFIRMED
@@ -418,7 +418,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__52@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SG Wasserball Essen II 10:8 Duisburger SV 1898 III (Ruhrgebietsliga
   männlich)
 STATUS:CONFIRMED
@@ -434,7 +434,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_C_22@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SG Wasserball Essen : SV Lünen 08 (NRW Verbandsliga - Gruppe C mä
  )
 STATUS:TENTATIVE
@@ -448,7 +448,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__53@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SG Wasserball Essen II : WSG Oberhausen Masters (Ruhrgebietsliga m
  ännlich)
 STATUS:TENTATIVE
@@ -462,7 +462,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__48@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:PSV Duisburg Masters : SG Wasserball Essen II (Ruhrgebietsliga män
  nlich)
 STATUS:TENTATIVE
@@ -476,7 +476,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_C_23@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SG Wasserball Essen : SGW SC Solingen/Wfr. Wuppertal II (NRW Verban
  dsliga - Gruppe C mä)
 STATUS:TENTATIVE
@@ -490,7 +490,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__14@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:ASC Duisburg IV : SG Wasserball Essen II (Ruhrgebietsliga männlich
  )
 STATUS:TENTATIVE
@@ -504,7 +504,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__65@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:Kevelaerer SV Masters : SG Wasserball Essen II (Ruhrgebietsliga mä
  nnlich)
 STATUS:TENTATIVE
@@ -518,7 +518,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__7@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:Wassersportverein Schermbeck II : SG Wasserball Essen II (Ruhrgebie
  tsliga männlich)
 STATUS:TENTATIVE
@@ -532,7 +532,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_C_24@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SG Wasserball Essen : Bocholter WSV 1920 (NRW Verbandsliga - Gruppe
   C mä)
 STATUS:TENTATIVE
@@ -546,7 +546,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_C_25@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SG Wasserball Essen : SVg Münster von 1891 (NRW Verbandsliga - Gru
  ppe C mä)
 STATUS:TENTATIVE
@@ -560,7 +560,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__54@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SG Wasserball Essen II : PSV Duisburg Masters (Ruhrgebietsliga män
  nlich)
 STATUS:TENTATIVE
@@ -574,7 +574,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_C_15@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SV Rheinhausen 1913 II : SG Wasserball Essen (NRW Verbandsliga - Gr
  uppe C mä)
 STATUS:TENTATIVE
@@ -588,7 +588,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__55@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SG Wasserball Essen II : WSG Oberhausen 97/27 (Ruhrgebietsliga män
  nlich)
 STATUS:TENTATIVE
@@ -602,7 +602,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__56@sgw-essen.local
-DTSTAMP:20260601T102101Z
+DTSTAMP:20260601T222101Z
 SUMMARY:SG Wasserball Essen II : ASC Duisburg IV (Ruhrgebietsliga männlich
  )
 STATUS:TENTATIVE
