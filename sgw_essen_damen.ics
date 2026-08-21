@@ -23,7 +23,7 @@ END:DAYLIGHT
 END:VTIMEZONE
 BEGIN:VEVENT
 UID:2025_225__6@sgw-essen.local
-DTSTAMP:20260820T222219Z
+DTSTAMP:20260821T102221Z
 SUMMARY:Duisburger SSC 09/20 4:11 SG Wasserball Essen (Ruhrgebietsliga weib
  lich)
 STATUS:CONFIRMED
@@ -39,7 +39,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__7@sgw-essen.local
-DTSTAMP:20260820T222219Z
+DTSTAMP:20260821T102221Z
 SUMMARY:SG Wasserball Essen 12:11 Düsseldorfer SC 1898 (Ruhrgebietsliga we
  iblich)
 STATUS:CONFIRMED
@@ -55,7 +55,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__24@sgw-essen.local
-DTSTAMP:20260820T222219Z
+DTSTAMP:20260821T102221Z
 SUMMARY:WSG Oberhausen 97/27 5:8 SG Wasserball Essen (Ruhrgebietsliga weibl
  ich)
 STATUS:CONFIRMED
@@ -71,7 +71,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__12@sgw-essen.local
-DTSTAMP:20260820T222219Z
+DTSTAMP:20260821T102221Z
 SUMMARY:Duisburger SSC 09/20 II 5:17 SG Wasserball Essen (Ruhrgebietsliga w
  eiblich)
 STATUS:CONFIRMED
@@ -87,7 +87,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__29@sgw-essen.local
-DTSTAMP:20260820T222219Z
+DTSTAMP:20260821T102221Z
 SUMMARY:SGW Essen Masters 12:9 SG Wasserball Essen (Ruhrgebietsliga weiblic
  h)
 STATUS:CONFIRMED
@@ -103,7 +103,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__30@sgw-essen.local
-DTSTAMP:20260820T222219Z
+DTSTAMP:20260821T102221Z
 SUMMARY:SG Wasserball Essen 5:12 WSG Oberhausen 97/27 (Ruhrgebietsliga weib
  lich)
 STATUS:CONFIRMED
@@ -119,7 +119,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__33@sgw-essen.local
-DTSTAMP:20260820T222219Z
+DTSTAMP:20260821T102221Z
 SUMMARY:SG Wasserball Essen 11:6 WSG Vest (Ruhrgebietsliga weiblich)
 STATUS:CONFIRMED
 DTSTART;TZID=Europe/Berlin:20260609T200000
@@ -134,7 +134,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__36@sgw-essen.local
-DTSTAMP:20260820T222219Z
+DTSTAMP:20260821T102221Z
 SUMMARY:SG Wasserball Essen 9:15 Duisburger SSC 09/20 (Ruhrgebietsliga weib
  lich)
 STATUS:CONFIRMED
@@ -150,7 +150,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__39@sgw-essen.local
-DTSTAMP:20260820T222219Z
+DTSTAMP:20260821T102221Z
 SUMMARY:WSG Vest 5:9 SG Wasserball Essen (Ruhrgebietsliga weiblich)
 STATUS:CONFIRMED
 DTSTART;TZID=Europe/Berlin:20260630T203000
@@ -164,7 +164,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__40@sgw-essen.local
-DTSTAMP:20260820T222219Z
+DTSTAMP:20260821T102221Z
 SUMMARY:SG Wasserball Essen 12:20 SGW Essen Masters (Ruhrgebietsliga weibli
  ch)
 STATUS:CONFIRMED
