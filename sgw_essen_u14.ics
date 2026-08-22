@@ -23,7 +23,7 @@ END:DAYLIGHT
 END:VTIMEZONE
 BEGIN:VEVENT
 UID:2025_279__13@sgw-essen.local
-DTSTAMP:20260822T102219Z
+DTSTAMP:20260822T222218Z
 SUMMARY:WSG Oberhausen 97/27 8:24 SG Wasserball Essen (U14 Ruhrgebietsliga 
  mixed)
 STATUS:CONFIRMED
@@ -38,7 +38,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=279&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_279__14@sgw-essen.local
-DTSTAMP:20260822T102219Z
+DTSTAMP:20260822T222218Z
 SUMMARY:ASC Duisburg 23:11 SG Wasserball Essen (U14 Ruhrgebietsliga mixed)
 STATUS:CONFIRMED
 DTSTART;TZID=Europe/Berlin:20260315T173000
@@ -52,7 +52,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=279&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_279__15@sgw-essen.local
-DTSTAMP:20260822T102219Z
+DTSTAMP:20260822T222218Z
 SUMMARY:Duisburger SSC 09/20 5:40 SG Wasserball Essen (U14 Ruhrgebietsliga 
  mixed)
 STATUS:CONFIRMED
@@ -68,7 +68,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=279&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_279__17@sgw-essen.local
-DTSTAMP:20260822T102219Z
+DTSTAMP:20260822T222218Z
 SUMMARY:SG Wasserball Essen 41:3 Duisburger SSC 09/20 (U14 Ruhrgebietsliga 
  mixed)
 STATUS:CONFIRMED
@@ -83,7 +83,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=279&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_279__16@sgw-essen.local
-DTSTAMP:20260822T102219Z
+DTSTAMP:20260822T222218Z
 SUMMARY:SG Wasserball Essen 17:14 WSG Oberhausen 97/27 (U14 Ruhrgebietsliga
   mixed)
 STATUS:CONFIRMED
@@ -98,7 +98,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=279&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_279__18@sgw-essen.local
-DTSTAMP:20260822T102219Z
+DTSTAMP:20260822T222218Z
 SUMMARY:SG Wasserball Essen 17:11 ASC Duisburg (U14 Ruhrgebietsliga mixed)
 STATUS:CONFIRMED
 DTSTART;TZID=Europe/Berlin:20260626T200000
@@ -112,7 +112,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=279&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_279__19@sgw-essen.local
-DTSTAMP:20260822T102219Z
+DTSTAMP:20260822T222218Z
 SUMMARY:Duisburger SV 1898 27:4 SG Wasserball Essen (U14 Ruhrgebietsliga mi
  xed)
 STATUS:CONFIRMED
@@ -127,7 +127,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=279&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_279__20@sgw-essen.local
-DTSTAMP:20260822T102219Z
+DTSTAMP:20260822T222218Z
 SUMMARY:SG Wasserball Essen 6:32 Duisburger SV 1898 (U14 Ruhrgebietsliga mi
  xed)
 STATUS:CONFIRMED

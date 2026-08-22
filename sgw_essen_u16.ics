@@ -23,7 +23,7 @@ END:DAYLIGHT
 END:VTIMEZONE
 BEGIN:VEVENT
 UID:2025_362__8@sgw-essen.local
-DTSTAMP:20260822T102219Z
+DTSTAMP:20260822T222218Z
 SUMMARY:SG Wasserball Essen 10:17 ASC Duisburg (U16 Ruhrgebietsliga mixed)
 STATUS:CONFIRMED
 DTSTART;TZID=Europe/Berlin:20260214T150000
@@ -37,7 +37,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=362&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_362__1@sgw-essen.local
-DTSTAMP:20260822T102219Z
+DTSTAMP:20260822T222218Z
 SUMMARY:WSG Oberhausen 97/27 4:30 SG Wasserball Essen (U16 Ruhrgebietsliga 
  mixed)
 STATUS:CONFIRMED
@@ -52,7 +52,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=362&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_362__4@sgw-essen.local
-DTSTAMP:20260822T102219Z
+DTSTAMP:20260822T222218Z
 SUMMARY:Wassersportverein Schermbeck : SG Wasserball Essen (U16 Ruhrgebiets
  liga mixed)
 STATUS:TENTATIVE
@@ -67,7 +67,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=362&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_362__9@sgw-essen.local
-DTSTAMP:20260822T102219Z
+DTSTAMP:20260822T222218Z
 SUMMARY:ASC Duisburg 15:11 SG Wasserball Essen (U16 Ruhrgebietsliga mixed)
 STATUS:CONFIRMED
 DTSTART;TZID=Europe/Berlin:20260314T174500
@@ -81,7 +81,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=362&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_362__7@sgw-essen.local
-DTSTAMP:20260822T102219Z
+DTSTAMP:20260822T222218Z
 SUMMARY:SG Wasserball Essen 21:3 WSG Oberhausen 97/27 (U16 Ruhrgebietsliga 
  mixed)
 STATUS:CONFIRMED
@@ -96,7 +96,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=362&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_362__6@sgw-essen.local
-DTSTAMP:20260822T102219Z
+DTSTAMP:20260822T222218Z
 SUMMARY:SG Wasserball Essen 9:5 Wassersportverein Schermbeck (U16 Ruhrgebie
  tsliga mixed)
 STATUS:CONFIRMED
