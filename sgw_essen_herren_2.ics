@@ -23,7 +23,7 @@ END:DAYLIGHT
 END:VTIMEZONE
 BEGIN:VEVENT
 UID:2025_212__49@sgw-essen.local
-DTSTAMP:20260823T102218Z
+DTSTAMP:20260823T222219Z
 SUMMARY:SG Wasserball Essen II 21:10 Wfr. 1912 Mülheim Masters (Ruhrgebiet
  sliga männlich)
 STATUS:CONFIRMED
@@ -39,7 +39,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__68@sgw-essen.local
-DTSTAMP:20260823T102218Z
+DTSTAMP:20260823T222219Z
 SUMMARY:Duisburger SV 1898 III 8:15 SG Wasserball Essen II (Ruhrgebietsliga
   männlich)
 STATUS:CONFIRMED
@@ -55,7 +55,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__21@sgw-essen.local
-DTSTAMP:20260823T102218Z
+DTSTAMP:20260823T222219Z
 SUMMARY:Wfr. 1912 Mülheim Masters 10:11 SG Wasserball Essen II (Ruhrgebiet
  sliga männlich)
 STATUS:CONFIRMED
@@ -70,7 +70,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__36@sgw-essen.local
-DTSTAMP:20260823T102218Z
+DTSTAMP:20260823T222219Z
 SUMMARY:WSG Oberhausen 97/27 14:23 SG Wasserball Essen II (Ruhrgebietsliga 
  männlich)
 STATUS:CONFIRMED
@@ -86,7 +86,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__50@sgw-essen.local
-DTSTAMP:20260823T102218Z
+DTSTAMP:20260823T222219Z
 SUMMARY:SG Wasserball Essen II 27:0 Kevelaerer SV Masters (Ruhrgebietsliga 
  männlich)
 STATUS:CONFIRMED
@@ -102,7 +102,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__31@sgw-essen.local
-DTSTAMP:20260823T102218Z
+DTSTAMP:20260823T222219Z
 SUMMARY:WSG Oberhausen Masters 13:15 SG Wasserball Essen II (Ruhrgebietslig
  a männlich)
 STATUS:CONFIRMED
@@ -118,7 +118,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__51@sgw-essen.local
-DTSTAMP:20260823T102218Z
+DTSTAMP:20260823T222219Z
 SUMMARY:SG Wasserball Essen II 12:14 Wassersportverein Schermbeck II (Ruhrg
  ebietsliga männlich)
 STATUS:CONFIRMED
@@ -134,7 +134,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__52@sgw-essen.local
-DTSTAMP:20260823T102218Z
+DTSTAMP:20260823T222219Z
 SUMMARY:SG Wasserball Essen II 10:8 Duisburger SV 1898 III (Ruhrgebietsliga
   männlich)
 STATUS:CONFIRMED
@@ -150,7 +150,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__53@sgw-essen.local
-DTSTAMP:20260823T102218Z
+DTSTAMP:20260823T222219Z
 SUMMARY:SG Wasserball Essen II 0:10 WSG Oberhausen Masters (Ruhrgebietsliga
   männlich)
 STATUS:CONFIRMED
@@ -166,7 +166,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__48@sgw-essen.local
-DTSTAMP:20260823T102218Z
+DTSTAMP:20260823T222219Z
 SUMMARY:PSV Duisburg Masters 8:14 SG Wasserball Essen II (Ruhrgebietsliga m
  ännlich)
 STATUS:CONFIRMED
@@ -182,7 +182,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__14@sgw-essen.local
-DTSTAMP:20260823T102218Z
+DTSTAMP:20260823T222219Z
 SUMMARY:ASC Duisburg IV 15:16 SG Wasserball Essen II (Ruhrgebietsliga männ
  lich)
 STATUS:CONFIRMED
@@ -198,7 +198,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__65@sgw-essen.local
-DTSTAMP:20260823T102218Z
+DTSTAMP:20260823T222219Z
 SUMMARY:Kevelaerer SV Masters 14:17 SG Wasserball Essen II (Ruhrgebietsliga
   männlich)
 STATUS:CONFIRMED
@@ -214,7 +214,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__7@sgw-essen.local
-DTSTAMP:20260823T102218Z
+DTSTAMP:20260823T222219Z
 SUMMARY:Wassersportverein Schermbeck II 6:24 SG Wasserball Essen II (Ruhrge
  bietsliga männlich)
 STATUS:CONFIRMED
@@ -230,7 +230,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__54@sgw-essen.local
-DTSTAMP:20260823T102218Z
+DTSTAMP:20260823T222219Z
 SUMMARY:SG Wasserball Essen II 19:8 PSV Duisburg Masters (Ruhrgebietsliga m
  ännlich)
 STATUS:CONFIRMED
@@ -246,7 +246,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__55@sgw-essen.local
-DTSTAMP:20260823T102218Z
+DTSTAMP:20260823T222219Z
 SUMMARY:SG Wasserball Essen II 19:13 WSG Oberhausen 97/27 (Ruhrgebietsliga 
  männlich)
 STATUS:CONFIRMED
@@ -262,7 +262,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__56@sgw-essen.local
-DTSTAMP:20260823T102218Z
+DTSTAMP:20260823T222219Z
 SUMMARY:SG Wasserball Essen II 18:10 ASC Duisburg IV (Ruhrgebietsliga männ
  lich)
 STATUS:CONFIRMED
@@ -278,7 +278,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_250__4@sgw-essen.local
-DTSTAMP:20260823T102218Z
+DTSTAMP:20260823T222219Z
 SUMMARY:Wassersportverein Schermbeck : SG Wasserball Essen II (Pokalrunde R
  uhrgebiet männlich)
 STATUS:TENTATIVE
