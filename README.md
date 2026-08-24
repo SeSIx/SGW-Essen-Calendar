@@ -15,29 +15,35 @@ iCalendar feeds. Runs unattended on GitHub Actions twice a day.
 Add these as a *subscription*, not an import, and new fixtures, venue changes and
 results appear automatically.
 
-| Team | Google Calendar | Other apps (Apple, Outlook, Thunderbird) |
+| Team | Google Calendar | Apple, Outlook, Thunderbird |
 |---|---|---|
-| **Men I + II** (default) | [subscribe](https://www.google.com/calendar/render?cid=webcal://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar@main/sgw_termine.ics) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_termine.ics` |
-| Men I | [subscribe](https://www.google.com/calendar/render?cid=webcal://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar@main/sgw_essen_herren_1.ics) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_1.ics` |
-| Men II | [subscribe](https://www.google.com/calendar/render?cid=webcal://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar@main/sgw_essen_herren_2.ics) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_2.ics` |
-| Women | [subscribe](https://www.google.com/calendar/render?cid=webcal://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar@main/sgw_essen_damen.ics) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_damen.ics` |
-| U16 | [subscribe](https://www.google.com/calendar/render?cid=webcal://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar@main/sgw_essen_u16.ics) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u16.ics` |
-| U14 | [subscribe](https://www.google.com/calendar/render?cid=webcal://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar@main/sgw_essen_u14.ics) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u14.ics` |
-| U12 | [subscribe](https://www.google.com/calendar/render?cid=webcal://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar@main/sgw_essen_u12.ics) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u12.ics` |
+| **Men I + II** (default) | `https://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar/sgw_termine.ics` | `https://sesix.github.io/SGW-Essen-Calendar/sgw_termine.ics` |
+| Men I | `https://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar/sgw_essen_herren_1.ics` | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_1.ics` |
+| Men II | `https://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar/sgw_essen_herren_2.ics` | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_2.ics` |
+| Women | `https://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar/sgw_essen_damen.ics` | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_damen.ics` |
+| U16 | `https://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar/sgw_essen_u16.ics` | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u16.ics` |
+| U14 | `https://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar/sgw_essen_u14.ics` | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u14.ics` |
+| U12 | `https://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar/sgw_essen_u12.ics` | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u12.ics` |
 
 The default feed also carries club dates (team meetings, training start, referee
 courses) that exist nowhere in the DSV data.
 
-Two hosts, because Google Calendar only accepts a feed served as
-`text/calendar; charset=utf-8`. GitHub Pages omits the charset, so the Google
-links go through jsDelivr, which sets the full header; jsDelivr caches for up to
-twelve hours, which costs nothing because Google polls roughly once a day anyway.
-Clients that poll more often get the Pages URL, which is current the moment a run
-finishes. Neither `github.com/…/raw/…` (302 redirect) nor
-`raw.githubusercontent.com/…` (`text/plain` plus `nosniff`) works with any of them.
+Google Calendar only accepts subscriptions added from the web interface — its
+Android app cannot add a calendar by URL at all, and a
+`calendar/render?cid=webcal://…` link, the usual one-click trick, is decoded as
+base64 by that app and produces a garbage calendar name. Add it once at
+[calendar.google.com](https://calendar.google.com) under Settings → Add calendar
+→ From URL, and it appears on the phone by itself.
 
-Each entry carries the result once played, the full venue address so navigation
-apps can route to it, the referees, and a link back to the DSV match page.
+Two hosts, because Google only accepts a feed served as
+`text/calendar; charset=utf-8`. GitHub Pages omits the charset, so Google gets
+the jsDelivr URL; jsDelivr caches for up to twelve hours, which costs nothing at
+Google's once-a-day polling. Clients that poll more often get the Pages URL.
+Neither `github.com/…/raw/…` (302) nor `raw.githubusercontent.com/…`
+(`text/plain` plus `nosniff`) works anywhere.
+
+Each entry carries the result once played, the full venue address, the referees,
+and a link back to the DSV match page.
 
 ## What it does
 
