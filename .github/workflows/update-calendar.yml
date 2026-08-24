@@ -1,0 +1,70 @@
+name: Update calendar
+
+on:
+  schedule:
+    # Runners are on UTC; these are 10:15 and 22:15 Europe/Berlin during CEST.
+    - cron: "15 8 * * *"
+    - cron: "15 20 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: update-calendar
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Scrape DSV and rebuild calendars
+        id: scrape
+        run: |
+          set +e
+          python main.py 2>&1 | tee run.log
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+
+      - name: Commit changed calendars
+        run: |
+          git config user.name "SGW Bot"
+          git config user.email "bot@sgw-essen.local"
+          git add -- '*.ics'
+          if git diff --cached --quiet; then
+            echo "No calendar changes."
+          else
+            git commit -m "Auto-update: calendars $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
+
+      - name: Raise alarm
+        if: steps.scrape.outputs.exit_code != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create scrape-alarm --color B60205 \
+            --description "Scraper produced no usable calendar" --force
+          summary=$(tail -30 run.log)
+          body=$(printf '%s\n\n```\n%s\n```\n\n[Run](%s/%s/actions/runs/%s)\n' \
+            "\`main.py\` exited with code ${{ steps.scrape.outputs.exit_code }}. Either the DSV has not published the new season yet, or the parser broke. The calendar is not updating until this is resolved." \
+            "$summary" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")
+          existing=$(gh issue list --label scrape-alarm --state open --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "Scraper alarm: no upcoming fixtures" \
+              --label scrape-alarm --body "$body"
+          fi
+          exit 1

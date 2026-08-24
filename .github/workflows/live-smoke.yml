@@ -1,0 +1,49 @@
+name: Live smoke test
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Hit the real DSV portal
+        id: live
+        run: |
+          set +e
+          pytest -m live -v 2>&1 | tee live.log
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+
+      - name: Raise alarm
+        if: steps.live.outputs.exit_code != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create scrape-alarm --color B60205 \
+            --description "Scraper produced no usable calendar" --force
+          body=$(printf '%s\n\n```\n%s\n```\n' \
+            "The nightly live test against dsvdaten.dsv.de failed. The DSV most likely changed its HTML, which means the parser needs updating before the next scheduled run publishes a broken calendar." \
+            "$(tail -30 live.log)")
+          existing=$(gh issue list --label scrape-alarm --state open --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "Live smoke test failed: DSV layout may have changed" \
+              --label scrape-alarm --body "$body"
+          fi
+          exit 1
