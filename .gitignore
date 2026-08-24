@@ -32,4 +32,19 @@ Thumbs.db
 *.log
 *.tmp
 
-# Database and ICS files werden committed für direkten Zugang
+# Per-team DB/ICS outputs (not committed — use combine.py to build sgw_termine.*)
+output/*.db
+output/*.db-shm
+output/*.db-wal
+output/*.ics
+
+# Databases are derived artefacts and never committed
+*.db
+*.db-shm
+*.db-wal
+
+# The .ics files at repo root ARE committed: subscribers fetch them by raw URL
+
+# Virtual env
+.venv/
+docs/superpowers/

@@ -1,67 +1,92 @@
-# SGW Essen Wasserball Kalender
+# SGW Essen Water Polo Calendar
 
-🏊‍♂️ Einfacher Kalender für SG Wasserball Essen Termine
+[![Tests](https://github.com/SeSIx/SGW-Essen-Calendar/actions/workflows/tests.yml/badge.svg)](https://github.com/SeSIx/SGW-Essen-Calendar/actions/workflows/tests.yml)
+[![Update calendar](https://github.com/SeSIx/SGW-Essen-Calendar/actions/workflows/update-calendar.yml/badge.svg)](https://github.com/SeSIx/SGW-Essen-Calendar/actions/workflows/update-calendar.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-## 📱 Kalender abonnieren
+Fixtures, results, venues and referees for every SG Wasserball Essen team, scraped
+from the German Swimming Federation (DSV) portal and published as subscribable
+iCalendar feeds. Runs unattended on GitHub Actions twice a day.
 
-**Direkt in Ihrer Kalender-App:**
+**🇩🇪 [Abo-Anleitung auf Deutsch](README.de.md)**
 
-```
-https://github.com/SeSIx/SGW-Essen-Calendar/raw/main/sgw_termine.ics
-```
+## Subscribe
 
-### So geht's:
-- **Android**: Google Calendar → ☰ → Einstellungen → Kalender hinzufügen → Über URL
-- **iOS**: Kalender → Kalender hinzufügen → Abonnement
-- **Desktop**: Outlook/Thunderbird → Internetkalender hinzufügen
+Add one of these URLs to any calendar app as a *subscription* (not an import), and
+new fixtures, venue changes and results appear automatically.
 
-## 🎯 Termine hinzufügen
+| Calendar | URL |
+|---|---|
+| **Men I + II** (default) | `https://github.com/SeSIx/SGW-Essen-Calendar/raw/main/sgw_termine.ics` |
+| Men I | `https://github.com/SeSIx/SGW-Essen-Calendar/raw/main/sgw_essen_herren_1.ics` |
+| Men II | `https://github.com/SeSIx/SGW-Essen-Calendar/raw/main/sgw_essen_herren_2.ics` |
+| Women | `https://github.com/SeSIx/SGW-Essen-Calendar/raw/main/sgw_essen_damen.ics` |
+| U16 | `https://github.com/SeSIx/SGW-Essen-Calendar/raw/main/sgw_essen_u16.ics` |
+| U14 | `https://github.com/SeSIx/SGW-Essen-Calendar/raw/main/sgw_essen_u14.ics` |
+| U12 | `https://github.com/SeSIx/SGW-Essen-Calendar/raw/main/sgw_essen_u12.ics` |
 
-### Einzelner Termin:
-```bash
-python sgw_essen_scraper.py --add "20.12.2025" "15:00" "SGW Essen" "Weihnachtsfeier" "Weihnachtsmarkt" ""
-```
-*Format: DATUM ZEIT HEIM GAST ORT ERGEBNIS*
+The default feed also carries club dates (team meetings, training start, referee
+courses) that exist nowhere in the DSV data.
 
-### Interaktive Eingabe:
-```bash
-python sgw_essen_scraper.py -new
-```
+Each entry contains the result once played, the full venue address so navigation
+apps can route to it, the referees, and a link back to the DSV match page.
 
-### Termine anzeigen:
-```bash
-python sgw_essen_scraper.py --list
-```
+## What it does
 
-### Web-Scraping testen:
-```bash
-python sgw_essen_scraper.py --enable-scraping
-```
-*(Sobald die neue DSV-Website für 2025 online ist)*
+The DSV publishes fixtures as paginated ASP.NET pages with no API. This project:
 
-## 🔄 Kalender aktualisieren
+1. fetches the club's season page for every relevant DSV season key,
+2. parses fixtures, results, venues, referees and player statistics out of the HTML,
+3. stores them in one SQLite database per team, upserting so reruns are idempotent,
+4. renders RFC 5545 calendars, and
+5. commits the changed `.ics` files so subscribers pick them up on their next sync.
 
-1. Termine hinzufügen (siehe oben)
-2. Zu GitHub pushen:
-   ```bash
-   git add .
-   git commit -m "Add new games"
-   git push
-   ```
-3. **Fertig!** Kalender wird automatisch aktualisiert
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the data flow and the design
+decisions behind it.
 
-## ⚙️ Installation
+## Quickstart
 
 ```bash
-pip install -r requirements.txt
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements-dev.txt
+
+python main.py                 # scrape, rebuild every calendar, print a run report
+python main.py --no-details    # fast pass: fixtures only, no detail pages
+python main.py --summary       # row counts from the existing databases
+python combine.py --add-event  # add a club date to the default calendar
+pytest                         # 50 offline tests, no network access
+ruff check .
 ```
 
-## 📋 Aktueller Status
+`main.py` exits `2` when no team has a single upcoming fixture — the failure mode
+that would otherwise publish an empty calendar unnoticed. The scheduled workflow
+turns that exit code into a GitHub issue.
 
-- ✅ **Weihnachtsfeier**: 20.12.2025, 15:00 Uhr
-- ✅ **Neue Saison**: Spiele ab November 2026
-- ℹ️ **DSV-Website**: Noch nicht für neue Saison verfügbar
+## Tech stack
 
----
+Python 3.12 · requests · BeautifulSoup/lxml · SQLite · pytest · ruff · GitHub Actions
 
-*Einfach und funktional! 🎉*
+## Repository layout
+
+| Path | Purpose |
+|---|---|
+| `main.py` | Orchestrator: seasons, scraping, run report, exit codes |
+| `scraper.py` | HTTP + HTML parsing for the DSV portal |
+| `db.py` | SQLite schema, non-destructive upserts, health queries |
+| `ics.py` | RFC 5545 calendar generation per team |
+| `combine.py` | Default calendar (Men I + II) plus manually added club dates |
+| `config.py` | URLs, club id, season arithmetic |
+| `tests/` | Offline suite driven by captured DSV HTML |
+| `.github/workflows/` | Test, scrape and live-smoke automation |
+
+## Data source and fair use
+
+Data belongs to the [Deutscher Schwimm-Verband](https://dsvdaten.dsv.de). Requests
+are serialised with a four-second delay, rate-limit responses are retried with
+backoff, and detail pages are only refetched when something is actually missing —
+a full rerun costs a handful of requests instead of seventy-four. This is a
+non-commercial tool for one club's members.
+
+## License
+
+[MIT](LICENSE) © Julius Gerecke
