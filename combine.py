@@ -1,11 +1,12 @@
-"""combine.py — build sgw_termine.db + sgw_termine.ics from Herren I + II + custom events.
+"""combine.py — build the default calendar from Herren I + II plus club dates.
 
 Usage:
   python combine.py [--output-dir OUTPUT_DIR] [--add-event] [--list-events]
 
-Custom events are stored in custom_events.db next to the output directory.
-They are merged into sgw_termine.db and exported to sgw_termine.ics together
-with Herren I and Herren II fixtures.
+Club dates live in custom_events.json at the repository root so the scheduled
+job can see them; a legacy output/custom_events.db is migrated on first read.
+Fixtures come from the per-team databases in output/, and the result is written
+to sgw_termine.ics next to this file.
 """
 
 import argparse
@@ -363,9 +364,9 @@ def main() -> None:
     parser.add_argument("--output-dir", default=str(OUTPUT_DIR),
                         help=f"Directory with per-team DBs (default: {OUTPUT_DIR})")
     parser.add_argument("--add-event", action="store_true",
-                        help="Interactively add a custom event to custom_events.db")
+                        help="Interactively add a club date to custom_events.json")
     parser.add_argument("--list-events", action="store_true",
-                        help="List all custom events")
+                        help="List all club dates")
     args = parser.parse_args()
 
     if args.add_event:

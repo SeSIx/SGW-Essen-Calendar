@@ -7,7 +7,8 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VENV="$REPO_DIR/.venv"
 PYTHON="$VENV/bin/python"
-GIT_BRANCH="sgw-scraper-rewrite"
+# Fall back to the branch actually checked out; the old rewrite branch is gone.
+GIT_BRANCH="${GIT_BRANCH:-$(git -C "$REPO_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || echo main)}"
 
 echo "=== $(date '+%Y-%m-%d %H:%M:%S') START ==="
 
@@ -26,9 +27,15 @@ git pull --ff-only origin "$GIT_BRANCH" || {
     echo "[Git] WARNING: pull failed — continuing with local version"
 }
 
-# Run the scraper
+# Run the scraper. Exit code 2 means "no upcoming fixtures" — worth shouting
+# about, but the calendars it did produce should still be committed, so this
+# must not abort the script under `set -e`.
 echo "[Scraper] Running main.py..."
-"$PYTHON" main.py
+SCRAPE_STATUS=0
+"$PYTHON" main.py || SCRAPE_STATUS=$?
+if [ "$SCRAPE_STATUS" -ne 0 ]; then
+    echo "[Scraper] WARNING: main.py exited with $SCRAPE_STATUS"
+fi
 
 # Stage all ICS files at repo root (per-team + combined)
 git add -- *.ics 2>/dev/null || true
@@ -43,4 +50,5 @@ else
     echo "[Git] No changes to ICS files — nothing to push."
 fi
 
-echo "=== $(date '+%Y-%m-%d %H:%M:%S') DONE ==="
+echo "=== $(date '+%Y-%m-%d %H:%M:%S') DONE (scraper exit $SCRAPE_STATUS) ==="
+exit "$SCRAPE_STATUS"
