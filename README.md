@@ -29,7 +29,7 @@ The default feed also carries club dates (team meetings, training start, referee
 courses) that exist nowhere in the DSV data.
 
 Each entry contains the result once played, the full venue address so navigation
-apps can route to it, the referees, and a link to the official match protocol.
+apps can route to it, the referees, and a link back to the DSV match page.
 
 ## What it does
 

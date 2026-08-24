@@ -33,7 +33,7 @@ Trainingsstart, Kampfrichter-Ausbildung), die es in den DSV-Daten nicht gibt.
 
 Jeder Eintrag enthält das Ergebnis, sobald gespielt wurde, die vollständige Adresse
 der Schwimmhalle (damit die Navigation direkt losfahren kann), die Schiedsrichter
-und einen Link zum offiziellen Spielprotokoll.
+und einen Link zur DSV-Spielseite.
 
 ## Vereinstermine eintragen
 
