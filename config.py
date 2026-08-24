@@ -5,7 +5,6 @@ from datetime import date
 BASE_URL = "https://dsvdaten.dsv.de"
 CLUBS_URL = f"{BASE_URL}/Modules/WB/Clubs.aspx"
 
-CLUB_NAME = "SG Wasserball Essen"
 CLUB_ID = "6638"
 
 # --- Season handling -------------------------------------------------------
@@ -41,9 +40,8 @@ def season_label(key: str) -> str:
     return f"{key}/{int(key) + 1}"
 
 
-# Kept for callers that want a single key (default argument of fetch_club_page).
+# Default for callers that want a single key (fetch_club_page's default argument).
 SEASON_YEAR = current_season_key()
-SEASON_LABEL = season_label(SEASON_YEAR)
 
 OUTPUT_DIR = "output"
 

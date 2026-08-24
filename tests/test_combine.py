@@ -89,7 +89,7 @@ def test_rebuilding_is_idempotent(out):
     assert first == second, "a rerun must not duplicate events"
 
 
-def test_club_dates_survive_a_rebuild_on_a_fresh_checkout(out, tmp_path):
+def test_club_dates_survive_a_rebuild_on_a_fresh_checkout(out):
     """A scheduled run starts from a clean checkout with no databases. If club
     dates lived only in the gitignored SQLite file, the job would quietly delete
     them from the published calendar — which is exactly what happened once."""
@@ -115,7 +115,7 @@ def test_club_dates_survive_a_rebuild_on_a_fresh_checkout(out, tmp_path):
     assert count == 3
 
 
-def test_legacy_database_is_migrated_once(out, tmp_path):
+def test_legacy_database_is_migrated_once(out):
     """Existing installations keep their club dates without manual steps."""
     legacy = out / "custom_events.db"
     conn = sqlite3.connect(str(legacy))
