@@ -1,5 +1,6 @@
 """ICS generation must produce calendars real clients accept (RFC 5545)."""
 
+import sqlite3
 
 import pytest
 from icalendar import Calendar
@@ -92,3 +93,38 @@ def test_game_without_date_is_skipped(tmp_path):
     conn.close()
     count = ics.write_ics(str(db_path), str(tmp_path / "t.ics"))
     assert count == 0, "a game without a date cannot become a calendar entry"
+
+
+def test_output_is_byte_stable_when_nothing_changed(tmp_path):
+    """The scheduled job commits whatever changed. If DTSTAMP tracked wall-clock
+    time, every run would produce a diff and commit noise twice a day forever."""
+    db_path = tmp_path / "t.db"
+    conn = db.init_db(str(db_path))
+    db.upsert_game(conn, GAME_TIMED)
+    conn.close()
+
+    first = tmp_path / "a.ics"
+    second = tmp_path / "b.ics"
+    ics.write_ics(str(db_path), str(first))
+    ics.write_ics(str(db_path), str(second))
+    assert first.read_bytes() == second.read_bytes()
+
+
+def test_dtstamp_moves_when_the_data_changes(tmp_path):
+    db_path = tmp_path / "t.db"
+    conn = db.init_db(str(db_path))
+    db.upsert_game(conn, GAME_TIMED)
+    conn.close()
+    before = tmp_path / "a.ics"
+    ics.write_ics(str(db_path), str(before))
+
+    conn = sqlite3.connect(str(db_path))
+    conn.execute("UPDATE games SET home_score = 9, away_score = 9, "
+                 "last_updated = '2030-01-01 12:00:00' WHERE id = ?", (GAME_TIMED["id"],))
+    conn.commit()
+    conn.close()
+
+    after = tmp_path / "b.ics"
+    ics.write_ics(str(db_path), str(after))
+    assert before.read_bytes() != after.read_bytes()
+    assert "DTSTAMP:20300101T120000Z" in after.read_text(encoding="utf-8")

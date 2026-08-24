@@ -11,11 +11,12 @@ with Herren I and Herren II fixtures.
 import argparse
 import sqlite3
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import config
-from ics import _VTIMEZONE, _esc, _fold
+import db
+from ics import _VTIMEZONE, _esc, _fold, data_dtstamp
 
 OUTPUT_DIR = Path(__file__).parent / config.OUTPUT_DIR
 CUSTOM_EVENTS_DB = OUTPUT_DIR / "custom_events.db"
@@ -101,17 +102,7 @@ def _init_termine_db(path: str) -> sqlite3.Connection:
 
 
 def _upsert_game(conn: sqlite3.Connection, row: dict) -> None:
-    values = [row.get(c) for c in _GAME_COLS]
-    placeholders = ", ".join("?" * len(_GAME_COLS))
-    col_list = ", ".join(_GAME_COLS)
-    update_cols = [c for c in _GAME_COLS if c not in ("id", "first_seen")]
-    update_clause = ", ".join(f"{c} = excluded.{c}" for c in update_cols)
-    update_clause += ", last_updated = CURRENT_TIMESTAMP"
-    conn.execute(
-        f"INSERT INTO games ({col_list}) VALUES ({placeholders}) "
-        f"ON CONFLICT(id) DO UPDATE SET {update_clause}",
-        values,
-    )
+    conn.execute(db.build_game_upsert_sql(), [row.get(c) for c in _GAME_COLS])
 
 
 def _sync_custom_events(termine_conn: sqlite3.Connection) -> None:
@@ -277,8 +268,8 @@ def write_termine_ics(output_dir: Path) -> int:
     termine_path = output_dir / "sgw_termine.db"
     ics_path = output_dir.parent / "sgw_termine.ics"
 
-    dtstamp = datetime.now(tz=UTC).strftime("%Y%m%dT%H%M%SZ")
     conn = sqlite3.connect(str(termine_path))
+    dtstamp = data_dtstamp(conn)
     conn.row_factory = sqlite3.Row
 
     game_rows = conn.execute("SELECT * FROM games ORDER BY game_date, game_time").fetchall()

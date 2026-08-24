@@ -56,6 +56,32 @@ END:DAYLIGHT\r
 END:VTIMEZONE"""
 
 
+
+def data_dtstamp(conn: sqlite3.Connection) -> str:
+    """DTSTAMP derived from the data, not from the clock.
+
+    RFC 5545 defines DTSTAMP as the moment the calendar information was last
+    revised. Using wall-clock time would rewrite every VEVENT on every run, so
+    the scheduled job would commit an identical calendar twice a day forever.
+    Deriving it from the newest row makes output byte-stable until data changes.
+    """
+    stamps = []
+    for table, column in (("games", "last_updated"), ("custom_events", "added_at")):
+        try:
+            row = conn.execute(f"SELECT MAX({column}) FROM {table}").fetchone()
+        except sqlite3.OperationalError:
+            continue  # table absent in this database
+        if row and row[0]:
+            stamps.append(str(row[0]))
+    if not stamps:
+        return datetime.now(tz=UTC).strftime("%Y%m%dT%H%M%SZ")
+    newest = max(stamps)
+    try:
+        dt = datetime.strptime(newest[:19], "%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        return datetime.now(tz=UTC).strftime("%Y%m%dT%H%M%SZ")
+    return dt.strftime("%Y%m%dT%H%M%SZ")
+
 def _build_vevent(row: dict, dtstamp: str) -> str:
     uid       = f"{row['id']}@sgw-essen.local"
     home      = row["home_team"] or ""
@@ -142,10 +168,9 @@ def write_ics(db_path: str, ics_path: str, calendar_name: str = "SGW Essen") -> 
     """Return number of events written."""
     Path(ics_path).parent.mkdir(parents=True, exist_ok=True)
 
-    dtstamp = datetime.now(tz=UTC).strftime("%Y%m%dT%H%M%SZ")
-
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
+    dtstamp = data_dtstamp(conn)
     rows = conn.execute(
         "SELECT * FROM games ORDER BY game_date, game_time"
     ).fetchall()

@@ -127,27 +127,40 @@ def init_db(path: str) -> sqlite3.Connection:
     return conn
 
 
-def upsert_game(conn: sqlite3.Connection, game: dict) -> None:
-    values = [game.get(c) for c in _GAME_COLS]
-    placeholders = ", ".join("?" * len(_GAME_COLS))
-    col_list = ", ".join(_GAME_COLS)
-    # Skip first_seen and id in the UPDATE clause — first_seen is append-only
+def build_game_upsert_sql(table: str = "games") -> str:
+    """Upsert that neither loses data nor churns timestamps.
+
+    Two rules, both learned the hard way:
+
+    * A club-page stub carries no venue, referees or scores while a detail-page
+      row does, so an empty incoming value never overwrites a stored one.
+    * The UPDATE is skipped entirely when nothing would change, because
+      last_updated drives DTSTAMP — bumping it on a no-op rewrites every
+      calendar entry and makes the scheduler commit identical files forever.
+    """
     update_cols = [c for c in _GAME_COLS if c not in ("id", "first_seen")]
-    # A club-page stub carries no venue, referees or scores, while a detail-page
-    # row does. Overwriting a stored value with NULL/'' would throw away data the
-    # detail fetch already paid for — and drop the fixture out of the calendar
-    # when the DSV strips a date after re-grading a game. Empty never wins.
-    update_clause = ", ".join(
-        f"{c} = CASE WHEN excluded.{c} IS NULL OR excluded.{c} = '' "
-        f"THEN games.{c} ELSE excluded.{c} END"
-        for c in update_cols
+
+    def effective(col: str) -> str:
+        return (f"CASE WHEN excluded.{col} IS NULL OR excluded.{col} = '' "
+                f"THEN {table}.{col} ELSE excluded.{col} END")
+
+    set_clause = ", ".join(f"{c} = {effective(c)}" for c in update_cols)
+    set_clause += ", last_updated = CURRENT_TIMESTAMP"
+    where_clause = " OR ".join(f"{table}.{c} IS NOT {effective(c)}" for c in update_cols)
+
+    col_list = ", ".join(_GAME_COLS)
+    placeholders = ", ".join("?" * len(_GAME_COLS))
+    return (
+        f"INSERT INTO {table} ({col_list}) VALUES ({placeholders}) "
+        f"ON CONFLICT(id) DO UPDATE SET {set_clause} WHERE {where_clause}"
     )
-    update_clause += ", last_updated = CURRENT_TIMESTAMP"
-    sql = (
-        f"INSERT INTO games ({col_list}) VALUES ({placeholders}) "
-        f"ON CONFLICT(id) DO UPDATE SET {update_clause}"
-    )
-    conn.execute(sql, values)
+
+
+_GAME_UPSERT_SQL = build_game_upsert_sql()
+
+
+def upsert_game(conn: sqlite3.Connection, game: dict) -> None:
+    conn.execute(_GAME_UPSERT_SQL, [game.get(c) for c in _GAME_COLS])
     conn.commit()
 
 

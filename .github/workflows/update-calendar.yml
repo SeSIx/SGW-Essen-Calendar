@@ -29,6 +29,17 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      # The SQLite files are not in version control, so without this cache every
+      # run would refetch all ~75 throttled detail pages instead of the handful
+      # that actually changed.
+      - name: Restore scraped data
+        uses: actions/cache@v4
+        with:
+          path: output
+          key: dsv-data-${{ github.run_id }}
+          restore-keys: |
+            dsv-data-
+
       - name: Scrape DSV and rebuild calendars
         id: scrape
         run: |

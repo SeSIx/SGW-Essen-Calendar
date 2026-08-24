@@ -45,7 +45,9 @@ FULL = {
     "venue_address": "Scheppmannskamp 6, 45357 Essen",
     "referee_1": "Mustermann", "protocol_url": "https://dsvdaten.dsv.de/protocol/1",
 }
-STUB = {k: GAME[k] for k in GAME}  # what the club page alone provides
+# What the club page alone provides for the same fixture: no venue, no referees,
+# no protocol link — but it agrees with the detail page on status and score.
+STUB = {**GAME, "status": "played", "home_score": 21, "away_score": 10}
 
 
 def test_stub_upsert_must_not_erase_detail_data(tmp_path):
@@ -88,6 +90,35 @@ def test_zero_score_is_a_real_value_not_an_empty_one(tmp_path):
     """A 10:0 forfeit must survive; 0 is data, not absence."""
     conn = db.init_db(str(tmp_path / "t.db"))
     db.upsert_game(conn, {**FULL, "home_score": 10, "away_score": 0})
-    db.upsert_game(conn, STUB)
+    db.upsert_game(conn, {**GAME, "status": "played"})  # stub carries no score at all
     conn.commit()
     assert conn.execute("SELECT home_score, away_score FROM games").fetchone() == (10, 0)
+
+
+def test_unchanged_upsert_does_not_touch_last_updated(tmp_path):
+    """last_updated drives DTSTAMP. Bumping it on a no-op rewrites every calendar
+    entry and makes the scheduled job commit an identical file twice a day."""
+    conn = db.init_db(str(tmp_path / "t.db"))
+    db.upsert_game(conn, FULL)
+    conn.commit()
+    before = conn.execute("SELECT last_updated FROM games").fetchone()[0]
+
+    conn.execute("UPDATE games SET last_updated = '2020-01-01 00:00:00'")
+    conn.commit()
+    db.upsert_game(conn, FULL)   # identical payload
+    db.upsert_game(conn, STUB)   # club-page view: same facts, fewer fields
+    conn.commit()
+
+    after = conn.execute("SELECT last_updated FROM games").fetchone()[0]
+    assert after == "2020-01-01 00:00:00", f"no-op upsert bumped last_updated to {after}"
+    assert before is not None
+
+
+def test_changed_upsert_does_touch_last_updated(tmp_path):
+    conn = db.init_db(str(tmp_path / "t.db"))
+    db.upsert_game(conn, FULL)
+    conn.execute("UPDATE games SET last_updated = '2020-01-01 00:00:00'")
+    conn.commit()
+    db.upsert_game(conn, {**FULL, "home_score": 99})
+    conn.commit()
+    assert conn.execute("SELECT last_updated FROM games").fetchone()[0] != "2020-01-01 00:00:00"
