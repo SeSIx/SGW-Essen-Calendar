@@ -37,3 +37,57 @@ def test_slug_separates_teams_and_age_groups():
         ("Ruhrgebietsliga weiblich", "sgw_essen_damen"),
     ]:
         assert db.slug_for_team("SG Wasserball Essen", comp) == expected
+
+
+FULL = {
+    **GAME, "status": "played", "home_score": 21, "away_score": 10,
+    "venue": 'Freibad Dellwig "Hesse"',
+    "venue_address": "Scheppmannskamp 6, 45357 Essen",
+    "referee_1": "Mustermann", "protocol_url": "https://dsvdaten.dsv.de/protocol/1",
+}
+STUB = {k: GAME[k] for k in GAME}  # what the club page alone provides
+
+
+def test_stub_upsert_must_not_erase_detail_data(tmp_path):
+    """The club page carries no venue or referees. Re-upserting a stub after a
+    detail fetch must not wipe what the detail page already delivered."""
+    conn = db.init_db(str(tmp_path / "t.db"))
+    db.upsert_game(conn, FULL)
+    db.upsert_game(conn, STUB)
+    conn.commit()
+    row = conn.execute(
+        "SELECT venue, venue_address, referee_1, home_score, away_score, protocol_url "
+        "FROM games WHERE id = ?", (GAME["id"],)
+    ).fetchone()
+    assert row == ('Freibad Dellwig "Hesse"', "Scheppmannskamp 6, 45357 Essen",
+                   "Mustermann", 21, 10, "https://dsvdaten.dsv.de/protocol/1")
+
+
+def test_a_date_removed_upstream_does_not_empty_the_calendar_entry(tmp_path):
+    """DSV drops the date when it re-grades a fixture. Keeping the last known
+    date keeps the entry in subscribers' calendars instead of silently deleting it."""
+    conn = db.init_db(str(tmp_path / "t.db"))
+    db.upsert_game(conn, {**GAME, "game_date": "2026-06-28", "game_time": "20:00"})
+    db.upsert_game(conn, {**GAME, "game_date": "", "game_time": ""})
+    conn.commit()
+    assert conn.execute("SELECT game_date, game_time FROM games").fetchone() == ("2026-06-28", "20:00")
+
+
+def test_real_updates_still_apply(tmp_path):
+    """Preserving old values must not freeze the record: any non-empty value wins."""
+    conn = db.init_db(str(tmp_path / "t.db"))
+    db.upsert_game(conn, FULL)
+    db.upsert_game(conn, {**FULL, "game_time": "18:45", "venue": "Sportbad Thurmfeld",
+                          "home_score": 22})
+    conn.commit()
+    row = conn.execute("SELECT game_time, venue, home_score FROM games").fetchone()
+    assert row == ("18:45", "Sportbad Thurmfeld", 22)
+
+
+def test_zero_score_is_a_real_value_not_an_empty_one(tmp_path):
+    """A 10:0 forfeit must survive; 0 is data, not absence."""
+    conn = db.init_db(str(tmp_path / "t.db"))
+    db.upsert_game(conn, {**FULL, "home_score": 10, "away_score": 0})
+    db.upsert_game(conn, STUB)
+    conn.commit()
+    assert conn.execute("SELECT home_score, away_score FROM games").fetchone() == (10, 0)

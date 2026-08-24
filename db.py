@@ -133,7 +133,15 @@ def upsert_game(conn: sqlite3.Connection, game: dict) -> None:
     col_list = ", ".join(_GAME_COLS)
     # Skip first_seen and id in the UPDATE clause — first_seen is append-only
     update_cols = [c for c in _GAME_COLS if c not in ("id", "first_seen")]
-    update_clause = ", ".join(f"{c} = excluded.{c}" for c in update_cols)
+    # A club-page stub carries no venue, referees or scores, while a detail-page
+    # row does. Overwriting a stored value with NULL/'' would throw away data the
+    # detail fetch already paid for — and drop the fixture out of the calendar
+    # when the DSV strips a date after re-grading a game. Empty never wins.
+    update_clause = ", ".join(
+        f"{c} = CASE WHEN excluded.{c} IS NULL OR excluded.{c} = '' "
+        f"THEN games.{c} ELSE excluded.{c} END"
+        for c in update_cols
+    )
     update_clause += ", last_updated = CURRENT_TIMESTAMP"
     sql = (
         f"INSERT INTO games ({col_list}) VALUES ({placeholders}) "
