@@ -10,20 +10,22 @@ automatisch aus dem DSV-Portal geholt und als Kalender-Abo bereitgestellt.
 Die URL als **Abo** eintragen (nicht als Import) — dann aktualisiert sich der
 Kalender von selbst, sobald sich Ansetzungen ändern oder Ergebnisse feststehen.
 
-> Genau die `raw.githubusercontent.com`-Adresse verwenden. Die kürzere Variante
-> `github.com/…/raw/…` antwortet mit einer Weiterleitung, der Kalender-Apps
-> nicht folgen — Google Calendar meldet dann „Kalender konnte nicht hinzugefügt
-> werden".
+> Es sind bewusst GitHub-Pages-Adressen. Die Dateien direkt aus dem Repository
+> zu laden funktioniert nicht: `github.com/…/raw/…` antwortet mit einer
+> Weiterleitung, der Kalender-Apps nicht folgen, und `raw.githubusercontent.com`
+> liefert `text/plain` plus `nosniff` — damit darf keine App die Datei als
+> Kalender interpretieren. Google Calendar lehnt beides ab. Pages liefert
+> `.ics` korrekt als `text/calendar` aus.
 
 | Kalender | URL |
 |---|---|
-| **Herren I + II** (Standard) | `https://raw.githubusercontent.com/SeSIx/SGW-Essen-Calendar/main/sgw_termine.ics` |
-| Herren I | `https://raw.githubusercontent.com/SeSIx/SGW-Essen-Calendar/main/sgw_essen_herren_1.ics` |
-| Herren II | `https://raw.githubusercontent.com/SeSIx/SGW-Essen-Calendar/main/sgw_essen_herren_2.ics` |
-| Damen | `https://raw.githubusercontent.com/SeSIx/SGW-Essen-Calendar/main/sgw_essen_damen.ics` |
-| U16 | `https://raw.githubusercontent.com/SeSIx/SGW-Essen-Calendar/main/sgw_essen_u16.ics` |
-| U14 | `https://raw.githubusercontent.com/SeSIx/SGW-Essen-Calendar/main/sgw_essen_u14.ics` |
-| U12 | `https://raw.githubusercontent.com/SeSIx/SGW-Essen-Calendar/main/sgw_essen_u12.ics` |
+| **Herren I + II** (Standard) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_termine.ics` |
+| Herren I | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_1.ics` |
+| Herren II | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_2.ics` |
+| Damen | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_damen.ics` |
+| U16 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u16.ics` |
+| U14 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u14.ics` |
+| U12 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u12.ics` |
 
 Im Standard-Kalender stehen zusätzlich die Vereinstermine (Mannschaftsbesprechung,
 Trainingsstart, Kampfrichter-Ausbildung), die es in den DSV-Daten nicht gibt.

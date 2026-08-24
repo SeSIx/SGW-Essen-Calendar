@@ -15,19 +15,22 @@ iCalendar feeds. Runs unattended on GitHub Actions twice a day.
 Add one of these URLs to any calendar app as a *subscription* (not an import), and
 new fixtures, venue changes and results appear automatically.
 
-> Use the `raw.githubusercontent.com` form exactly as shown. The prettier
-> `github.com/…/raw/…` variant answers with a 302 redirect, and calendar clients
-> — Google Calendar among them — do not follow it, so the subscription fails.
+> These are GitHub Pages URLs, and that is deliberate. Serving the same files
+> straight from the repository does not work: `github.com/…/raw/…` answers with
+> a 302 that calendar clients refuse to follow, and `raw.githubusercontent.com`
+> answers `text/plain` together with `X-Content-Type-Options: nosniff`, which
+> forbids clients from treating it as a calendar. Google Calendar rejects both.
+> Pages serves `.ics` as `text/calendar`.
 
 | Calendar | URL |
 |---|---|
-| **Men I + II** (default) | `https://raw.githubusercontent.com/SeSIx/SGW-Essen-Calendar/main/sgw_termine.ics` |
-| Men I | `https://raw.githubusercontent.com/SeSIx/SGW-Essen-Calendar/main/sgw_essen_herren_1.ics` |
-| Men II | `https://raw.githubusercontent.com/SeSIx/SGW-Essen-Calendar/main/sgw_essen_herren_2.ics` |
-| Women | `https://raw.githubusercontent.com/SeSIx/SGW-Essen-Calendar/main/sgw_essen_damen.ics` |
-| U16 | `https://raw.githubusercontent.com/SeSIx/SGW-Essen-Calendar/main/sgw_essen_u16.ics` |
-| U14 | `https://raw.githubusercontent.com/SeSIx/SGW-Essen-Calendar/main/sgw_essen_u14.ics` |
-| U12 | `https://raw.githubusercontent.com/SeSIx/SGW-Essen-Calendar/main/sgw_essen_u12.ics` |
+| **Men I + II** (default) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_termine.ics` |
+| Men I | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_1.ics` |
+| Men II | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_2.ics` |
+| Women | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_damen.ics` |
+| U16 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u16.ics` |
+| U14 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u14.ics` |
+| U12 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u12.ics` |
 
 The default feed also carries club dates (team meetings, training start, referee
 courses) that exist nowhere in the DSV data.

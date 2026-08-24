@@ -110,9 +110,17 @@ visible to the automation.
 ### Generated calendars are committed
 
 `.ics` files are build artefacts, and committing build artefacts is usually wrong.
-Here it is the delivery mechanism: subscribers point their calendar apps at the raw
-GitHub URL, so the file in the repository *is* the product. Databases stay out of
-version control — they are rebuildable from the DSV at any time.
+Here it is the delivery mechanism: the file in the repository *is* the product.
+Databases stay out of version control — they are rebuildable from the DSV at any
+time.
+
+Delivery goes through GitHub Pages rather than the repository URLs, because
+neither repository URL is usable by a calendar client: `github.com/…/raw/…`
+answers with a 302 that clients do not follow, and `raw.githubusercontent.com`
+answers `text/plain` alongside `X-Content-Type-Options: nosniff`, which
+explicitly forbids reinterpreting it as a calendar. Pages serves `.ics` as
+`text/calendar`, so Pages is the published interface and every push to `main`
+redeploys it.
 
 ## Testing
 
