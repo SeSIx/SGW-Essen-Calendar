@@ -30,8 +30,8 @@ DTSTART;TZID=Europe/Berlin:20260214T150000
 DTEND;TZID=Europe/Berlin:20260214T163000
 LOCATION:Sportbad Thurmfeld\, Reckhammerweg 84\, 45141 Essen
 DESCRIPTION:Wettbewerb: U16 Ruhrgebietsliga mixed\nErgebnis: 10:17\nSchieds
- richter: Wiechers\, Christoph\nDetails: https://dsvdaten.dsv.de/Modules/WB/
- Game.aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=8
+ richter: Wiechers\, Christoph\nDetails: https://dsvdaten.dsv.de/Modules/WB
+ /Game.aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=8
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=362&G
  roup=&LeagueKind=L&GameID=8
 END:VEVENT
@@ -45,8 +45,8 @@ DTSTART;TZID=Europe/Berlin:20260221T173000
 DTEND;TZID=Europe/Berlin:20260221T190000
 LOCATION:AquaPark Oberhausen\, Heinz-Schleußer-Str. 1\, 46047 Oberhausen
 DESCRIPTION:Wettbewerb: U16 Ruhrgebietsliga mixed\nErgebnis: 4:30\nSchiedsr
- ichter: Hümmelink\, Phil\nDetails: https://dsvdaten.dsv.de/Modules/WB/Game
- .aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=1
+ ichter: Hümmelink\, Phil\nDetails: https://dsvdaten.dsv.de/Modules/WB/Gam
+ e.aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=1
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=362&G
  roup=&LeagueKind=L&GameID=1
 END:VEVENT
@@ -60,8 +60,8 @@ DTSTART;TZID=Europe/Berlin:20260228T153000
 DTEND;TZID=Europe/Berlin:20260228T170000
 LOCATION:Hallenbad Schermbeck\, Weseler Straße 11\, 46514 Schermbeck
 DESCRIPTION:Wettbewerb: U16 Ruhrgebietsliga mixed\nErgebnis: geplant\nSchie
- dsrichter: Rosenke\, Axel\nDetails: https://dsvdaten.dsv.de/Modules/WB/Game
- .aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=4
+ dsrichter: Rosenke\, Axel\nDetails: https://dsvdaten.dsv.de/Modules/WB/Gam
+ e.aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=4
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=362&G
  roup=&LeagueKind=L&GameID=4
 END:VEVENT
@@ -74,8 +74,8 @@ DTSTART;TZID=Europe/Berlin:20260314T174500
 DTEND;TZID=Europe/Berlin:20260314T191500
 LOCATION:Schwimmstadion\, Margaretenstraße 11\, 47051 Duisburg
 DESCRIPTION:Wettbewerb: U16 Ruhrgebietsliga mixed\nErgebnis: 15:11\nSchieds
- richter: Depenbrock\, Hans-Jürgen\nDetails: https://dsvdaten.dsv.de/Module
- s/WB/Game.aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=9
+ richter: Depenbrock\, Hans-Jürgen\nDetails: https://dsvdaten.dsv.de/Modul
+ es/WB/Game.aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=9
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=362&G
  roup=&LeagueKind=L&GameID=9
 END:VEVENT
@@ -89,8 +89,8 @@ DTSTART;TZID=Europe/Berlin:20260426T150000
 DTEND;TZID=Europe/Berlin:20260426T163000
 LOCATION:Sportbad Thurmfeld\, Reckhammerweg 84\, 45141 Essen
 DESCRIPTION:Wettbewerb: U16 Ruhrgebietsliga mixed\nErgebnis: 21:3\nSchiedsr
- ichter: Niewind\, Holger\nDetails: https://dsvdaten.dsv.de/Modules/WB/Game.
- aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=7
+ ichter: Niewind\, Holger\nDetails: https://dsvdaten.dsv.de/Modules/WB/Game
+ .aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=7
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=362&G
  roup=&LeagueKind=L&GameID=7
 END:VEVENT
@@ -104,8 +104,8 @@ DTSTART;TZID=Europe/Berlin:20260703T200000
 DTEND;TZID=Europe/Berlin:20260703T213000
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: U16 Ruhrgebietsliga mixed\nErgebnis: 9:5\nSchiedsri
- chter: Drobina\, Sladjan\nDetails: https://dsvdaten.dsv.de/Modules/WB/Game.
- aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=6
+ chter: Drobina\, Sladjan\nDetails: https://dsvdaten.dsv.de/Modules/WB/Game
+ .aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=6
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=362&G
  roup=&LeagueKind=L&GameID=6
 END:VEVENT

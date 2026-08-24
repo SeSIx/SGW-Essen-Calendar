@@ -169,3 +169,25 @@ def test_file_is_rewritten_when_the_fixture_itself_changes(tmp_path):
     ics.write_ics(str(db_path), str(out))
     assert out.read_bytes() != first
     assert "DTSTART;TZID=Europe/Berlin:20260903T180000" in out.read_text(encoding="utf-8")
+
+
+def test_no_line_exceeds_the_75_octet_limit(written):
+    """RFC 5545 §3.1 counts octets including the leading space of a folded
+    continuation line. Strict parsers reject longer lines outright."""
+    _, path = written
+    for i, line in enumerate(path.read_bytes().split(b"\r\n"), start=1):
+        assert len(line) <= 75, f"line {i} is {len(line)} octets: {line[:50]!r}"
+
+
+def test_folding_round_trips_including_umlauts():
+    value = "DESCRIPTION:" + "Schiedsrichter: Müller, Jürgen / Weiß, Kätchen. " * 4
+    folded = ics._fold(value)
+    for line in folded.encode("utf-8").split(b"\r\n"):
+        assert len(line) <= 75, f"{len(line)} octets: {line[:40]!r}"
+    assert folded.replace("\r\n ", "") == value, "unfolding must restore the original"
+
+
+def test_folding_never_splits_a_multibyte_character():
+    folded = ics._fold("SUMMARY:" + "ä" * 120)
+    for line in folded.encode("utf-8").split(b"\r\n"):
+        line.decode("utf-8")  # raises if a character was cut in half

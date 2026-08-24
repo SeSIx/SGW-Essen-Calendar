@@ -31,9 +31,9 @@ DTSTART;TZID=Europe/Berlin:20260119T202000
 DTEND;TZID=Europe/Berlin:20260119T215000
 LOCATION:Schwimmleistungszentrum Essen\, von-Einem-Straße 77\, 45130 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 21:10\nSchieds
- richter: Clausmeyer\, Florian / Dillig\, Ralf\nDetails: https://dsvdaten.ds
- v.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&Game
- ID=49
+ richter: Clausmeyer\, Florian / Dillig\, Ralf\nDetails: https://dsvdaten.d
+ sv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&Ga
+ meID=49
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
  roup=&LeagueKind=L&GameID=49
 END:VEVENT
@@ -47,9 +47,9 @@ DTSTART;TZID=Europe/Berlin:20260201T143000
 DTEND;TZID=Europe/Berlin:20260201T160000
 LOCATION:Schwimmstadion\, Margaretenstraße 11\, 47051 Duisburg
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 8:15\nSchiedsr
- ichter: Depenbrock\, Hans-Jürgen / Malorny\, Christian\nDetails: https://d
- svdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueK
- ind=L&GameID=68
+ ichter: Depenbrock\, Hans-Jürgen / Malorny\, Christian\nDetails: https://
+ dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&Leagu
+ eKind=L&GameID=68
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
  roup=&LeagueKind=L&GameID=68
 END:VEVENT
@@ -63,8 +63,9 @@ DTSTART;TZID=Europe/Berlin:20260312T204500
 DTEND;TZID=Europe/Berlin:20260312T221500
 LOCATION:Hallenbad Süd\, An den Sportstätten 2\, 45468 Mülheim (Ruhr)
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 10:11\nSchieds
- richter: Dillig\, Ralf / Rosenke\, Axel\nDetails: https://dsvdaten.dsv.de/M
- odules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&GameID=21
+ richter: Dillig\, Ralf / Rosenke\, Axel\nDetails: https://dsvdaten.dsv.de/
+ Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&GameID=2
+ 1
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
  roup=&LeagueKind=L&GameID=21
 END:VEVENT
@@ -78,9 +79,9 @@ DTSTART;TZID=Europe/Berlin:20260314T190000
 DTEND;TZID=Europe/Berlin:20260314T203000
 LOCATION:AquaPark Oberhausen\, Heinz-Schleußer-Str. 1\, 46047 Oberhausen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 14:23\nSchieds
- richter: Malorny\, Christian / Gomes\, Joel\nDetails: https://dsvdaten.dsv.
- de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&GameID
- =36
+ richter: Malorny\, Christian / Gomes\, Joel\nDetails: https://dsvdaten.dsv
+ .de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&Game
+ ID=36
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
  roup=&LeagueKind=L&GameID=36
 END:VEVENT
@@ -94,9 +95,9 @@ DTSTART;TZID=Europe/Berlin:20260506T200000
 DTEND;TZID=Europe/Berlin:20260506T213000
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 27:0\nSchiedsr
- ichter: Clausmeyer\, Florian / Hinkler\, Wolfgang\nDetails: https://dsvdate
- n.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&
- GameID=50
+ ichter: Clausmeyer\, Florian / Hinkler\, Wolfgang\nDetails: https://dsvdat
+ en.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=
+ L&GameID=50
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
  roup=&LeagueKind=L&GameID=50
 END:VEVENT
@@ -110,9 +111,9 @@ DTSTART;TZID=Europe/Berlin:20260509T173000
 DTEND;TZID=Europe/Berlin:20260509T190000
 LOCATION:AquaPark Oberhausen\, Heinz-Schleußer-Str. 1\, 46047 Oberhausen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 13:15\nSchieds
- richter: Talaga\, Ralf / Theis\, Christian\nDetails: https://dsvdaten.dsv.d
- e/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&GameID=
- 31
+ richter: Talaga\, Ralf / Theis\, Christian\nDetails: https://dsvdaten.dsv.
+ de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&GameI
+ D=31
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
  roup=&LeagueKind=L&GameID=31
 END:VEVENT
@@ -126,9 +127,9 @@ DTSTART;TZID=Europe/Berlin:20260520T200000
 DTEND;TZID=Europe/Berlin:20260520T213000
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 12:14\nSchieds
- richter: Blattau\, Rainer / Hinkler\, Wolfgang\nDetails: https://dsvdaten.d
- sv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&Gam
- eID=51
+ richter: Blattau\, Rainer / Hinkler\, Wolfgang\nDetails: https://dsvdaten.
+ dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&G
+ ameID=51
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
  roup=&LeagueKind=L&GameID=51
 END:VEVENT
@@ -142,9 +143,9 @@ DTSTART;TZID=Europe/Berlin:20260527T200000
 DTEND;TZID=Europe/Berlin:20260527T213000
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 10:8\nSchiedsr
- ichter: Herrschaft\, Charlotte / Hinkler\, Wolfgang\nDetails: https://dsvda
- ten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=
- L&GameID=52
+ ichter: Herrschaft\, Charlotte / Hinkler\, Wolfgang\nDetails: https://dsvd
+ aten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKin
+ d=L&GameID=52
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
  roup=&LeagueKind=L&GameID=52
 END:VEVENT
@@ -158,9 +159,9 @@ DTSTART;TZID=Europe/Berlin:20260610T200000
 DTEND;TZID=Europe/Berlin:20260610T213000
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 0:10\nSchiedsr
- ichter: Arntzen\, Mirko / Wiechers\, Christoph\nDetails: https://dsvdaten.d
- sv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&Gam
- eID=53
+ ichter: Arntzen\, Mirko / Wiechers\, Christoph\nDetails: https://dsvdaten.
+ dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&G
+ ameID=53
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
  roup=&LeagueKind=L&GameID=53
 END:VEVENT
@@ -175,8 +176,9 @@ DTEND;TZID=Europe/Berlin:20260612T214500
 LOCATION:Allwetterbad Walsum\, Scholte-Rahm-Straße 21\, 47178 Duisburg Wal
  sum
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 8:14\nSchiedsr
- ichter: Petrov\, Michael / Dillig\, Ralf\nDetails: https://dsvdaten.dsv.de/
- Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&GameID=48
+ ichter: Petrov\, Michael / Dillig\, Ralf\nDetails: https://dsvdaten.dsv.de
+ /Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&GameID=
+ 48
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
  roup=&LeagueKind=L&GameID=48
 END:VEVENT
@@ -190,9 +192,9 @@ DTSTART;TZID=Europe/Berlin:20260621T143000
 DTEND;TZID=Europe/Berlin:20260621T160000
 LOCATION:Schwimmstadion\, Margaretenstraße 11\, 47051 Duisburg
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 15:16\nSchieds
- richter: Kleinefeldt\, Maximilian / Clausmeyer\, Florian\nDetails: https://
- dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&League
- Kind=L&GameID=14
+ richter: Kleinefeldt\, Maximilian / Clausmeyer\, Florian\nDetails: https:/
+ /dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&Leag
+ ueKind=L&GameID=14
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
  roup=&LeagueKind=L&GameID=14
 END:VEVENT
@@ -206,9 +208,9 @@ DTSTART;TZID=Europe/Berlin:20260622T203000
 DTEND;TZID=Europe/Berlin:20260622T220000
 LOCATION:Freibad Kevelaer\, Dondertstraße 25\, 47623 Kevelaer
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 14:17\nSchieds
- richter: Rosenke\, Axel / Hinkler\, Wolfgang\nDetails: https://dsvdaten.dsv
- .de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&GameI
- D=65
+ richter: Rosenke\, Axel / Hinkler\, Wolfgang\nDetails: https://dsvdaten.ds
+ v.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&Gam
+ eID=65
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
  roup=&LeagueKind=L&GameID=65
 END:VEVENT
@@ -222,9 +224,9 @@ DTSTART;TZID=Europe/Berlin:20260628T143000
 DTEND;TZID=Europe/Berlin:20260628T160000
 LOCATION:Hallenbad Schermbeck\, Weseler Straße 11\, 46514 Schermbeck
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 6:24\nSchiedsr
- ichter: Depenbrock\, Hans-Jürgen / Wiechers\, Christoph\nDetails: https://
- dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&League
- Kind=L&GameID=7
+ ichter: Depenbrock\, Hans-Jürgen / Wiechers\, Christoph\nDetails: https:/
+ /dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&Leag
+ ueKind=L&GameID=7
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
  roup=&LeagueKind=L&GameID=7
 END:VEVENT
@@ -238,9 +240,9 @@ DTSTART;TZID=Europe/Berlin:20260705T200000
 DTEND;TZID=Europe/Berlin:20260705T213000
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 19:8\nSchiedsr
- ichter: Hümmelink\, Phil / Dillig\, Ralf\nDetails: https://dsvdaten.dsv.de
- /Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&GameID=5
- 4
+ ichter: Hümmelink\, Phil / Dillig\, Ralf\nDetails: https://dsvdaten.dsv.d
+ e/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&GameID
+ =54
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
  roup=&LeagueKind=L&GameID=54
 END:VEVENT
@@ -254,9 +256,9 @@ DTSTART;TZID=Europe/Berlin:20260708T200000
 DTEND;TZID=Europe/Berlin:20260708T213000
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 19:13\nSchieds
- richter: Talaga\, Ralf / Wiechers\, Christoph\nDetails: https://dsvdaten.ds
- v.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&Game
- ID=55
+ richter: Talaga\, Ralf / Wiechers\, Christoph\nDetails: https://dsvdaten.d
+ sv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&Ga
+ meID=55
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
  roup=&LeagueKind=L&GameID=55
 END:VEVENT
@@ -270,9 +272,9 @@ DTSTART;TZID=Europe/Berlin:20260712T200000
 DTEND;TZID=Europe/Berlin:20260712T213000
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 18:10\nSchieds
- richter: Hinkler\, Wolfgang / Blattau\, Rainer\nDetails: https://dsvdaten.d
- sv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&Gam
- eID=56
+ richter: Hinkler\, Wolfgang / Blattau\, Rainer\nDetails: https://dsvdaten.
+ dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&G
+ ameID=56
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
  roup=&LeagueKind=L&GameID=56
 END:VEVENT
@@ -286,8 +288,8 @@ DTSTART;TZID=Europe/Berlin:20260921T203000
 DTEND;TZID=Europe/Berlin:20260921T220000
 LOCATION:Hallenbad Schermbeck\, Weseler Straße 11\, 46514 Schermbeck
 DESCRIPTION:Wettbewerb: Pokalrunde Ruhrgebiet männlich\nErgebnis: geplant\
- nDetails: https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID
- =250&Group=&LeagueKind=C&GameID=4
+ nDetails: https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueI
+ D=250&Group=&LeagueKind=C&GameID=4
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=250&G
  roup=&LeagueKind=C&GameID=4
 END:VEVENT

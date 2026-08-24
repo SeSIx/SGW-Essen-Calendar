@@ -10,18 +10,30 @@ from pathlib import Path
 # We fold on octets (UTF-8 encoded), not characters.
 # ---------------------------------------------------------------------------
 def _fold(s: str) -> str:
+    """Fold a content line so no output line exceeds 75 octets.
+
+    The limit counts the leading SPACE that marks a continuation, so folded
+    chunks after the first may only carry 74 octets. Splitting is done on the
+    UTF-8 encoding and never inside a multi-byte character.
+    """
     encoded = s.encode("utf-8")
     if len(encoded) <= 75:
         return s
-    lines = []
-    while len(encoded) > 75:
-        # Find safe split point (don't break a multi-byte char)
-        cut = 75
-        while (encoded[cut] & 0xC0) == 0x80:  # continuation byte
+
+    def take(buf: bytes, limit: int) -> tuple[bytes, bytes]:
+        """Split off at most `limit` octets without cutting a character in half."""
+        if len(buf) <= limit:
+            return buf, b""
+        cut = limit
+        while cut > 0 and (buf[cut] & 0xC0) == 0x80:   # landed on a continuation byte
             cut -= 1
-        lines.append(encoded[:cut].decode("utf-8"))
-        encoded = encoded[cut:]
-    lines.append(encoded.decode("utf-8"))
+        return buf[:cut], buf[cut:]
+
+    head, rest = take(encoded, 75)
+    lines = [head.decode("utf-8")]
+    while rest:
+        chunk, rest = take(rest, 74)   # 74 + the leading SPACE = 75 octets
+        lines.append(chunk.decode("utf-8"))
     return "\r\n ".join(lines)
 
 

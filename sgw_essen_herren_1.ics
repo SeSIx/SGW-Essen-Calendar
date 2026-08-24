@@ -31,9 +31,9 @@ DTSTART;TZID=Europe/Berlin:20251116T153000
 DTEND;TZID=Europe/Berlin:20251116T170000
 LOCATION:Sportbad Thurmfeld\, Reckhammerweg 84\, 45141 Essen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe B männlich\nErgebnis: 22
- :8\nSchiedsrichter: Schlieckmann\, Carsten / Banse\, Pascal\nDetails: https
- ://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=B&Le
- agueKind=L&GameID=3
+ :8\nSchiedsrichter: Schlieckmann\, Carsten / Banse\, Pascal\nDetails: http
+ s://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=B&
+ LeagueKind=L&GameID=3
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
  roup=B&LeagueKind=L&GameID=3
 END:VEVENT
@@ -47,9 +47,9 @@ DTSTART;TZID=Europe/Berlin:20251207T153000
 DTEND;TZID=Europe/Berlin:20251207T170000
 LOCATION:Sportbad Thurmfeld\, Reckhammerweg 84\, 45141 Essen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe B männlich\nErgebnis: 18
- :6\nSchiedsrichter: Allendorf\, Stefan / Gebauer\, Roland\nDetails: https:/
- /dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=B&Leag
- ueKind=L&GameID=28
+ :6\nSchiedsrichter: Allendorf\, Stefan / Gebauer\, Roland\nDetails: https:
+ //dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=B&Le
+ agueKind=L&GameID=28
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
  roup=B&LeagueKind=L&GameID=28
 END:VEVENT
@@ -63,9 +63,9 @@ DTSTART;TZID=Europe/Berlin:20251209T203000
 DTEND;TZID=Europe/Berlin:20251209T220000
 LOCATION:Sportbad Klingenhalle\, Kotterstraße\, 42655 Solingen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe B männlich\nErgebnis: 17
- :15\nSchiedsrichter: Schilling\, Viktor / Niewind\, Holger\nDetails: https:
- //dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=B&Lea
- gueKind=L&GameID=8
+ :15\nSchiedsrichter: Schilling\, Viktor / Niewind\, Holger\nDetails: https
+ ://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=B&L
+ eagueKind=L&GameID=8
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
  roup=B&LeagueKind=L&GameID=8
 END:VEVENT
@@ -79,8 +79,8 @@ DTSTART;TZID=Europe/Berlin:20260114T203000
 DTEND;TZID=Europe/Berlin:20260114T220000
 LOCATION:Sportbad Thurmfeld\, Reckhammerweg 84\, 45141 Essen
 DESCRIPTION:Wettbewerb: NRW Pokal männlich\nErgebnis: 10:0\nSchiedsrichter
- : Arntzen\, Mirko / Rzepka\, Sebastian\nDetails: https://dsvdaten.dsv.de/Mo
- dules/WB/Game.aspx?Season=2025&LeagueID=132&Group=&LeagueKind=C&GameID=10
+ : Arntzen\, Mirko / Rzepka\, Sebastian\nDetails: https://dsvdaten.dsv.de/M
+ odules/WB/Game.aspx?Season=2025&LeagueID=132&Group=&LeagueKind=C&GameID=10
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=132&G
  roup=&LeagueKind=C&GameID=10
 END:VEVENT
@@ -94,9 +94,9 @@ DTSTART;TZID=Europe/Berlin:20260117T170000
 DTEND;TZID=Europe/Berlin:20260117T183000
 LOCATION:Sportbad Thurmfeld\, Reckhammerweg 84\, 45141 Essen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe B männlich\nErgebnis: 10
- :0\nSchiedsrichter: Kuhn\, Uwe / Clausmeyer\, Florian\nDetails: https://dsv
- daten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=B&LeagueKi
- nd=L&GameID=12
+ :0\nSchiedsrichter: Kuhn\, Uwe / Clausmeyer\, Florian\nDetails: https://ds
+ vdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=B&League
+ Kind=L&GameID=12
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
  roup=B&LeagueKind=L&GameID=12
 END:VEVENT
@@ -110,9 +110,9 @@ DTSTART;TZID=Europe/Berlin:20260129T202000
 DTEND;TZID=Europe/Berlin:20260129T215000
 LOCATION:Schwimmleistungszentrum Essen\, von-Einem-Straße 77\, 45130 Essen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe B männlich\nErgebnis: 25
- :9\nSchiedsrichter: Kleiner\, Felix / Arntzen\, Mirko\nDetails: https://dsv
- daten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=B&LeagueKi
- nd=L&GameID=15
+ :9\nSchiedsrichter: Kleiner\, Felix / Arntzen\, Mirko\nDetails: https://ds
+ vdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=B&League
+ Kind=L&GameID=15
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
  roup=B&LeagueKind=L&GameID=15
 END:VEVENT
@@ -126,9 +126,9 @@ DTSTART;TZID=Europe/Berlin:20260214T170000
 DTEND;TZID=Europe/Berlin:20260214T183000
 LOCATION:Sportbad Thurmfeld\, Reckhammerweg 84\, 45141 Essen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe B männlich\nErgebnis: 12
- :6\nSchiedsrichter: Schlieckmann\, Tobias / Wagner\, Jesse\nDetails: https:
- //dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=B&Lea
- gueKind=L&GameID=17
+ :6\nSchiedsrichter: Schlieckmann\, Tobias / Wagner\, Jesse\nDetails: https
+ ://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=B&L
+ eagueKind=L&GameID=17
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
  roup=B&LeagueKind=L&GameID=17
 END:VEVENT
@@ -142,9 +142,9 @@ DTSTART;TZID=Europe/Berlin:20260221T173000
 DTEND;TZID=Europe/Berlin:20260221T190000
 LOCATION:Hallenbad Toeppersee\, Bergheimerstr. 101\, 47239 Duisburg
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe B männlich\nErgebnis: 10
- :26\nSchiedsrichter: Homolka\, Erwin / Ueberdick\, Jens\nDetails: https://d
- svdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=B&League
- Kind=L&GameID=20
+ :26\nSchiedsrichter: Homolka\, Erwin / Ueberdick\, Jens\nDetails: https://
+ dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=B&Leag
+ ueKind=L&GameID=20
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
  roup=B&LeagueKind=L&GameID=20
 END:VEVENT
@@ -158,9 +158,9 @@ DTSTART;TZID=Europe/Berlin:20260227T203000
 DTEND;TZID=Europe/Berlin:20260227T220000
 LOCATION:Leistungszentrum Köln\, Guths-Muths-Weg 1\, 50933 Köln
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe B männlich\nErgebnis: 12
- :16\nSchiedsrichter: Ueberdick\, Thorsten / Schmidt\, Georg\nDetails: https
- ://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=B&Le
- agueKind=L&GameID=24
+ :16\nSchiedsrichter: Ueberdick\, Thorsten / Schmidt\, Georg\nDetails: http
+ s://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=B&
+ LeagueKind=L&GameID=24
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
  roup=B&LeagueKind=L&GameID=24
 END:VEVENT
@@ -174,8 +174,8 @@ DTSTART;TZID=Europe/Berlin:20260303T203000
 DTEND;TZID=Europe/Berlin:20260303T220000
 LOCATION:Seilerseebad\, Seeuferstraße 26\, 58638 Iserlohn
 DESCRIPTION:Wettbewerb: NRW Pokal männlich\nErgebnis: 12:23\nSchiedsrichte
- r: Möller\, Lukas / Reek\, Roman\nDetails: https://dsvdaten.dsv.de/Modules
- /WB/Game.aspx?Season=2025&LeagueID=132&Group=&LeagueKind=C&GameID=22
+ r: Möller\, Lukas / Reek\, Roman\nDetails: https://dsvdaten.dsv.de/Module
+ s/WB/Game.aspx?Season=2025&LeagueID=132&Group=&LeagueKind=C&GameID=22
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=132&G
  roup=&LeagueKind=C&GameID=22
 END:VEVENT
@@ -189,9 +189,9 @@ DTSTART;TZID=Europe/Berlin:20260315T200000
 DTEND;TZID=Europe/Berlin:20260315T213000
 LOCATION:Hallenbad Kevelaer\, Hüls 13\, 47623 Kevelaer
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe B männlich\nErgebnis: 10
- :23\nSchiedsrichter: Peifer\, Carsten / Wiechers\, Christoph\nDetails: http
- s://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=B&L
- eagueKind=L&GameID=27
+ :23\nSchiedsrichter: Peifer\, Carsten / Wiechers\, Christoph\nDetails: htt
+ ps://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=B
+ &LeagueKind=L&GameID=27
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
  roup=B&LeagueKind=L&GameID=27
 END:VEVENT
@@ -205,9 +205,9 @@ DTSTART;TZID=Europe/Berlin:20260323T203000
 DTEND;TZID=Europe/Berlin:20260323T220000
 LOCATION:Unibad Bochum\, Hustadtring 157\, 44801 Bochum-Querenburg
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe B männlich\nErgebnis: 8:
- 23\nSchiedsrichter: Gal\, Benedikt / Pawelzik\, Bernd\nDetails: https://dsv
- daten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=B&LeagueKi
- nd=L&GameID=4
+ 23\nSchiedsrichter: Gal\, Benedikt / Pawelzik\, Bernd\nDetails: https://ds
+ vdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=B&League
+ Kind=L&GameID=4
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
  roup=B&LeagueKind=L&GameID=4
 END:VEVENT
@@ -220,8 +220,9 @@ DTSTART;TZID=Europe/Berlin:20260420T202000
 DTEND;TZID=Europe/Berlin:20260420T215000
 LOCATION:Schwimmleistungszentrum Essen\, von-Einem-Straße 77\, 45130 Essen
 DESCRIPTION:Wettbewerb: NRW Pokal männlich\nErgebnis: 16:25\nSchiedsrichte
- r: Schilling\, Viktor / Arntzen\, Mirko\nDetails: https://dsvdaten.dsv.de/M
- odules/WB/Game.aspx?Season=2025&LeagueID=132&Group=&LeagueKind=C&GameID=28
+ r: Schilling\, Viktor / Arntzen\, Mirko\nDetails: https://dsvdaten.dsv.de/
+ Modules/WB/Game.aspx?Season=2025&LeagueID=132&Group=&LeagueKind=C&GameID=2
+ 8
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=132&G
  roup=&LeagueKind=C&GameID=28
 END:VEVENT
@@ -235,9 +236,9 @@ DTSTART;TZID=Europe/Berlin:20260421T203000
 DTEND;TZID=Europe/Berlin:20260421T220000
 LOCATION:Fildekenbad\, Rheinstr. 6\, 46395 Bocholt
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe C männlich\nErgebnis: 11
- :17\nSchiedsrichter: Petrov\, Michael / Dillig\, Ralf\nDetails: https://dsv
- daten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=C&LeagueKi
- nd=L&GameID=1
+ :17\nSchiedsrichter: Petrov\, Michael / Dillig\, Ralf\nDetails: https://ds
+ vdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=C&League
+ Kind=L&GameID=1
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
  roup=C&LeagueKind=L&GameID=1
 END:VEVENT
@@ -251,9 +252,9 @@ DTSTART;TZID=Europe/Berlin:20260507T200000
 DTEND;TZID=Europe/Berlin:20260507T213000
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe C männlich\nErgebnis: 27
- :16\nSchiedsrichter: Opacic\, Dragan / Arntzen\, Mirko\nDetails: https://ds
- vdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=C&LeagueK
- ind=L&GameID=21
+ :16\nSchiedsrichter: Opacic\, Dragan / Arntzen\, Mirko\nDetails: https://d
+ svdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=C&Leagu
+ eKind=L&GameID=21
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
  roup=C&LeagueKind=L&GameID=21
 END:VEVENT
@@ -267,9 +268,9 @@ DTSTART;TZID=Europe/Berlin:20260513T203000
 DTEND;TZID=Europe/Berlin:20260513T220000
 LOCATION:Lippebad Lünen\, Konrad-Adenauer-Str. 28\, 44534 Lünen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe C männlich\nErgebnis: 11
- :13\nSchiedsrichter: Hiltmann\, Andreas / Kassing\, Michael\nDetails: https
- ://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=C&Le
- agueKind=L&GameID=17
+ :13\nSchiedsrichter: Hiltmann\, Andreas / Kassing\, Michael\nDetails: http
+ s://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=C&
+ LeagueKind=L&GameID=17
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
  roup=C&LeagueKind=L&GameID=17
 END:VEVENT
@@ -283,9 +284,9 @@ DTSTART;TZID=Europe/Berlin:20260521T200000
 DTEND;TZID=Europe/Berlin:20260521T213000
 LOCATION:Wersepark Sudmühle\, Dyckburgstraße 486\, 48157 Münster
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe C männlich\nErgebnis: 10
- :12\nSchiedsrichter: Reek\, Roman / Schlieckmann\, Carsten\nDetails: https:
- //dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=C&Lea
- gueKind=L&GameID=7
+ :12\nSchiedsrichter: Reek\, Roman / Schlieckmann\, Carsten\nDetails: https
+ ://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=C&L
+ eagueKind=L&GameID=7
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
  roup=C&LeagueKind=L&GameID=7
 END:VEVENT
@@ -299,9 +300,9 @@ DTSTART;TZID=Europe/Berlin:20260526T201500
 DTEND;TZID=Europe/Berlin:20260526T214500
 LOCATION:Alfred-Panke-Bad\, Bendahler Str. 136\, 42285 Wuppertal
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe C männlich\nErgebnis: 12
- :16\nSchiedsrichter: Knillmann\, Svenja / Hiltmann\, Andreas\nDetails: http
- s://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=C&L
- eagueKind=L&GameID=28
+ :16\nSchiedsrichter: Knillmann\, Svenja / Hiltmann\, Andreas\nDetails: htt
+ ps://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=C
+ &LeagueKind=L&GameID=28
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
  roup=C&LeagueKind=L&GameID=28
 END:VEVENT
@@ -315,9 +316,9 @@ DTSTART;TZID=Europe/Berlin:20260607T200000
 DTEND;TZID=Europe/Berlin:20260607T213000
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe C männlich\nErgebnis: 17
- :11\nSchiedsrichter: Clausmeyer\, Florian / Güner\, Berk Kemal\nDetails: h
- ttps://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=
- C&LeagueKind=L&GameID=22
+ :11\nSchiedsrichter: Clausmeyer\, Florian / Güner\, Berk Kemal\nDetails: 
+ https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Grou
+ p=C&LeagueKind=L&GameID=22
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
  roup=C&LeagueKind=L&GameID=22
 END:VEVENT
@@ -331,9 +332,9 @@ DTSTART;TZID=Europe/Berlin:20260615T200000
 DTEND;TZID=Europe/Berlin:20260615T213000
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe C männlich\nErgebnis: 20
- :12\nSchiedsrichter: Knillmann\, Svenja / Zoche\, Florian\nDetails: https:/
- /dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=C&Leag
- ueKind=L&GameID=23
+ :12\nSchiedsrichter: Knillmann\, Svenja / Zoche\, Florian\nDetails: https:
+ //dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=C&Le
+ agueKind=L&GameID=23
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
  roup=C&LeagueKind=L&GameID=23
 END:VEVENT
@@ -347,9 +348,9 @@ DTSTART;TZID=Europe/Berlin:20260701T200000
 DTEND;TZID=Europe/Berlin:20260701T213000
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe C männlich\nErgebnis: 34
- :12\nSchiedsrichter: Banse\, Pascal / Knillmann\, Svenja\nDetails: https://
- dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=C&Leagu
- eKind=L&GameID=25
+ :12\nSchiedsrichter: Banse\, Pascal / Knillmann\, Svenja\nDetails: https:/
+ /dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=C&Lea
+ gueKind=L&GameID=25
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
  roup=C&LeagueKind=L&GameID=25
 END:VEVENT
@@ -363,9 +364,9 @@ DTSTART;TZID=Europe/Berlin:20260706T193000
 DTEND;TZID=Europe/Berlin:20260706T210000
 LOCATION:Freibad Kruppsee\, Bachstraße 2\, 47229 Duisburg-Rheinhausen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe C männlich\nErgebnis: 10
- :18\nSchiedsrichter: Ueberdick\, Jens / Braun\, Sebastian\nDetails: https:/
- /dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=C&Leag
- ueKind=L&GameID=15
+ :18\nSchiedsrichter: Ueberdick\, Jens / Braun\, Sebastian\nDetails: https:
+ //dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&Group=C&Le
+ agueKind=L&GameID=15
 URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=197&G
  roup=C&LeagueKind=L&GameID=15
 END:VEVENT

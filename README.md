@@ -13,7 +13,9 @@ iCalendar feeds. Runs unattended on GitHub Actions twice a day.
 ## Subscribe
 
 Add one of these URLs to any calendar app as a *subscription* (not an import), and
-new fixtures, venue changes and results appear automatically.
+new fixtures, venue changes and results appear automatically. In Google Calendar
+this only works in the web interface — the Android app has no "from URL" option,
+but picks up whatever was subscribed on the web.
 
 > These are GitHub Pages URLs, and that is deliberate. Serving the same files
 > straight from the repository does not work: `github.com/…/raw/…` answers with

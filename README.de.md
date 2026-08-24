@@ -32,7 +32,11 @@ Trainingsstart, Kampfrichter-Ausbildung), die es in den DSV-Daten nicht gibt.
 
 ### So geht's
 
-- **Android:** Google Kalender → ☰ → Einstellungen → Kalender hinzufügen → Über URL
+- **Google Kalender:** nur am Rechner im Browser — in der Android-App gibt es
+  diese Funktion nicht. [calendar.google.com](https://calendar.google.com) →
+  Zahnrad → Einstellungen → *Kalender hinzufügen* → *Per URL* → URL einfügen →
+  *Kalender hinzufügen*. Auf dem Handy taucht er danach von selbst auf; falls
+  nicht, in der App unter Einstellungen den Haken bei dem Kalender setzen.
 - **iPhone/iPad:** Einstellungen → Apps → Kalender → Accounts → Account hinzufügen →
   Andere → Kalenderabo hinzufügen
 - **Outlook:** Kalender → Kalender hinzufügen → Aus dem Internet
