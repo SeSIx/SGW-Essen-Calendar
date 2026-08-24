@@ -41,7 +41,7 @@ Termine, die nicht vom DSV kommen, werden lokal gepflegt und landen im
 Standard-Kalender:
 
 ```bash
-python combine.py --add-event    # interaktiv anlegen
+python combine.py --add-event    # interaktiv anlegen (schreibt custom_events.json)
 python combine.py --list-events  # alle anzeigen
 python combine.py                # Kalender neu bauen
 ```

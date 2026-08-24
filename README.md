@@ -74,7 +74,7 @@ Python 3.12 · requests · BeautifulSoup/lxml · SQLite · pytest · ruff · Git
 | `scraper.py` | HTTP + HTML parsing for the DSV portal |
 | `db.py` | SQLite schema, non-destructive upserts, health queries |
 | `ics.py` | RFC 5545 calendar generation per team |
-| `combine.py` | Default calendar (Men I + II) plus manually added club dates |
+| `combine.py` | Default calendar (Men I + II) plus club dates from `custom_events.json` |
 | `config.py` | URLs, club id, season arithmetic |
 | `tests/` | Offline suite driven by captured DSV HTML |
 | `.github/workflows/` | Test, scrape and live-smoke automation |

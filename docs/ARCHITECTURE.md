@@ -23,7 +23,7 @@ flowchart TD
         MERGE["sgw_termine.ics<br/>Men I + II + club dates"]
     end
 
-    CUSTOM[("custom_events.db<br/>club dates, hand-maintained")]
+    CUSTOM[("custom_events.json<br/>club dates, version-controlled")]
     SUBS["Calendar apps<br/>subscribed by raw URL"]
 
     DSV --> CLUB --> PARSE --> H1 & H2 & REST
@@ -96,6 +96,16 @@ calendar entries, upcoming games and undated games, and exits `2` when no team h
 a single upcoming fixture. The scheduled workflow turns that into a GitHub issue,
 and a nightly live test against the real DSV catches HTML changes before the next
 scheduled run publishes a broken calendar.
+
+### Club dates are version-controlled, databases are not
+
+Dates that exist nowhere in the DSV data — team meetings, training start, referee
+courses — live in `custom_events.json` at the repository root. They used to live
+in a SQLite file under the gitignored `output/` directory, which worked as long as
+the calendar was built on the one machine that had it. The first scheduled run on
+a clean runner could not see the file and silently republished the calendar
+without those four entries. Anything the automation must preserve has to be
+visible to the automation.
 
 ### Generated calendars are committed
 

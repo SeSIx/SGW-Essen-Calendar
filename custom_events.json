@@ -1,0 +1,42 @@
+[
+  {
+    "id": "e7548548-4818-4bda-ac36-20f8bf0fc1e9",
+    "title": "Mannschaftsbesprechung",
+    "start_date": "2026-09-03",
+    "start_time": "19:30",
+    "end_date": null,
+    "end_time": "21:30",
+    "location": "Freibad Dellwig \"Hesse\", Scheppmannskamp 6, 45357 Essen",
+    "description": "Mannschaftsbesprechung zum Saisonstart"
+  },
+  {
+    "id": "c5a7f6fb-7448-4b99-a5c1-382cb642584f",
+    "title": "Trainingsstart — Eingewöhnung",
+    "start_date": "2026-09-07",
+    "start_time": null,
+    "end_date": null,
+    "end_time": null,
+    "location": null,
+    "description": "Beginn der Eingewöhnungswoche"
+  },
+  {
+    "id": "e5d0dc6e-449c-4078-81f7-53e611eae34a",
+    "title": "Kampfrichter-Ausbildung",
+    "start_date": "2026-09-12",
+    "start_time": "09:00",
+    "end_date": null,
+    "end_time": "13:00",
+    "location": null,
+    "description": "Ort steht noch aus"
+  },
+  {
+    "id": "9155eb15-13ee-4c8b-b9e8-a6fd06172eca",
+    "title": "Training 100%",
+    "start_date": "2026-09-14",
+    "start_time": null,
+    "end_date": null,
+    "end_time": null,
+    "location": null,
+    "description": "Ab jetzt volles Trainingsprogramm"
+  }
+]

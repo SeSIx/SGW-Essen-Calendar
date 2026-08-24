@@ -9,6 +9,7 @@ with Herren I and Herren II fixtures.
 """
 
 import argparse
+import json
 import sqlite3
 import uuid
 from datetime import datetime, timedelta
@@ -19,7 +20,11 @@ import db
 from ics import _VTIMEZONE, _esc, _fold, data_dtstamp
 
 OUTPUT_DIR = Path(__file__).parent / config.OUTPUT_DIR
-CUSTOM_EVENTS_DB = OUTPUT_DIR / "custom_events.db"
+# Club dates live in a tracked JSON file, not in the gitignored databases:
+# the scheduled job rebuilds calendars on a fresh runner, and anything it cannot
+# see there it silently deletes from the published calendar.
+CUSTOM_EVENTS_JSON = Path(__file__).parent / "custom_events.json"
+LEGACY_CUSTOM_EVENTS_DB = OUTPUT_DIR / "custom_events.db"
 
 # Source DBs that feed into sgw_termine
 SOURCE_SLUGS = ("sgw_essen_herren_1", "sgw_essen_herren_2")
@@ -85,12 +90,28 @@ _GAME_COLS = (
 )
 
 
-def _init_custom_events_db() -> sqlite3.Connection:
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(str(CUSTOM_EVENTS_DB))
-    conn.executescript(_CUSTOM_EVENTS_SCHEMA)
-    conn.commit()
-    return conn
+def load_custom_events() -> list[dict]:
+    """Read club dates, migrating a legacy custom_events.db on first use."""
+    if CUSTOM_EVENTS_JSON.exists():
+        return json.loads(CUSTOM_EVENTS_JSON.read_text(encoding="utf-8"))
+
+    if LEGACY_CUSTOM_EVENTS_DB.exists():
+        legacy = sqlite3.connect(str(LEGACY_CUSTOM_EVENTS_DB))
+        legacy.row_factory = sqlite3.Row
+        rows = [dict(r) for r in legacy.execute("SELECT * FROM events ORDER BY start_date")]
+        legacy.close()
+        for row in rows:
+            row.pop("added_at", None)
+        save_custom_events(rows)
+        return rows
+
+    return []
+
+
+def save_custom_events(events: list[dict]) -> None:
+    events = sorted(events, key=lambda e: (e["start_date"], e.get("start_time") or ""))
+    CUSTOM_EVENTS_JSON.write_text(
+        json.dumps(events, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
 def _init_termine_db(path: str) -> sqlite3.Connection:
@@ -106,25 +127,20 @@ def _upsert_game(conn: sqlite3.Connection, row: dict) -> None:
 
 
 def _sync_custom_events(termine_conn: sqlite3.Connection) -> None:
-    if not CUSTOM_EVENTS_DB.exists():
-        return
-    src = sqlite3.connect(str(CUSTOM_EVENTS_DB))
-    src.row_factory = sqlite3.Row
-    rows = src.execute("SELECT * FROM events").fetchall()
-    src.close()
-    for r in rows:
-        r = dict(r)
+    for event in load_custom_events():
         termine_conn.execute(
             "INSERT INTO custom_events (id, title, start_date, start_time, "
-            "end_date, end_time, location, description, added_at) "
+            "end_date, end_time, location, description) "
             "VALUES (:id, :title, :start_date, :start_time, "
-            ":end_date, :end_time, :location, :description, :added_at) "
+            ":end_date, :end_time, :location, :description) "
             "ON CONFLICT(id) DO UPDATE SET "
             "title=excluded.title, start_date=excluded.start_date, "
             "start_time=excluded.start_time, end_date=excluded.end_date, "
             "end_time=excluded.end_time, location=excluded.location, "
             "description=excluded.description",
-            r,
+            {k: event.get(k) for k in
+             ("id", "title", "start_date", "start_time", "end_date",
+              "end_time", "location", "description")},
         )
 
 
@@ -306,45 +322,39 @@ def write_termine_ics(output_dir: Path) -> int:
 # ---------------------------------------------------------------------------
 
 def cmd_add_event() -> None:
-    conn = _init_custom_events_db()
     print("Add custom event (Ctrl+C to cancel)\n")
     title = input("Title: ").strip()
     if not title:
         print("Title required.")
         return
     start_date = input("Start date (yyyy-mm-dd): ").strip()
-    start_time = input("Start time (HH:MM, or blank for all-day): ").strip() or None
-    end_date = input(f"End date (yyyy-mm-dd, or blank = {start_date}): ").strip() or None
-    end_time = input("End time (HH:MM, or blank): ").strip() or None
-    location = input("Location (or blank): ").strip() or None
-    description = input("Description (or blank): ").strip() or None
-
-    event_id = str(uuid.uuid4())
-    conn.execute(
-        "INSERT INTO events (id, title, start_date, start_time, end_date, end_time, location, description) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        (event_id, title, start_date, start_time, end_date, end_time, location, description),
-    )
-    conn.commit()
-    conn.close()
-    print(f"[Combine] Added custom event '{title}' ({event_id})")
+    event = {
+        "id": str(uuid.uuid4()),
+        "title": title,
+        "start_date": start_date,
+        "start_time": input("Start time (HH:MM, or blank for all-day): ").strip() or None,
+        "end_date": input(f"End date (yyyy-mm-dd, or blank = {start_date}): ").strip() or None,
+        "end_time": input("End time (HH:MM, or blank): ").strip() or None,
+        "location": input("Location (or blank): ").strip() or None,
+        "description": input("Description (or blank): ").strip() or None,
+    }
+    events = load_custom_events()
+    events.append(event)
+    save_custom_events(events)
+    print(f"[Combine] Added '{title}' to {CUSTOM_EVENTS_JSON.name} — "
+          f"run combine.py, then commit the file and the calendar.")
 
 
 def cmd_list_events() -> None:
-    if not CUSTOM_EVENTS_DB.exists():
-        print("[Combine] No custom events yet.")
-        return
-    conn = sqlite3.connect(str(CUSTOM_EVENTS_DB))
-    conn.row_factory = sqlite3.Row
-    rows = conn.execute("SELECT * FROM events ORDER BY start_date, start_time").fetchall()
-    conn.close()
-    if not rows:
+    events = load_custom_events()
+    if not events:
         print("[Combine] No custom events.")
         return
-    print(f"\n{'ID':<36}  {'Title':<30}  {'Date':<12}  Location")
-    print("-" * 90)
-    for r in rows:
-        print(f"{r['id']:<36}  {r['title']:<30}  {r['start_date']:<12}  {r['location'] or ''}")
+    print(f"\n{'Date':<12}  {'Time':<10}  {'Title':<32}  Location")
+    print("-" * 92)
+    for e in events:
+        print(f"{e['start_date']:<12}  {(e.get('start_time') or 'all-day'):<10}  "
+              f"{e['title'][:32]:<32}  {e.get('location') or ''}")
     print()
 
 
