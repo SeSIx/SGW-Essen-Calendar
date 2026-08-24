@@ -191,3 +191,14 @@ def test_folding_never_splits_a_multibyte_character():
     folded = ics._fold("SUMMARY:" + "ä" * 120)
     for line in folded.encode("utf-8").split(b"\r\n"):
         line.decode("utf-8")  # raises if a character was cut in half
+
+
+def test_calendar_header_carries_the_compatibility_hints(written):
+    """X-WR-TIMEZONE and X-WR-CALDESC are not in RFC 5545, but clients that
+    ignore VTIMEZONE fall back to them. The legacy calendars this project
+    replaced carried both, so keep them for the clients that relied on it."""
+    _, path = written
+    text = path.read_text(encoding="utf-8")
+    assert "X-WR-TIMEZONE:Europe/Berlin" in text
+    assert "X-WR-CALNAME:" in text
+    assert "X-WR-CALDESC:" in text

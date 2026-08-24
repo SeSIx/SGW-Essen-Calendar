@@ -2,6 +2,8 @@ BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//SGW Essen//sgw_scraper//DE
 X-WR-CALNAME:SGW Essen — sgw_essen_u14
+X-WR-CALDESC:Spiele der SG Wasserball Essen\, Daten vom DSV
+X-WR-TIMEZONE:Europe/Berlin
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VTIMEZONE

@@ -306,6 +306,9 @@ def write_termine_ics(output_dir: Path) -> int:
         "VERSION:2.0",
         "PRODID:-//SGW Essen//sgw_scraper//DE",
         _fold(f"X-WR-CALNAME:{_esc('SGW Essen — Termine')}"),
+        # Not RFC 5545, but clients that ignore VTIMEZONE fall back to these.
+        _fold(f"X-WR-CALDESC:{_esc('Spiele und Vereinstermine der SG Wasserball Essen')}"),
+        "X-WR-TIMEZONE:Europe/Berlin",
         "CALSCALE:GREGORIAN",
         "METHOD:PUBLISH",
         _VTIMEZONE,
