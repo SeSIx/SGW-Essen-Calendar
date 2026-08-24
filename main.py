@@ -22,13 +22,6 @@ OUTPUT_DIR = Path(__file__).parent / config.OUTPUT_DIR
 
 ESSEN_SUBSTR = "wasserball essen"
 
-# Columns main.py is responsible for populating from the detail page
-_DETAIL_COLS = {
-    "venue", "venue_address", "google_maps_url",
-    "referee_1", "referee_2",
-    "home_score", "away_score",
-    "game_number", "protocol_url",
-}
 _GAME_COLS_SET = set(db._GAME_COLS)
 
 

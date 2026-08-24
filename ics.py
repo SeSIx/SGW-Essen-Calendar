@@ -57,6 +57,28 @@ END:VTIMEZONE"""
 
 
 
+
+def write_if_changed(path: str, content: str) -> bool:
+    """Write only when something other than DTSTAMP differs. Returns True if written.
+
+    DTSTAMP is derived from the database's last_updated, and a laptop and a CI
+    runner keep separate databases — so the same fixtures yield different stamps
+    on each machine. Rewriting on that alone makes the two churn against each
+    other in git, which is the noise this whole mechanism exists to avoid.
+    """
+    target = Path(path)
+    new = content.encode("utf-8")
+    if target.exists():
+        def strip_stamps(raw: bytes) -> bytes:
+            return b"\r\n".join(
+                line for line in raw.split(b"\r\n") if not line.startswith(b"DTSTAMP:")
+            )
+        if strip_stamps(target.read_bytes()) == strip_stamps(new):
+            return False
+    target.write_bytes(new)
+    return True
+
+
 def data_dtstamp(conn: sqlite3.Connection) -> str:
     """DTSTAMP derived from the data, not from the clock.
 
@@ -190,5 +212,5 @@ def write_ics(db_path: str, ics_path: str, calendar_name: str = "SGW Essen") -> 
         "END:VCALENDAR",
     ]) + "\r\n"
 
-    Path(ics_path).write_bytes(cal.encode("utf-8"))
+    write_if_changed(ics_path, cal)
     return len(vevents)

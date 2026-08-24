@@ -128,3 +128,44 @@ def test_dtstamp_moves_when_the_data_changes(tmp_path):
     ics.write_ics(str(db_path), str(after))
     assert before.read_bytes() != after.read_bytes()
     assert "DTSTAMP:20300101T120000Z" in after.read_text(encoding="utf-8")
+
+
+def test_file_is_left_alone_when_only_the_timestamp_would_change(tmp_path):
+    """Local runs and CI runs keep separate databases, so their last_updated
+    values — and therefore DTSTAMP — differ even when the fixtures are identical.
+    Rewriting on that alone makes the two churn against each other in git."""
+    db_path = tmp_path / "t.db"
+    conn = db.init_db(str(db_path))
+    db.upsert_game(conn, GAME_TIMED)
+    conn.close()
+
+    out = tmp_path / "t.ics"
+    ics.write_ics(str(db_path), str(out))
+    first = out.read_bytes()
+
+    conn = sqlite3.connect(str(db_path))
+    conn.execute("UPDATE games SET last_updated = '2031-06-01 08:00:00'")
+    conn.commit()
+    conn.close()
+
+    ics.write_ics(str(db_path), str(out))
+    assert out.read_bytes() == first, "only DTSTAMP differed — the file must not be rewritten"
+
+
+def test_file_is_rewritten_when_the_fixture_itself_changes(tmp_path):
+    db_path = tmp_path / "t.db"
+    conn = db.init_db(str(db_path))
+    db.upsert_game(conn, GAME_TIMED)
+    conn.close()
+    out = tmp_path / "t.ics"
+    ics.write_ics(str(db_path), str(out))
+    first = out.read_bytes()
+
+    conn = sqlite3.connect(str(db_path))
+    conn.execute("UPDATE games SET game_time = '18:00' WHERE id = ?", (GAME_TIMED["id"],))
+    conn.commit()
+    conn.close()
+
+    ics.write_ics(str(db_path), str(out))
+    assert out.read_bytes() != first
+    assert "DTSTART;TZID=Europe/Berlin:20260903T180000" in out.read_text(encoding="utf-8")

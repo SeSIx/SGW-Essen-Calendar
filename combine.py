@@ -18,7 +18,7 @@ from pathlib import Path
 
 import config
 import db
-from ics import _VTIMEZONE, _esc, _fold, data_dtstamp
+from ics import _VTIMEZONE, _esc, _fold, data_dtstamp, write_if_changed
 
 OUTPUT_DIR = Path(__file__).parent / config.OUTPUT_DIR
 # Club dates live in a tracked JSON file, not in the gitignored databases:
@@ -313,7 +313,7 @@ def write_termine_ics(output_dir: Path) -> int:
         "END:VCALENDAR",
     ]) + "\r\n"
 
-    ics_path.write_bytes(cal.encode("utf-8"))
+    write_if_changed(str(ics_path), cal)
     print(f"[Combine] sgw_termine.ics: {len(vevents)} event(s) written to {ics_path}")
     return len(vevents)
 
