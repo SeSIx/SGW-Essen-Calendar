@@ -54,7 +54,7 @@ python main.py                 # scrape, rebuild every calendar, print a run rep
 python main.py --no-details    # fast pass: fixtures only, no detail pages
 python main.py --summary       # row counts from the existing databases
 python combine.py --add-event  # add a club date to the default calendar
-pytest                         # 50 offline tests, no network access
+pytest                         # 56 offline tests, no network access
 ruff check .
 ```
 
