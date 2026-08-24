@@ -38,8 +38,12 @@ output/*.db-shm
 output/*.db-wal
 output/*.ics
 
-# Keep combined calendar in version control so subscribers get updates
-# (sgw_termine.db and sgw_termine.ics are committed at repo root)
+# Databases are derived artefacts and never committed
+*.db
+*.db-shm
+*.db-wal
+
+# The .ics files at repo root ARE committed: subscribers fetch them by raw URL
 
 # Virtual env
 .venv/

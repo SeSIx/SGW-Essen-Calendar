@@ -11,11 +11,11 @@ with Herren I and Herren II fixtures.
 import argparse
 import sqlite3
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import config
-from ics import _fold, _esc, _VTIMEZONE
+from ics import _VTIMEZONE, _esc, _fold
 
 OUTPUT_DIR = Path(__file__).parent / config.OUTPUT_DIR
 CUSTOM_EVENTS_DB = OUTPUT_DIR / "custom_events.db"
@@ -277,7 +277,7 @@ def write_termine_ics(output_dir: Path) -> int:
     termine_path = output_dir / "sgw_termine.db"
     ics_path = output_dir.parent / "sgw_termine.ics"
 
-    dtstamp = datetime.now(tz=timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    dtstamp = datetime.now(tz=UTC).strftime("%Y%m%dT%H%M%SZ")
     conn = sqlite3.connect(str(termine_path))
     conn.row_factory = sqlite3.Row
 

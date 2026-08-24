@@ -1,8 +1,9 @@
 """ics.py — write a RFC 5545 VCALENDAR from a per-team SGW Essen SQLite DB."""
 
 import sqlite3
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
+
 
 # ---------------------------------------------------------------------------
 # RFC 5545 §3.1: lines MUST be ≤75 octets; fold with CRLF + single SPACE.
@@ -141,7 +142,7 @@ def write_ics(db_path: str, ics_path: str, calendar_name: str = "SGW Essen") -> 
     """Return number of events written."""
     Path(ics_path).parent.mkdir(parents=True, exist_ok=True)
 
-    dtstamp = datetime.now(tz=timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    dtstamp = datetime.now(tz=UTC).strftime("%Y%m%dT%H%M%SZ")
 
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
