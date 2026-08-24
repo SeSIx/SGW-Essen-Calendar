@@ -43,3 +43,4 @@ output/*.ics
 
 # Virtual env
 .venv/
+docs/superpowers/

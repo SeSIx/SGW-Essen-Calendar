@@ -11,13 +11,12 @@ import requests
 from bs4 import BeautifulSoup
 
 from config import (
-    CLUBS_URL,
     CLUB_ID,
-    SEASON_YEAR,
+    CLUBS_URL,
     RATE_LIMIT_RETRIES,
-    REQUEST_DELAY,
-    USER_AGENT,
     REFERER_HEADER,
+    SEASON_YEAR,
+    USER_AGENT,
 )
 
 # ---------------------------------------------------------------------------
@@ -177,10 +176,10 @@ def parse_games(html: str, season_year: str = SEASON_YEAR) -> list[dict]:
         if not gm:
             continue  # no GameID → cannot build ID, skip
 
-        s = sm.group(1) if sm else season_year
-        l = lm.group(1) if lm else "?"
-        grp = gpm.group(1) if gpm else ""
-        game_id = f"{s}_{l}_{grp}_{gm.group(1)}"
+        season_id = sm.group(1) if sm else season_year
+        league_id = lm.group(1) if lm else "?"
+        group_id = gpm.group(1) if gpm else ""
+        game_id = f"{season_id}_{league_id}_{group_id}_{gm.group(1)}"
 
         # Determine status and score from link text
         score_m = re.search(r"(\d+)\s*:\s*(\d+)", link_text)
@@ -203,7 +202,7 @@ def parse_games(html: str, season_year: str = SEASON_YEAR) -> list[dict]:
             "away_score": away_score,
             "status": status,
             "detail_url": detail_url,
-            "season": f"{s}/{int(s) + 1}",
+            "season": f"{season_id}/{int(season_id) + 1}",
         })
 
     print(f"[Scraper] Parsed {len(games)} games")
