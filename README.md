@@ -24,15 +24,17 @@ but picks up whatever was subscribed on the web.
 > forbids clients from treating it as a calendar. Google Calendar rejects both.
 > Pages serves `.ics` as `text/calendar`.
 
-| Calendar | URL |
+**One click** opens Google Calendar with a confirmation prompt:
+
+| Subscribe in Google | URL for any other client |
 |---|---|
-| **Men I + II** (default) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_termine.ics` |
-| Men I | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_1.ics` |
-| Men II | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_2.ics` |
-| Women | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_damen.ics` |
-| U16 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u16.ics` |
-| U14 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u14.ics` |
-| U12 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u12.ics` |
+| [**Men I + II** (default)](https://www.google.com/calendar/render?cid=webcal://sesix.github.io/SGW-Essen-Calendar/sgw_termine.ics) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_termine.ics` |
+| [Men I](https://www.google.com/calendar/render?cid=webcal://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_1.ics) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_1.ics` |
+| [Men II](https://www.google.com/calendar/render?cid=webcal://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_2.ics) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_2.ics` |
+| [Women](https://www.google.com/calendar/render?cid=webcal://sesix.github.io/SGW-Essen-Calendar/sgw_essen_damen.ics) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_damen.ics` |
+| [U16](https://www.google.com/calendar/render?cid=webcal://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u16.ics) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u16.ics` |
+| [U14](https://www.google.com/calendar/render?cid=webcal://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u14.ics) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u14.ics` |
+| [U12](https://www.google.com/calendar/render?cid=webcal://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u12.ics) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u12.ics` |
 
 The default feed also carries club dates (team meetings, training start, referee
 courses) that exist nowhere in the DSV data.

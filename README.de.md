@@ -17,15 +17,17 @@ Kalender von selbst, sobald sich Ansetzungen ändern oder Ergebnisse feststehen.
 > Kalender interpretieren. Google Calendar lehnt beides ab. Pages liefert
 > `.ics` korrekt als `text/calendar` aus.
 
-| Kalender | URL |
+**Ein Klick genügt** — der Link öffnet Google Kalender mit einer Nachfrage:
+
+| Direkt abonnieren | URL zum manuellen Eintragen |
 |---|---|
-| **Herren I + II** (Standard) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_termine.ics` |
-| Herren I | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_1.ics` |
-| Herren II | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_2.ics` |
-| Damen | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_damen.ics` |
-| U16 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u16.ics` |
-| U14 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u14.ics` |
-| U12 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u12.ics` |
+| [**Herren I + II** (Standard)](https://www.google.com/calendar/render?cid=webcal://sesix.github.io/SGW-Essen-Calendar/sgw_termine.ics) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_termine.ics` |
+| [Herren I](https://www.google.com/calendar/render?cid=webcal://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_1.ics) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_1.ics` |
+| [Herren II](https://www.google.com/calendar/render?cid=webcal://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_2.ics) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_2.ics` |
+| [Damen](https://www.google.com/calendar/render?cid=webcal://sesix.github.io/SGW-Essen-Calendar/sgw_essen_damen.ics) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_damen.ics` |
+| [U16](https://www.google.com/calendar/render?cid=webcal://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u16.ics) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u16.ics` |
+| [U14](https://www.google.com/calendar/render?cid=webcal://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u14.ics) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u14.ics` |
+| [U12](https://www.google.com/calendar/render?cid=webcal://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u12.ics) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u12.ics` |
 
 Im Standard-Kalender stehen zusätzlich die Vereinstermine (Mannschaftsbesprechung,
 Trainingsstart, Kampfrichter-Ausbildung), die es in den DSV-Daten nicht gibt.
