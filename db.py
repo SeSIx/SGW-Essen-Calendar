@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import date
 from pathlib import Path
 
 _SCHEMA = """
@@ -205,3 +206,55 @@ def slug_for_team(team_name: str, competition: str) -> str:
     else:
         suffix = "herren_1"
     return f"sgw_essen_{suffix}"
+
+
+# ---------------------------------------------------------------------------
+# Health / incremental-scrape helpers
+# ---------------------------------------------------------------------------
+
+def count_upcoming(conn: sqlite3.Connection, today: date | None = None) -> int:
+    """Number of fixtures on or after `today`. Zero means the calendar is dead."""
+    today = today or date.today()
+    row = conn.execute(
+        "SELECT COUNT(*) FROM games WHERE game_date IS NOT NULL "
+        "AND game_date <> '' AND game_date >= ?",
+        (today.isoformat(),),
+    ).fetchone()
+    return row[0]
+
+
+def undated_game_ids(conn: sqlite3.Connection) -> list[str]:
+    """Games the DSV listed without a date — they cannot become calendar entries."""
+    return [
+        r[0] for r in conn.execute(
+            "SELECT id FROM games WHERE game_date IS NULL OR game_date = ''"
+        )
+    ]
+
+
+def needs_detail(conn: sqlite3.Connection, game: dict, today: date | None = None) -> bool:
+    """Whether the expensive Game.aspx detail page still has to be fetched.
+
+    Detail pages cost one throttled request each, so a finished game whose venue
+    and result are already stored is never fetched again. Anything unfinished,
+    unknown or still upcoming is refetched, because DSV edits fixtures freely.
+    """
+    today = today or date.today()
+    row = conn.execute(
+        "SELECT status, home_score, away_score, venue, venue_address "
+        "FROM games WHERE id = ?",
+        (game.get("id"),),
+    ).fetchone()
+    if row is None:
+        return True
+
+    status, home_score, away_score, venue, venue_address = row
+    if not venue or not venue_address:
+        return True
+    if status == "played" and (home_score is None or away_score is None):
+        return True
+
+    game_date = game.get("game_date") or ""
+    if not game_date:
+        return True
+    return game_date >= today.isoformat()
