@@ -15,15 +15,19 @@ iCalendar feeds. Runs unattended on GitHub Actions twice a day.
 Add one of these URLs to any calendar app as a *subscription* (not an import), and
 new fixtures, venue changes and results appear automatically.
 
+> Use the `raw.githubusercontent.com` form exactly as shown. The prettier
+> `github.com/…/raw/…` variant answers with a 302 redirect, and calendar clients
+> — Google Calendar among them — do not follow it, so the subscription fails.
+
 | Calendar | URL |
 |---|---|
-| **Men I + II** (default) | `https://github.com/SeSIx/SGW-Essen-Calendar/raw/main/sgw_termine.ics` |
-| Men I | `https://github.com/SeSIx/SGW-Essen-Calendar/raw/main/sgw_essen_herren_1.ics` |
-| Men II | `https://github.com/SeSIx/SGW-Essen-Calendar/raw/main/sgw_essen_herren_2.ics` |
-| Women | `https://github.com/SeSIx/SGW-Essen-Calendar/raw/main/sgw_essen_damen.ics` |
-| U16 | `https://github.com/SeSIx/SGW-Essen-Calendar/raw/main/sgw_essen_u16.ics` |
-| U14 | `https://github.com/SeSIx/SGW-Essen-Calendar/raw/main/sgw_essen_u14.ics` |
-| U12 | `https://github.com/SeSIx/SGW-Essen-Calendar/raw/main/sgw_essen_u12.ics` |
+| **Men I + II** (default) | `https://raw.githubusercontent.com/SeSIx/SGW-Essen-Calendar/main/sgw_termine.ics` |
+| Men I | `https://raw.githubusercontent.com/SeSIx/SGW-Essen-Calendar/main/sgw_essen_herren_1.ics` |
+| Men II | `https://raw.githubusercontent.com/SeSIx/SGW-Essen-Calendar/main/sgw_essen_herren_2.ics` |
+| Women | `https://raw.githubusercontent.com/SeSIx/SGW-Essen-Calendar/main/sgw_essen_damen.ics` |
+| U16 | `https://raw.githubusercontent.com/SeSIx/SGW-Essen-Calendar/main/sgw_essen_u16.ics` |
+| U14 | `https://raw.githubusercontent.com/SeSIx/SGW-Essen-Calendar/main/sgw_essen_u14.ics` |
+| U12 | `https://raw.githubusercontent.com/SeSIx/SGW-Essen-Calendar/main/sgw_essen_u12.ics` |
 
 The default feed also carries club dates (team meetings, training start, referee
 courses) that exist nowhere in the DSV data.
