@@ -58,6 +58,9 @@ jobs:
             git commit -m "Auto-update: calendars $(date -u +'%Y-%m-%d %H:%M UTC')"
             git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
             git push origin "HEAD:${GITHUB_REF_NAME}"
+            # Subscribers from before the branch consolidation still poll the
+            # old sgw-scraper-rewrite URL; keep it pointing at the same commit.
+            git push origin "HEAD:refs/heads/sgw-scraper-rewrite"
           fi
 
       - name: Raise alarm

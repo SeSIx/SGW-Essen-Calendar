@@ -45,6 +45,22 @@ Neither `github.com/…/raw/…` (302) nor `raw.githubusercontent.com/…`
 Each entry carries the result once played, the full venue address, the referees,
 and a link back to the DSV match page.
 
+### Google Calendar currently rejects new subscriptions
+
+**As of 2026-08-25:** Google's `addcalendarfromurl` endpoint answers every
+subscription attempt with `HTTP 200 OK` and the empty payload
+`[["addcalendarfromurlaction.acfur"]]` — it reports success and creates nothing.
+
+This affects every new feed, not just this one: an unrelated third-party
+calendar was refused in the same account while feeds Google already knew were
+accepted, and existing subscriptions keep updating. The same behaviour was
+independently reported on 23/24 August 2026.
+
+Until Google fixes it, Apple Calendar, Outlook and Thunderbird subscribe to the
+feed without trouble, and
+[GAS-ICS-Sync](https://github.com/derekantrican/GAS-ICS-Sync) writes the events
+into a Google calendar via the API, bypassing the broken endpoint entirely.
+
 ## What it does
 
 The DSV publishes fixtures as paginated ASP.NET pages with no API. This project:

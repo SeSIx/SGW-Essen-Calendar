@@ -37,6 +37,27 @@ automatisch auf dem Handy.
 Account hinzufügen → Andere → Kalenderabo. Outlook → Kalender hinzufügen → Aus
 dem Internet. Apple Kalender am Mac → Ablage → Neues Kalenderabo.
 
+### Google Kalender nimmt derzeit keine neuen Abos an
+
+**Stand 25.08.2026:** Googles Endpunkt `addcalendarfromurl` antwortet auf jeden
+Abo-Versuch mit `HTTP 200 OK` und dem leeren Rumpf
+`[["addcalendarfromurlaction.acfur"]]` — er meldet Erfolg und legt nichts an.
+Im Browser erscheint „Hoppla, dieser Kalender konnte nicht hinzugefügt werden".
+
+Das betrifft **jeden** neuen Feed, nicht nur diesen: In Tests wurde auch ein
+fremder, unbeteiligter Kalender abgelehnt, während bereits bekannte Feeds
+(Googles Feiertagskalender, officeholidays.com) angenommen wurden. Bestehende
+Abos laufen weiter. Gleiches ist am 23./24.08.2026 unabhängig dokumentiert
+worden.
+
+Bis Google das behebt:
+
+- **Apple Kalender, Outlook und Thunderbird** abonnieren den Feed problemlos.
+- Für Google Kalender: [GAS-ICS-Sync](https://github.com/derekantrican/GAS-ICS-Sync)
+  — ein Apps Script im eigenen Konto, das den Feed selbst abholt und die Termine
+  über die Kalender-API einträgt. Umgeht die defekte Abo-Funktion vollständig und
+  synchronisiert häufiger als Googles 24-Stunden-Takt.
+
 ### Warum zwei verschiedene Adressen?
 
 Google nimmt einen Feed nur an, wenn der Server ihn als
