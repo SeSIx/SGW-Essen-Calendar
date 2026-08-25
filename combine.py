@@ -18,7 +18,7 @@ from pathlib import Path
 
 import config
 import db
-from ics import _VTIMEZONE, _esc, _fold, data_dtstamp, write_if_changed
+from ics import _esc, _fold, data_dtstamp, to_utc, write_if_changed
 
 OUTPUT_DIR = Path(__file__).parent / config.OUTPUT_DIR
 # Club dates live in a tracked JSON file, not in the gitignored databases:
@@ -189,7 +189,8 @@ def _build_game_vevent(row: dict, dtstamp: str) -> str:
         summary = f"{home} {row['home_score']}:{row['away_score']} {away}"
     else:
         summary = f"{home} : {away}"
-    summary += f" ({comp[:30]})"
+    short_comp = comp if len(comp) <= 34 else comp[:34].rsplit(" ", 1)[0]
+    summary += f" ({short_comp})"
 
     date_str = row["game_date"]
     time_str = row["game_time"]
@@ -201,7 +202,8 @@ def _build_game_vevent(row: dict, dtstamp: str) -> str:
         _fold(f"UID:{uid}"),
         _fold(f"DTSTAMP:{dtstamp}"),
         _fold(f"SUMMARY:{_esc(summary)}"),
-        _fold(f"STATUS:{'CONFIRMED' if played else 'TENTATIVE'}"),
+        "STATUS:CONFIRMED",
+        "TRANSP:OPAQUE",
     ]
 
     if not time_str:
@@ -210,10 +212,10 @@ def _build_game_vevent(row: dict, dtstamp: str) -> str:
         lines.append(_fold(f"DTSTART;VALUE=DATE:{start_date.strftime('%Y%m%d')}"))
         lines.append(_fold(f"DTEND;VALUE=DATE:{end_date.strftime('%Y%m%d')}"))
     else:
-        dt_start = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
+        dt_start = to_utc(date_str, time_str)
         dt_end = dt_start + timedelta(minutes=90)
-        lines.append(_fold(f"DTSTART;TZID=Europe/Berlin:{dt_start:%Y%m%dT%H%M%S}"))
-        lines.append(_fold(f"DTEND;TZID=Europe/Berlin:{dt_end:%Y%m%dT%H%M%S}"))
+        lines.append(_fold(f"DTSTART:{dt_start:%Y%m%dT%H%M%S}Z"))
+        lines.append(_fold(f"DTEND:{dt_end:%Y%m%dT%H%M%S}Z"))
 
     venue = row.get("venue") or ""
     addr = row.get("venue_address") or ""
@@ -251,6 +253,7 @@ def _build_custom_vevent(row: dict, dtstamp: str) -> str:
         _fold(f"DTSTAMP:{dtstamp}"),
         _fold(f"SUMMARY:{_esc(row['title'])}"),
         "STATUS:CONFIRMED",
+        "TRANSP:OPAQUE",
     ]
 
     date_str = row["start_date"]
@@ -264,13 +267,13 @@ def _build_custom_vevent(row: dict, dtstamp: str) -> str:
         lines.append(_fold(f"DTSTART;VALUE=DATE:{start_date.strftime('%Y%m%d')}"))
         lines.append(_fold(f"DTEND;VALUE=DATE:{end_date.strftime('%Y%m%d')}"))
     else:
-        dt_start = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
+        dt_start = to_utc(date_str, time_str)
         if end_time_str:
-            dt_end = datetime.strptime(f"{end_date_str} {end_time_str}", "%Y-%m-%d %H:%M")
+            dt_end = to_utc(end_date_str, end_time_str)
         else:
             dt_end = dt_start + timedelta(hours=2)
-        lines.append(_fold(f"DTSTART;TZID=Europe/Berlin:{dt_start:%Y%m%dT%H%M%S}"))
-        lines.append(_fold(f"DTEND;TZID=Europe/Berlin:{dt_end:%Y%m%dT%H%M%S}"))
+        lines.append(_fold(f"DTSTART:{dt_start:%Y%m%dT%H%M%S}Z"))
+        lines.append(_fold(f"DTEND:{dt_end:%Y%m%dT%H%M%S}Z"))
 
     if row.get("location"):
         lines.append(_fold(f"LOCATION:{_esc(row['location'])}"))
@@ -305,13 +308,13 @@ def write_termine_ics(output_dir: Path) -> int:
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
         "PRODID:-//SGW Essen//sgw_scraper//DE",
-        _fold(f"X-WR-CALNAME:{_esc('SGW Essen — Termine')}"),
-        # Not RFC 5545, but clients that ignore VTIMEZONE fall back to these.
+        _fold(f"X-WR-CALNAME:{_esc('SGW Essen Termine')}"),
         _fold(f"X-WR-CALDESC:{_esc('Spiele und Vereinstermine der SG Wasserball Essen')}"),
         "X-WR-TIMEZONE:Europe/Berlin",
+        "REFRESH-INTERVAL;VALUE=DURATION:PT12H",
+        "X-PUBLISHED-TTL:PT12H",
         "CALSCALE:GREGORIAN",
         "METHOD:PUBLISH",
-        _VTIMEZONE,
         *vevents,
         "END:VCALENDAR",
     ]) + "\r\n"

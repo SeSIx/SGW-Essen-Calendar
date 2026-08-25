@@ -4,33 +4,19 @@ PRODID:-//SGW Essen//sgw_scraper//DE
 X-WR-CALNAME:SGW Essen — sgw_essen_u14
 X-WR-CALDESC:Spiele der SG Wasserball Essen\, Daten vom DSV
 X-WR-TIMEZONE:Europe/Berlin
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
-BEGIN:VTIMEZONE
-TZID:Europe/Berlin
-BEGIN:STANDARD
-TZOFFSETFROM:+0200
-TZOFFSETTO:+0100
-TZNAME:CET
-DTSTART:19701025T030000
-RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10
-END:STANDARD
-BEGIN:DAYLIGHT
-TZOFFSETFROM:+0100
-TZOFFSETTO:+0200
-TZNAME:CEST
-DTSTART:19700329T020000
-RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3
-END:DAYLIGHT
-END:VTIMEZONE
 BEGIN:VEVENT
 UID:2025_279__13@sgw-essen.local
 DTSTAMP:20260824T154012Z
 SUMMARY:WSG Oberhausen 97/27 8:24 SG Wasserball Essen (U14 Ruhrgebietsliga 
  mixed)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260110T173000
-DTEND;TZID=Europe/Berlin:20260110T190000
+TRANSP:OPAQUE
+DTSTART:20260110T163000Z
+DTEND:20260110T180000Z
 LOCATION:AquaPark Oberhausen\, Heinz-Schleußer-Str. 1\, 46047 Oberhausen
 DESCRIPTION:Wettbewerb: U14 Ruhrgebietsliga mixed\nErgebnis: 8:24\nSchiedsr
  ichter: Kleinefeldt\, Maximilian\nDetails: https://dsvdaten.dsv.de/Modules
@@ -43,8 +29,9 @@ UID:2025_279__14@sgw-essen.local
 DTSTAMP:20260824T154012Z
 SUMMARY:ASC Duisburg 23:11 SG Wasserball Essen (U14 Ruhrgebietsliga mixed)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260315T173000
-DTEND;TZID=Europe/Berlin:20260315T190000
+TRANSP:OPAQUE
+DTSTART:20260315T163000Z
+DTEND:20260315T180000Z
 LOCATION:Schwimmstadion\, Margaretenstraße 11\, 47051 Duisburg
 DESCRIPTION:Wettbewerb: U14 Ruhrgebietsliga mixed\nErgebnis: 23:11\nSchieds
  richter: Depenbrock\, Hans-Jürgen\nDetails: https://dsvdaten.dsv.de/Modul
@@ -58,8 +45,9 @@ DTSTAMP:20260824T154012Z
 SUMMARY:Duisburger SSC 09/20 5:40 SG Wasserball Essen (U14 Ruhrgebietsliga 
  mixed)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260510T140000
-DTEND;TZID=Europe/Berlin:20260510T153000
+TRANSP:OPAQUE
+DTSTART:20260510T120000Z
+DTEND:20260510T133000Z
 LOCATION:Kombibad Homberg\, Schillerstr. 162\, 47198 Duisburg
 DESCRIPTION:Wettbewerb: U14 Ruhrgebietsliga mixed\nErgebnis: 5:40\nSchiedsr
  ichter: Dillig\, Ralf / Schilling\, Moritz\nDetails: https://dsvdaten.dsv.
@@ -74,8 +62,9 @@ DTSTAMP:20260824T154012Z
 SUMMARY:SG Wasserball Essen 41:3 Duisburger SSC 09/20 (U14 Ruhrgebietsliga 
  mixed)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260612T193000
-DTEND;TZID=Europe/Berlin:20260612T210000
+TRANSP:OPAQUE
+DTSTART:20260612T173000Z
+DTEND:20260612T190000Z
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: U14 Ruhrgebietsliga mixed\nErgebnis: 41:3\nSchiedsr
  ichter: Herrschaft\, Charlotte\nDetails: https://dsvdaten.dsv.de/Modules/W
@@ -89,8 +78,9 @@ DTSTAMP:20260824T154012Z
 SUMMARY:SG Wasserball Essen 17:14 WSG Oberhausen 97/27 (U14 Ruhrgebietsliga
   mixed)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260624T193000
-DTEND;TZID=Europe/Berlin:20260624T210000
+TRANSP:OPAQUE
+DTSTART:20260624T173000Z
+DTEND:20260624T190000Z
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: U14 Ruhrgebietsliga mixed\nErgebnis: 17:14\nSchieds
  richter: Banse\, Pascal\nDetails: https://dsvdaten.dsv.de/Modules/WB/Game.
@@ -103,8 +93,9 @@ UID:2025_279__18@sgw-essen.local
 DTSTAMP:20260824T154012Z
 SUMMARY:SG Wasserball Essen 17:11 ASC Duisburg (U14 Ruhrgebietsliga mixed)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260626T200000
-DTEND;TZID=Europe/Berlin:20260626T213000
+TRANSP:OPAQUE
+DTSTART:20260626T180000Z
+DTEND:20260626T193000Z
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: U14 Ruhrgebietsliga mixed\nErgebnis: 17:11\nSchieds
  richter: Depenbrock\, Hans-Jürgen\nDetails: https://dsvdaten.dsv.de/Modul
@@ -118,8 +109,9 @@ DTSTAMP:20260824T154012Z
 SUMMARY:Duisburger SV 1898 27:4 SG Wasserball Essen (U14 Ruhrgebietsliga mi
  xed)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260628T143000
-DTEND;TZID=Europe/Berlin:20260628T160000
+TRANSP:OPAQUE
+DTSTART:20260628T123000Z
+DTEND:20260628T140000Z
 LOCATION:Schwimmstadion\, Margaretenstraße 11\, 47051 Duisburg
 DESCRIPTION:Wettbewerb: U14 Ruhrgebietsliga mixed\nErgebnis: 27:4\nSchiedsr
  ichter: Wandelt\, Thomas\nDetails: https://dsvdaten.dsv.de/Modules/WB/Game
@@ -133,8 +125,9 @@ DTSTAMP:20260824T154012Z
 SUMMARY:SG Wasserball Essen 6:32 Duisburger SV 1898 (U14 Ruhrgebietsliga mi
  xed)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260710T200000
-DTEND;TZID=Europe/Berlin:20260710T213000
+TRANSP:OPAQUE
+DTSTART:20260710T180000Z
+DTEND:20260710T193000Z
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: U14 Ruhrgebietsliga mixed\nErgebnis: 6:32\nSchiedsr
  ichter: Banse\, Pascal / Bascarevic\, Pavle\nDetails: https://dsvdaten.dsv

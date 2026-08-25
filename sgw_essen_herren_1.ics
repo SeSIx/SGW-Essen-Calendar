@@ -4,33 +4,18 @@ PRODID:-//SGW Essen//sgw_scraper//DE
 X-WR-CALNAME:SGW Essen — sgw_essen_herren_1
 X-WR-CALDESC:Spiele der SG Wasserball Essen\, Daten vom DSV
 X-WR-TIMEZONE:Europe/Berlin
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
-BEGIN:VTIMEZONE
-TZID:Europe/Berlin
-BEGIN:STANDARD
-TZOFFSETFROM:+0200
-TZOFFSETTO:+0100
-TZNAME:CET
-DTSTART:19701025T030000
-RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10
-END:STANDARD
-BEGIN:DAYLIGHT
-TZOFFSETFROM:+0100
-TZOFFSETTO:+0200
-TZNAME:CEST
-DTSTART:19700329T020000
-RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3
-END:DAYLIGHT
-END:VTIMEZONE
 BEGIN:VEVENT
 UID:2025_197_B_3@sgw-essen.local
 DTSTAMP:20260824T154232Z
-SUMMARY:SG Wasserball Essen 22:8 TPSK 1925 (NRW Verbandsliga - Gruppe B mä
- )
+SUMMARY:SG Wasserball Essen 22:8 TPSK 1925 (NRW Verbandsliga - Gruppe B)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20251116T153000
-DTEND;TZID=Europe/Berlin:20251116T170000
+TRANSP:OPAQUE
+DTSTART:20251116T143000Z
+DTEND:20251116T160000Z
 LOCATION:Sportbad Thurmfeld\, Reckhammerweg 84\, 45141 Essen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe B männlich\nErgebnis: 22
  :8\nSchiedsrichter: Schlieckmann\, Carsten / Banse\, Pascal\nDetails: http
@@ -43,10 +28,11 @@ BEGIN:VEVENT
 UID:2025_197_B_28@sgw-essen.local
 DTSTAMP:20260824T154232Z
 SUMMARY:SG Wasserball Essen 18:6 SV Blau-Weiß Bochum II (NRW Verbandsliga 
- - Gruppe B mä)
+ - Gruppe B)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20251207T153000
-DTEND;TZID=Europe/Berlin:20251207T170000
+TRANSP:OPAQUE
+DTSTART:20251207T143000Z
+DTEND:20251207T160000Z
 LOCATION:Sportbad Thurmfeld\, Reckhammerweg 84\, 45141 Essen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe B männlich\nErgebnis: 18
  :6\nSchiedsrichter: Allendorf\, Stefan / Gebauer\, Roland\nDetails: https:
@@ -59,10 +45,11 @@ BEGIN:VEVENT
 UID:2025_197_B_8@sgw-essen.local
 DTSTAMP:20260824T154232Z
 SUMMARY:SGW SC Solingen/Wfr. Wuppertal II 17:15 SG Wasserball Essen (NRW Ve
- rbandsliga - Gruppe B mä)
+ rbandsliga - Gruppe B)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20251209T203000
-DTEND;TZID=Europe/Berlin:20251209T220000
+TRANSP:OPAQUE
+DTSTART:20251209T193000Z
+DTEND:20251209T210000Z
 LOCATION:Sportbad Klingenhalle\, Kotterstraße\, 42655 Solingen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe B männlich\nErgebnis: 17
  :15\nSchiedsrichter: Schilling\, Viktor / Niewind\, Holger\nDetails: https
@@ -77,8 +64,9 @@ DTSTAMP:20260824T154232Z
 SUMMARY:SG Wasserball Essen 10:0 Uerdinger Schwimmverein 08 II (NRW Pokal m
  ännlich)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260114T203000
-DTEND;TZID=Europe/Berlin:20260114T220000
+TRANSP:OPAQUE
+DTSTART:20260114T193000Z
+DTEND:20260114T210000Z
 LOCATION:Sportbad Thurmfeld\, Reckhammerweg 84\, 45141 Essen
 DESCRIPTION:Wettbewerb: NRW Pokal männlich\nErgebnis: 10:0\nSchiedsrichter
  : Arntzen\, Mirko / Rzepka\, Sebastian\nDetails: https://dsvdaten.dsv.de/M
@@ -90,10 +78,11 @@ BEGIN:VEVENT
 UID:2025_197_B_12@sgw-essen.local
 DTSTAMP:20260824T154232Z
 SUMMARY:SG Wasserball Essen 10:0 Kevelaerer SV (NRW Verbandsliga - Gruppe B
-  mä)
+ )
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260117T170000
-DTEND;TZID=Europe/Berlin:20260117T183000
+TRANSP:OPAQUE
+DTSTART:20260117T160000Z
+DTEND:20260117T173000Z
 LOCATION:Sportbad Thurmfeld\, Reckhammerweg 84\, 45141 Essen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe B männlich\nErgebnis: 10
  :0\nSchiedsrichter: Kuhn\, Uwe / Clausmeyer\, Florian\nDetails: https://ds
@@ -106,10 +95,11 @@ BEGIN:VEVENT
 UID:2025_197_B_15@sgw-essen.local
 DTSTAMP:20260824T154232Z
 SUMMARY:SG Wasserball Essen 25:9 SV Rheinhausen 1913 II (NRW Verbandsliga -
-  Gruppe B mä)
+  Gruppe B)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260129T202000
-DTEND;TZID=Europe/Berlin:20260129T215000
+TRANSP:OPAQUE
+DTSTART:20260129T192000Z
+DTEND:20260129T205000Z
 LOCATION:Schwimmleistungszentrum Essen\, von-Einem-Straße 77\, 45130 Essen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe B männlich\nErgebnis: 25
  :9\nSchiedsrichter: Kleiner\, Felix / Arntzen\, Mirko\nDetails: https://ds
@@ -122,10 +112,11 @@ BEGIN:VEVENT
 UID:2025_197_B_17@sgw-essen.local
 DTSTAMP:20260824T154232Z
 SUMMARY:SG Wasserball Essen 12:6 SGW SC Solingen/Wfr. Wuppertal II (NRW Ver
- bandsliga - Gruppe B mä)
+ bandsliga - Gruppe B)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260214T170000
-DTEND;TZID=Europe/Berlin:20260214T183000
+TRANSP:OPAQUE
+DTSTART:20260214T160000Z
+DTEND:20260214T173000Z
 LOCATION:Sportbad Thurmfeld\, Reckhammerweg 84\, 45141 Essen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe B männlich\nErgebnis: 12
  :6\nSchiedsrichter: Schlieckmann\, Tobias / Wagner\, Jesse\nDetails: https
@@ -138,10 +129,11 @@ BEGIN:VEVENT
 UID:2025_197_B_20@sgw-essen.local
 DTSTAMP:20260824T154232Z
 SUMMARY:SV Rheinhausen 1913 II 10:26 SG Wasserball Essen (NRW Verbandsliga 
- - Gruppe B mä)
+ - Gruppe B)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260221T173000
-DTEND;TZID=Europe/Berlin:20260221T190000
+TRANSP:OPAQUE
+DTSTART:20260221T163000Z
+DTEND:20260221T180000Z
 LOCATION:Hallenbad Toeppersee\, Bergheimerstr. 101\, 47239 Duisburg
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe B männlich\nErgebnis: 10
  :26\nSchiedsrichter: Homolka\, Erwin / Ueberdick\, Jens\nDetails: https://
@@ -153,11 +145,11 @@ END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_B_24@sgw-essen.local
 DTSTAMP:20260824T154232Z
-SUMMARY:TPSK 1925 12:16 SG Wasserball Essen (NRW Verbandsliga - Gruppe B m
- ä)
+SUMMARY:TPSK 1925 12:16 SG Wasserball Essen (NRW Verbandsliga - Gruppe B)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260227T203000
-DTEND;TZID=Europe/Berlin:20260227T220000
+TRANSP:OPAQUE
+DTSTART:20260227T193000Z
+DTEND:20260227T210000Z
 LOCATION:Leistungszentrum Köln\, Guths-Muths-Weg 1\, 50933 Köln
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe B männlich\nErgebnis: 12
  :16\nSchiedsrichter: Ueberdick\, Thorsten / Schmidt\, Georg\nDetails: http
@@ -172,8 +164,9 @@ DTSTAMP:20260824T154232Z
 SUMMARY:SG Wassersport Iserlohn II 12:23 SG Wasserball Essen (NRW Pokal mä
  nnlich)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260303T203000
-DTEND;TZID=Europe/Berlin:20260303T220000
+TRANSP:OPAQUE
+DTSTART:20260303T193000Z
+DTEND:20260303T210000Z
 LOCATION:Seilerseebad\, Seeuferstraße 26\, 58638 Iserlohn
 DESCRIPTION:Wettbewerb: NRW Pokal männlich\nErgebnis: 12:23\nSchiedsrichte
  r: Möller\, Lukas / Reek\, Roman\nDetails: https://dsvdaten.dsv.de/Module
@@ -185,10 +178,11 @@ BEGIN:VEVENT
 UID:2025_197_B_27@sgw-essen.local
 DTSTAMP:20260824T154232Z
 SUMMARY:Kevelaerer SV 10:23 SG Wasserball Essen (NRW Verbandsliga - Gruppe 
- B mä)
+ B)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260315T200000
-DTEND;TZID=Europe/Berlin:20260315T213000
+TRANSP:OPAQUE
+DTSTART:20260315T190000Z
+DTEND:20260315T203000Z
 LOCATION:Hallenbad Kevelaer\, Hüls 13\, 47623 Kevelaer
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe B männlich\nErgebnis: 10
  :23\nSchiedsrichter: Peifer\, Carsten / Wiechers\, Christoph\nDetails: htt
@@ -201,10 +195,11 @@ BEGIN:VEVENT
 UID:2025_197_B_4@sgw-essen.local
 DTSTAMP:20260824T154232Z
 SUMMARY:SV Blau-Weiß Bochum II 8:23 SG Wasserball Essen (NRW Verbandsliga 
- - Gruppe B mä)
+ - Gruppe B)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260323T203000
-DTEND;TZID=Europe/Berlin:20260323T220000
+TRANSP:OPAQUE
+DTSTART:20260323T193000Z
+DTEND:20260323T210000Z
 LOCATION:Unibad Bochum\, Hustadtring 157\, 44801 Bochum-Querenburg
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe B männlich\nErgebnis: 8:
  23\nSchiedsrichter: Gal\, Benedikt / Pawelzik\, Bernd\nDetails: https://ds
@@ -218,8 +213,9 @@ UID:2025_132__28@sgw-essen.local
 DTSTAMP:20260824T154232Z
 SUMMARY:SG Wasserball Essen 16:25 SV Krefeld 1972 II (NRW Pokal männlich)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260420T202000
-DTEND;TZID=Europe/Berlin:20260420T215000
+TRANSP:OPAQUE
+DTSTART:20260420T182000Z
+DTEND:20260420T195000Z
 LOCATION:Schwimmleistungszentrum Essen\, von-Einem-Straße 77\, 45130 Essen
 DESCRIPTION:Wettbewerb: NRW Pokal männlich\nErgebnis: 16:25\nSchiedsrichte
  r: Schilling\, Viktor / Arntzen\, Mirko\nDetails: https://dsvdaten.dsv.de/
@@ -232,10 +228,11 @@ BEGIN:VEVENT
 UID:2025_197_C_1@sgw-essen.local
 DTSTAMP:20260824T154232Z
 SUMMARY:Bocholter WSV 1920 11:17 SG Wasserball Essen (NRW Verbandsliga - Gr
- uppe C mä)
+ uppe C)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260421T203000
-DTEND;TZID=Europe/Berlin:20260421T220000
+TRANSP:OPAQUE
+DTSTART:20260421T183000Z
+DTEND:20260421T200000Z
 LOCATION:Fildekenbad\, Rheinstr. 6\, 46395 Bocholt
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe C männlich\nErgebnis: 11
  :17\nSchiedsrichter: Petrov\, Michael / Dillig\, Ralf\nDetails: https://ds
@@ -248,10 +245,11 @@ BEGIN:VEVENT
 UID:2025_197_C_21@sgw-essen.local
 DTSTAMP:20260824T154232Z
 SUMMARY:SG Wasserball Essen 27:16 SV Rheinhausen 1913 II (NRW Verbandsliga 
- - Gruppe C mä)
+ - Gruppe C)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260507T200000
-DTEND;TZID=Europe/Berlin:20260507T213000
+TRANSP:OPAQUE
+DTSTART:20260507T180000Z
+DTEND:20260507T193000Z
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe C männlich\nErgebnis: 27
  :16\nSchiedsrichter: Opacic\, Dragan / Arntzen\, Mirko\nDetails: https://d
@@ -264,10 +262,11 @@ BEGIN:VEVENT
 UID:2025_197_C_17@sgw-essen.local
 DTSTAMP:20260824T154232Z
 SUMMARY:SV Lünen 08 11:13 SG Wasserball Essen (NRW Verbandsliga - Gruppe C
-  mä)
+ )
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260513T203000
-DTEND;TZID=Europe/Berlin:20260513T220000
+TRANSP:OPAQUE
+DTSTART:20260513T183000Z
+DTEND:20260513T200000Z
 LOCATION:Lippebad Lünen\, Konrad-Adenauer-Str. 28\, 44534 Lünen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe C männlich\nErgebnis: 11
  :13\nSchiedsrichter: Hiltmann\, Andreas / Kassing\, Michael\nDetails: http
@@ -280,10 +279,11 @@ BEGIN:VEVENT
 UID:2025_197_C_7@sgw-essen.local
 DTSTAMP:20260824T154232Z
 SUMMARY:SVg Münster von 1891 10:12 SG Wasserball Essen (NRW Verbandsliga -
-  Gruppe C mä)
+  Gruppe C)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260521T200000
-DTEND;TZID=Europe/Berlin:20260521T213000
+TRANSP:OPAQUE
+DTSTART:20260521T180000Z
+DTEND:20260521T193000Z
 LOCATION:Wersepark Sudmühle\, Dyckburgstraße 486\, 48157 Münster
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe C männlich\nErgebnis: 10
  :12\nSchiedsrichter: Reek\, Roman / Schlieckmann\, Carsten\nDetails: https
@@ -296,10 +296,11 @@ BEGIN:VEVENT
 UID:2025_197_C_28@sgw-essen.local
 DTSTAMP:20260824T154232Z
 SUMMARY:SGW SC Solingen/Wfr. Wuppertal II 12:16 SG Wasserball Essen (NRW Ve
- rbandsliga - Gruppe C mä)
+ rbandsliga - Gruppe C)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260526T201500
-DTEND;TZID=Europe/Berlin:20260526T214500
+TRANSP:OPAQUE
+DTSTART:20260526T181500Z
+DTEND:20260526T194500Z
 LOCATION:Alfred-Panke-Bad\, Bendahler Str. 136\, 42285 Wuppertal
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe C männlich\nErgebnis: 12
  :16\nSchiedsrichter: Knillmann\, Svenja / Hiltmann\, Andreas\nDetails: htt
@@ -312,10 +313,11 @@ BEGIN:VEVENT
 UID:2025_197_C_22@sgw-essen.local
 DTSTAMP:20260824T154232Z
 SUMMARY:SG Wasserball Essen 17:11 SV Lünen 08 (NRW Verbandsliga - Gruppe C
-  mä)
+ )
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260607T200000
-DTEND;TZID=Europe/Berlin:20260607T213000
+TRANSP:OPAQUE
+DTSTART:20260607T180000Z
+DTEND:20260607T193000Z
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe C männlich\nErgebnis: 17
  :11\nSchiedsrichter: Clausmeyer\, Florian / Güner\, Berk Kemal\nDetails: 
@@ -328,10 +330,11 @@ BEGIN:VEVENT
 UID:2025_197_C_23@sgw-essen.local
 DTSTAMP:20260824T154232Z
 SUMMARY:SG Wasserball Essen 20:12 SGW SC Solingen/Wfr. Wuppertal II (NRW Ve
- rbandsliga - Gruppe C mä)
+ rbandsliga - Gruppe C)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260615T200000
-DTEND;TZID=Europe/Berlin:20260615T213000
+TRANSP:OPAQUE
+DTSTART:20260615T180000Z
+DTEND:20260615T193000Z
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe C männlich\nErgebnis: 20
  :12\nSchiedsrichter: Knillmann\, Svenja / Zoche\, Florian\nDetails: https:
@@ -344,10 +347,11 @@ BEGIN:VEVENT
 UID:2025_197_C_25@sgw-essen.local
 DTSTAMP:20260824T154232Z
 SUMMARY:SG Wasserball Essen 34:12 SVg Münster von 1891 (NRW Verbandsliga -
-  Gruppe C mä)
+  Gruppe C)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260701T200000
-DTEND;TZID=Europe/Berlin:20260701T213000
+TRANSP:OPAQUE
+DTSTART:20260701T180000Z
+DTEND:20260701T193000Z
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe C männlich\nErgebnis: 34
  :12\nSchiedsrichter: Banse\, Pascal / Knillmann\, Svenja\nDetails: https:/
@@ -360,10 +364,11 @@ BEGIN:VEVENT
 UID:2025_197_C_15@sgw-essen.local
 DTSTAMP:20260824T154232Z
 SUMMARY:SV Rheinhausen 1913 II 10:18 SG Wasserball Essen (NRW Verbandsliga 
- - Gruppe C mä)
+ - Gruppe C)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260706T193000
-DTEND;TZID=Europe/Berlin:20260706T210000
+TRANSP:OPAQUE
+DTSTART:20260706T173000Z
+DTEND:20260706T190000Z
 LOCATION:Freibad Kruppsee\, Bachstraße 2\, 47229 Duisburg-Rheinhausen
 DESCRIPTION:Wettbewerb: NRW Verbandsliga - Gruppe C männlich\nErgebnis: 10
  :18\nSchiedsrichter: Ueberdick\, Jens / Braun\, Sebastian\nDetails: https:

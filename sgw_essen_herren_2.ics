@@ -4,33 +4,19 @@ PRODID:-//SGW Essen//sgw_scraper//DE
 X-WR-CALNAME:SGW Essen — sgw_essen_herren_2
 X-WR-CALDESC:Spiele der SG Wasserball Essen\, Daten vom DSV
 X-WR-TIMEZONE:Europe/Berlin
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
-BEGIN:VTIMEZONE
-TZID:Europe/Berlin
-BEGIN:STANDARD
-TZOFFSETFROM:+0200
-TZOFFSETTO:+0100
-TZNAME:CET
-DTSTART:19701025T030000
-RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10
-END:STANDARD
-BEGIN:DAYLIGHT
-TZOFFSETFROM:+0100
-TZOFFSETTO:+0200
-TZNAME:CEST
-DTSTART:19700329T020000
-RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3
-END:DAYLIGHT
-END:VTIMEZONE
 BEGIN:VEVENT
 UID:2025_212__49@sgw-essen.local
 DTSTAMP:20260824T153939Z
 SUMMARY:SG Wasserball Essen II 21:10 Wfr. 1912 Mülheim Masters (Ruhrgebiet
  sliga männlich)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260119T202000
-DTEND;TZID=Europe/Berlin:20260119T215000
+TRANSP:OPAQUE
+DTSTART:20260119T192000Z
+DTEND:20260119T205000Z
 LOCATION:Schwimmleistungszentrum Essen\, von-Einem-Straße 77\, 45130 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 21:10\nSchieds
  richter: Clausmeyer\, Florian / Dillig\, Ralf\nDetails: https://dsvdaten.d
@@ -45,8 +31,9 @@ DTSTAMP:20260824T153939Z
 SUMMARY:Duisburger SV 1898 III 8:15 SG Wasserball Essen II (Ruhrgebietsliga
   männlich)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260201T143000
-DTEND;TZID=Europe/Berlin:20260201T160000
+TRANSP:OPAQUE
+DTSTART:20260201T133000Z
+DTEND:20260201T150000Z
 LOCATION:Schwimmstadion\, Margaretenstraße 11\, 47051 Duisburg
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 8:15\nSchiedsr
  ichter: Depenbrock\, Hans-Jürgen / Malorny\, Christian\nDetails: https://
@@ -61,8 +48,9 @@ DTSTAMP:20260824T153939Z
 SUMMARY:Wfr. 1912 Mülheim Masters 10:11 SG Wasserball Essen II (Ruhrgebiet
  sliga männlich)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260312T204500
-DTEND;TZID=Europe/Berlin:20260312T221500
+TRANSP:OPAQUE
+DTSTART:20260312T194500Z
+DTEND:20260312T211500Z
 LOCATION:Hallenbad Süd\, An den Sportstätten 2\, 45468 Mülheim (Ruhr)
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 10:11\nSchieds
  richter: Dillig\, Ralf / Rosenke\, Axel\nDetails: https://dsvdaten.dsv.de/
@@ -77,8 +65,9 @@ DTSTAMP:20260824T153939Z
 SUMMARY:WSG Oberhausen 97/27 14:23 SG Wasserball Essen II (Ruhrgebietsliga 
  männlich)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260314T190000
-DTEND;TZID=Europe/Berlin:20260314T203000
+TRANSP:OPAQUE
+DTSTART:20260314T180000Z
+DTEND:20260314T193000Z
 LOCATION:AquaPark Oberhausen\, Heinz-Schleußer-Str. 1\, 46047 Oberhausen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 14:23\nSchieds
  richter: Malorny\, Christian / Gomes\, Joel\nDetails: https://dsvdaten.dsv
@@ -93,8 +82,9 @@ DTSTAMP:20260824T153939Z
 SUMMARY:SG Wasserball Essen II 27:0 Kevelaerer SV Masters (Ruhrgebietsliga 
  männlich)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260506T200000
-DTEND;TZID=Europe/Berlin:20260506T213000
+TRANSP:OPAQUE
+DTSTART:20260506T180000Z
+DTEND:20260506T193000Z
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 27:0\nSchiedsr
  ichter: Clausmeyer\, Florian / Hinkler\, Wolfgang\nDetails: https://dsvdat
@@ -109,8 +99,9 @@ DTSTAMP:20260824T153939Z
 SUMMARY:WSG Oberhausen Masters 13:15 SG Wasserball Essen II (Ruhrgebietslig
  a männlich)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260509T173000
-DTEND;TZID=Europe/Berlin:20260509T190000
+TRANSP:OPAQUE
+DTSTART:20260509T153000Z
+DTEND:20260509T170000Z
 LOCATION:AquaPark Oberhausen\, Heinz-Schleußer-Str. 1\, 46047 Oberhausen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 13:15\nSchieds
  richter: Talaga\, Ralf / Theis\, Christian\nDetails: https://dsvdaten.dsv.
@@ -125,8 +116,9 @@ DTSTAMP:20260824T153939Z
 SUMMARY:SG Wasserball Essen II 12:14 Wassersportverein Schermbeck II (Ruhrg
  ebietsliga männlich)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260520T200000
-DTEND;TZID=Europe/Berlin:20260520T213000
+TRANSP:OPAQUE
+DTSTART:20260520T180000Z
+DTEND:20260520T193000Z
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 12:14\nSchieds
  richter: Blattau\, Rainer / Hinkler\, Wolfgang\nDetails: https://dsvdaten.
@@ -141,8 +133,9 @@ DTSTAMP:20260824T153939Z
 SUMMARY:SG Wasserball Essen II 10:8 Duisburger SV 1898 III (Ruhrgebietsliga
   männlich)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260527T200000
-DTEND;TZID=Europe/Berlin:20260527T213000
+TRANSP:OPAQUE
+DTSTART:20260527T180000Z
+DTEND:20260527T193000Z
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 10:8\nSchiedsr
  ichter: Herrschaft\, Charlotte / Hinkler\, Wolfgang\nDetails: https://dsvd
@@ -157,8 +150,9 @@ DTSTAMP:20260824T153939Z
 SUMMARY:SG Wasserball Essen II 0:10 WSG Oberhausen Masters (Ruhrgebietsliga
   männlich)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260610T200000
-DTEND;TZID=Europe/Berlin:20260610T213000
+TRANSP:OPAQUE
+DTSTART:20260610T180000Z
+DTEND:20260610T193000Z
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 0:10\nSchiedsr
  ichter: Arntzen\, Mirko / Wiechers\, Christoph\nDetails: https://dsvdaten.
@@ -173,8 +167,9 @@ DTSTAMP:20260824T153939Z
 SUMMARY:PSV Duisburg Masters 8:14 SG Wasserball Essen II (Ruhrgebietsliga m
  ännlich)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260612T201500
-DTEND;TZID=Europe/Berlin:20260612T214500
+TRANSP:OPAQUE
+DTSTART:20260612T181500Z
+DTEND:20260612T194500Z
 LOCATION:Allwetterbad Walsum\, Scholte-Rahm-Straße 21\, 47178 Duisburg Wal
  sum
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 8:14\nSchiedsr
@@ -190,8 +185,9 @@ DTSTAMP:20260824T153939Z
 SUMMARY:ASC Duisburg IV 15:16 SG Wasserball Essen II (Ruhrgebietsliga männ
  lich)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260621T143000
-DTEND;TZID=Europe/Berlin:20260621T160000
+TRANSP:OPAQUE
+DTSTART:20260621T123000Z
+DTEND:20260621T140000Z
 LOCATION:Schwimmstadion\, Margaretenstraße 11\, 47051 Duisburg
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 15:16\nSchieds
  richter: Kleinefeldt\, Maximilian / Clausmeyer\, Florian\nDetails: https:/
@@ -206,8 +202,9 @@ DTSTAMP:20260824T153939Z
 SUMMARY:Kevelaerer SV Masters 14:17 SG Wasserball Essen II (Ruhrgebietsliga
   männlich)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260622T203000
-DTEND;TZID=Europe/Berlin:20260622T220000
+TRANSP:OPAQUE
+DTSTART:20260622T183000Z
+DTEND:20260622T200000Z
 LOCATION:Freibad Kevelaer\, Dondertstraße 25\, 47623 Kevelaer
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 14:17\nSchieds
  richter: Rosenke\, Axel / Hinkler\, Wolfgang\nDetails: https://dsvdaten.ds
@@ -222,8 +219,9 @@ DTSTAMP:20260824T153939Z
 SUMMARY:Wassersportverein Schermbeck II 6:24 SG Wasserball Essen II (Ruhrge
  bietsliga männlich)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260628T143000
-DTEND;TZID=Europe/Berlin:20260628T160000
+TRANSP:OPAQUE
+DTSTART:20260628T123000Z
+DTEND:20260628T140000Z
 LOCATION:Hallenbad Schermbeck\, Weseler Straße 11\, 46514 Schermbeck
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 6:24\nSchiedsr
  ichter: Depenbrock\, Hans-Jürgen / Wiechers\, Christoph\nDetails: https:/
@@ -238,8 +236,9 @@ DTSTAMP:20260824T153939Z
 SUMMARY:SG Wasserball Essen II 19:8 PSV Duisburg Masters (Ruhrgebietsliga m
  ännlich)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260705T200000
-DTEND;TZID=Europe/Berlin:20260705T213000
+TRANSP:OPAQUE
+DTSTART:20260705T180000Z
+DTEND:20260705T193000Z
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 19:8\nSchiedsr
  ichter: Hümmelink\, Phil / Dillig\, Ralf\nDetails: https://dsvdaten.dsv.d
@@ -254,8 +253,9 @@ DTSTAMP:20260824T153939Z
 SUMMARY:SG Wasserball Essen II 19:13 WSG Oberhausen 97/27 (Ruhrgebietsliga 
  männlich)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260708T200000
-DTEND;TZID=Europe/Berlin:20260708T213000
+TRANSP:OPAQUE
+DTSTART:20260708T180000Z
+DTEND:20260708T193000Z
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 19:13\nSchieds
  richter: Talaga\, Ralf / Wiechers\, Christoph\nDetails: https://dsvdaten.d
@@ -270,8 +270,9 @@ DTSTAMP:20260824T153939Z
 SUMMARY:SG Wasserball Essen II 18:10 ASC Duisburg IV (Ruhrgebietsliga männ
  lich)
 STATUS:CONFIRMED
-DTSTART;TZID=Europe/Berlin:20260712T200000
-DTEND;TZID=Europe/Berlin:20260712T213000
+TRANSP:OPAQUE
+DTSTART:20260712T180000Z
+DTEND:20260712T193000Z
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 18:10\nSchieds
  richter: Hinkler\, Wolfgang / Blattau\, Rainer\nDetails: https://dsvdaten.
@@ -285,9 +286,10 @@ UID:2025_250__4@sgw-essen.local
 DTSTAMP:20260824T153939Z
 SUMMARY:Wassersportverein Schermbeck : SG Wasserball Essen II (Pokalrunde R
  uhrgebiet männlich)
-STATUS:TENTATIVE
-DTSTART;TZID=Europe/Berlin:20260921T203000
-DTEND;TZID=Europe/Berlin:20260921T220000
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+DTSTART:20260921T183000Z
+DTEND:20260921T200000Z
 LOCATION:Hallenbad Schermbeck\, Weseler Straße 11\, 46514 Schermbeck
 DESCRIPTION:Wettbewerb: Pokalrunde Ruhrgebiet männlich\nErgebnis: geplant\
  nDetails: https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueI

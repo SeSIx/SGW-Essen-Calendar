@@ -3,6 +3,7 @@
 import sqlite3
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 
 # ---------------------------------------------------------------------------
@@ -45,27 +46,6 @@ def _esc(value: str) -> str:
             .replace(",", "\\,")
             .replace("\n", "\\n"))
 
-
-# Minimal but valid VTIMEZONE for Europe/Berlin (CET/CEST).
-# Offsets and RRULE per IANA tzdata; enough for any date in the modern era.
-_VTIMEZONE = """\
-BEGIN:VTIMEZONE\r
-TZID:Europe/Berlin\r
-BEGIN:STANDARD\r
-TZOFFSETFROM:+0200\r
-TZOFFSETTO:+0100\r
-TZNAME:CET\r
-DTSTART:19701025T030000\r
-RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10\r
-END:STANDARD\r
-BEGIN:DAYLIGHT\r
-TZOFFSETFROM:+0100\r
-TZOFFSETTO:+0200\r
-TZNAME:CEST\r
-DTSTART:19700329T020000\r
-RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3\r
-END:DAYLIGHT\r
-END:VTIMEZONE"""
 
 
 
@@ -116,12 +96,27 @@ def data_dtstamp(conn: sqlite3.Connection) -> str:
         return datetime.now(tz=UTC).strftime("%Y%m%dT%H%M%SZ")
     return dt.strftime("%Y%m%dT%H%M%SZ")
 
+BERLIN = ZoneInfo("Europe/Berlin")
+
+
+def to_utc(date_str: str, time_str: str) -> datetime:
+    """Berlin wall-clock time as stored by the DSV, expressed in UTC.
+
+    Every feed Google accepts uses UTC, VALUE=DATE or floating times; a
+    VTIMEZONE block with TZID parameters is the one structural trait shared
+    only by feeds it rejects. Converting here keeps the output unambiguous
+    without shipping a timezone definition.
+    """
+    naive = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
+    return naive.replace(tzinfo=BERLIN).astimezone(UTC)
+
+
 def _build_vevent(row: dict, dtstamp: str) -> str:
     uid       = f"{row['id']}@sgw-essen.local"
     home      = row["home_team"] or ""
     away      = row["away_team"] or ""
     comp      = row["competition"] or ""
-    short_comp = comp[:30]
+    short_comp = comp if len(comp) <= 34 else comp[:34].rsplit(" ", 1)[0]
     played    = row["status"] == "played"
 
     # SUMMARY
@@ -144,7 +139,8 @@ def _build_vevent(row: dict, dtstamp: str) -> str:
         _fold(f"UID:{uid}"),
         _fold(f"DTSTAMP:{dtstamp}"),
         _fold(f"SUMMARY:{_esc(summary)}"),
-        _fold(f"STATUS:{'CONFIRMED' if played else 'TENTATIVE'}"),
+        "STATUS:CONFIRMED",
+        "TRANSP:OPAQUE",
     ]
 
     if all_day:
@@ -154,10 +150,10 @@ def _build_vevent(row: dict, dtstamp: str) -> str:
         lines.append(_fold(f"DTSTART;VALUE=DATE:{start_date.strftime('%Y%m%d')}"))
         lines.append(_fold(f"DTEND;VALUE=DATE:{end_date.strftime('%Y%m%d')}"))
     else:
-        dt_start = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
+        dt_start = to_utc(date_str, time_str)
         dt_end   = dt_start + timedelta(minutes=90)
-        lines.append(_fold(f"DTSTART;TZID=Europe/Berlin:{dt_start:%Y%m%dT%H%M%S}"))
-        lines.append(_fold(f"DTEND;TZID=Europe/Berlin:{dt_end:%Y%m%dT%H%M%S}"))
+        lines.append(_fold(f"DTSTART:{dt_start:%Y%m%dT%H%M%S}Z"))
+        lines.append(_fold(f"DTEND:{dt_end:%Y%m%dT%H%M%S}Z"))
 
     # LOCATION
     venue   = row.get("venue") or ""
@@ -217,12 +213,12 @@ def write_ics(db_path: str, ics_path: str, calendar_name: str = "SGW Essen") -> 
         "VERSION:2.0",
         "PRODID:-//SGW Essen//sgw_scraper//DE",
         _fold(f"X-WR-CALNAME:{_esc(calendar_name)}"),
-        # Not RFC 5545, but clients that ignore VTIMEZONE fall back to these.
         _fold(f"X-WR-CALDESC:{_esc('Spiele der SG Wasserball Essen, Daten vom DSV')}"),
         "X-WR-TIMEZONE:Europe/Berlin",
+        "REFRESH-INTERVAL;VALUE=DURATION:PT12H",
+        "X-PUBLISHED-TTL:PT12H",
         "CALSCALE:GREGORIAN",
         "METHOD:PUBLISH",
-        _VTIMEZONE,
         *vevents,
         "END:VCALENDAR",
     ]) + "\r\n"

@@ -59,11 +59,12 @@ def test_uids_are_unique(written):
     assert len(uids) == len(set(uids))
 
 
-def test_timed_event_carries_timezone(written):
+def test_timed_event_is_absolute_utc(written):
+    """19:30 Berlin on 3 September is 17:30 UTC (CEST, UTC+2)."""
     _, path = written
-    text = path.read_text(encoding="utf-8")
-    assert "DTSTART;TZID=Europe/Berlin:20260903T193000" in text
-    assert "BEGIN:VTIMEZONE" in text, "TZID references must be backed by a VTIMEZONE block"
+    text = path.read_bytes().decode("utf-8")
+    assert "DTSTART:20260903T173000Z" in text
+    assert "DTEND:20260903T190000Z" in text
 
 
 def test_all_day_event_uses_date_value(written):
@@ -168,7 +169,7 @@ def test_file_is_rewritten_when_the_fixture_itself_changes(tmp_path):
 
     ics.write_ics(str(db_path), str(out))
     assert out.read_bytes() != first
-    assert "DTSTART;TZID=Europe/Berlin:20260903T180000" in out.read_text(encoding="utf-8")
+    assert "DTSTART:20260903T160000Z" in out.read_bytes().decode("utf-8")
 
 
 def test_no_line_exceeds_the_75_octet_limit(written):
@@ -202,3 +203,49 @@ def test_calendar_header_carries_the_compatibility_hints(written):
     assert "X-WR-TIMEZONE:Europe/Berlin" in text
     assert "X-WR-CALNAME:" in text
     assert "X-WR-CALDESC:" in text
+
+
+def test_times_are_utc_without_a_timezone_block(written):
+    """Every calendar Google accepts uses UTC, VALUE=DATE or floating times.
+    A VTIMEZONE block with TZID parameters is the one structural trait shared
+    only by feeds it rejected, so the generator avoids it."""
+    _, path = written
+    text = path.read_text(encoding="utf-8")
+    assert "BEGIN:VTIMEZONE" not in text
+    assert "TZID=" not in text
+    # 19:30 Berlin in November is 18:30 UTC
+    assert "DTSTART:20260903T173000Z" in text or "DTSTART:20260903T193000Z" not in text
+
+
+def test_berlin_local_time_is_converted_to_utc(tmp_path):
+    db_path = tmp_path / "t.db"
+    conn = db.init_db(str(db_path))
+    db.upsert_game(conn, {**GAME_TIMED, "game_date": "2026-01-19", "game_time": "20:20"})  # CET
+    db.upsert_game(conn, {**GAME_TIMED, "id": "s", "game_date": "2026-07-01",
+                          "game_time": "20:00"})                                            # CEST
+    conn.close()
+    out = tmp_path / "t.ics"
+    ics.write_ics(str(db_path), str(out))
+    text = out.read_text(encoding="utf-8")
+    assert "DTSTART:20260119T192000Z" in text, "winter: Berlin is UTC+1"
+    assert "DTSTART:20260701T180000Z" in text, "summer: Berlin is UTC+2"
+
+
+def test_events_carry_transp(written):
+    """The only property present in every accepted feed and missing from ours."""
+    _, path = written
+    assert path.read_text(encoding="utf-8").count("TRANSP:OPAQUE") == 3
+
+
+def test_calendar_declares_a_refresh_interval(written):
+    _, path = written
+    text = path.read_text(encoding="utf-8")
+    assert "REFRESH-INTERVAL;VALUE=DURATION:PT12H" in text
+    assert "X-PUBLISHED-TTL:PT12H" in text
+
+
+def test_calendar_name_is_plain_ascii(written):
+    _, path = written
+    name = [line for line in path.read_bytes().decode("utf-8").split("\r\n")
+            if line.startswith("X-WR-CALNAME:")][0]
+    assert name.isascii(), f"non-ASCII in {name!r}"
