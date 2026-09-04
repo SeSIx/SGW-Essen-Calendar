@@ -131,3 +131,21 @@ def test_legacy_database_is_migrated_once(out):
     assert [e["title"] for e in events] == ["Weihnachtsfeier"]
     assert combine.CUSTOM_EVENTS_JSON.exists()
     assert json.loads(combine.CUSTOM_EVENTS_JSON.read_text())[0]["id"] == "legacy-1"
+
+
+def test_club_dates_are_published_on_their_own(out):
+    """Someone who subscribes to a single team still wants the meetings and
+    training dates, so they have to be available without the two men's teams
+    attached to them."""
+    _add_custom(title="Mannschaftsbesprechung", start_date="2026-09-03",
+                start_time="19:30", end_time="21:30", location="Freibad Dellwig")
+    combine.build_termine_db(out)
+    count = combine.write_vereinstermine_ics(out)
+    assert count == 1, "club dates only — the fixtures belong to the team feeds"
+
+    path = out.parent / "sgw_vereinstermine.ics"
+    cal = Calendar.from_ical(path.read_bytes())
+    summaries = {str(c["SUMMARY"]) for c in cal.walk() if c.name == "VEVENT"}
+    assert summaries == {"Mannschaftsbesprechung"}
+    assert "X-WR-CALNAME:SGW Essen Vereinstermine" in path.read_text(encoding="utf-8"), \
+        "a distinct name, or clients show two calendars called the same thing"

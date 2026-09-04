@@ -284,6 +284,23 @@ def _build_custom_vevent(row: dict, dtstamp: str) -> str:
     return "\r\n".join(lines)
 
 
+def _wrap_calendar(calname: str, caldesc: str, vevents: list[str]) -> str:
+    return "\r\n".join([
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//SGW Essen//sgw_scraper//DE",
+        _fold(f"X-WR-CALNAME:{_esc(calname)}"),
+        _fold(f"X-WR-CALDESC:{_esc(caldesc)}"),
+        "X-WR-TIMEZONE:Europe/Berlin",
+        "REFRESH-INTERVAL;VALUE=DURATION:PT12H",
+        "X-PUBLISHED-TTL:PT12H",
+        "CALSCALE:GREGORIAN",
+        "METHOD:PUBLISH",
+        *vevents,
+        "END:VCALENDAR",
+    ]) + "\r\n"
+
+
 def write_termine_ics(output_dir: Path) -> int:
     termine_path = output_dir / "sgw_termine.db"
     ics_path = output_dir.parent / "sgw_termine.ics"
@@ -304,23 +321,33 @@ def write_termine_ics(output_dir: Path) -> int:
     for r in custom_rows:
         vevents.append(_build_custom_vevent(dict(r), dtstamp))
 
-    cal = "\r\n".join([
-        "BEGIN:VCALENDAR",
-        "VERSION:2.0",
-        "PRODID:-//SGW Essen//sgw_scraper//DE",
-        _fold(f"X-WR-CALNAME:{_esc('SGW Essen Termine')}"),
-        _fold(f"X-WR-CALDESC:{_esc('Spiele und Vereinstermine der SG Wasserball Essen')}"),
-        "X-WR-TIMEZONE:Europe/Berlin",
-        "REFRESH-INTERVAL;VALUE=DURATION:PT12H",
-        "X-PUBLISHED-TTL:PT12H",
-        "CALSCALE:GREGORIAN",
-        "METHOD:PUBLISH",
-        *vevents,
-        "END:VCALENDAR",
-    ]) + "\r\n"
-
+    cal = _wrap_calendar("SGW Essen Termine",
+                         "Spiele und Vereinstermine der SG Wasserball Essen", vevents)
     write_if_changed(str(ics_path), cal)
     print(f"[Combine] sgw_termine.ics: {len(vevents)} event(s) written to {ics_path}")
+    return len(vevents)
+
+
+def write_vereinstermine_ics(output_dir: Path) -> int:
+    """Publish the club dates on their own.
+
+    The default feed bundles them with the two men's teams, so anyone who only
+    wants Herren I had to choose between their own fixtures and the meetings.
+    """
+    ics_path = output_dir.parent / "sgw_vereinstermine.ics"
+
+    conn = sqlite3.connect(str(output_dir / "sgw_termine.db"))
+    dtstamp = data_dtstamp(conn)
+    conn.row_factory = sqlite3.Row
+    rows = conn.execute(
+        "SELECT * FROM custom_events ORDER BY start_date, start_time").fetchall()
+    conn.close()
+
+    vevents = [_build_custom_vevent(dict(r), dtstamp) for r in rows]
+    cal = _wrap_calendar("SGW Essen Vereinstermine",
+                         "Vereinstermine der SG Wasserball Essen", vevents)
+    write_if_changed(str(ics_path), cal)
+    print(f"[Combine] sgw_vereinstermine.ics: {len(vevents)} event(s) written to {ics_path}")
     return len(vevents)
 
 

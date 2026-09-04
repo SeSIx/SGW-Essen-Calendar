@@ -158,6 +158,7 @@ def cmd_scrape(season_keys: list[str], fetch_details: bool, write_ics_files: boo
         print("[Main] Building sgw_termine.db + sgw_termine.ics...")
         combine.build_termine_db(OUTPUT_DIR)
         combine.write_termine_ics(OUTPUT_DIR)
+        combine.write_vereinstermine_ics(OUTPUT_DIR)
 
     return _report(buckets, ics_counts, fetched, skipped, failed, today)
 

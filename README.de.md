@@ -19,9 +19,12 @@ selbst, sobald sich Ansetzungen ändern oder Ergebnisse feststehen.
 | U16 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u16.ics` |
 | U14 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u14.ics` |
 | U12 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u12.ics` |
+| Nur Vereinstermine | `https://sesix.github.io/SGW-Essen-Calendar/sgw_vereinstermine.ics` |
 
 Im Standard-Kalender stehen zusätzlich die Vereinstermine (Mannschaftsbesprechung,
-Trainingsstart, Kampfrichter-Ausbildung), die es in den DSV-Daten nicht gibt.
+Trainingsstart, Kampfrichter-Ausbildung), die es in den DSV-Daten nicht gibt. Den
+letzten Eintrag braucht nur, wer eine einzelne Mannschaft abonniert hat und die
+Vereinstermine trotzdem sehen will.
 
 ### So geht's
 

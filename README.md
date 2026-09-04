@@ -24,9 +24,11 @@ results appear automatically.
 | U16 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u16.ics` |
 | U14 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u14.ics` |
 | U12 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u12.ics` |
+| Club dates only | `https://sesix.github.io/SGW-Essen-Calendar/sgw_vereinstermine.ics` |
 
 The default feed also carries club dates (team meetings, training start, referee
-courses) that exist nowhere in the DSV data.
+courses) that exist nowhere in the DSV data. The last entry is only for anyone
+subscribed to a single team who still wants those dates alongside it.
 
 Google Calendar only accepts subscriptions added from the web interface — its
 Android app cannot add a calendar by URL at all, and a
