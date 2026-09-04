@@ -10,7 +10,7 @@ CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
 UID:2025_362__8@sgw-essen.local
-DTSTAMP:20260824T154430Z
+DTSTAMP:20260824T160726Z
 SUMMARY:SG Wasserball Essen 10:17 ASC Duisburg (U16 Ruhrgebietsliga mixed)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -19,13 +19,14 @@ DTEND:20260214T153000Z
 LOCATION:Sportbad Thurmfeld\, Reckhammerweg 84\, 45141 Essen
 DESCRIPTION:Wettbewerb: U16 Ruhrgebietsliga mixed\nErgebnis: 10:17\nSchieds
  richter: Wiechers\, Christoph\nDetails: https://dsvdaten.dsv.de/Modules/WB
- /Game.aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=8
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=362&G
- roup=&LeagueKind=L&GameID=8
+ /Game.aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=8\nLive: ht
+ tps://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdaten.dsv.de/Modules
+ /WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_362__1@sgw-essen.local
-DTSTAMP:20260824T154430Z
+DTSTAMP:20260824T160726Z
 SUMMARY:WSG Oberhausen 97/27 4:30 SG Wasserball Essen (U16 Ruhrgebietsliga 
  mixed)
 STATUS:CONFIRMED
@@ -35,13 +36,14 @@ DTEND:20260221T180000Z
 LOCATION:AquaPark Oberhausen\, Heinz-Schleußer-Str. 1\, 46047 Oberhausen
 DESCRIPTION:Wettbewerb: U16 Ruhrgebietsliga mixed\nErgebnis: 4:30\nSchiedsr
  ichter: Hümmelink\, Phil\nDetails: https://dsvdaten.dsv.de/Modules/WB/Gam
- e.aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=1
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=362&G
- roup=&LeagueKind=L&GameID=1
+ e.aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=1\nLive: https:
+ //lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdaten.dsv.de/Modules/WB/
+ Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_362__4@sgw-essen.local
-DTSTAMP:20260824T154430Z
+DTSTAMP:20260824T160726Z
 SUMMARY:Wassersportverein Schermbeck : SG Wasserball Essen (U16 Ruhrgebiets
  liga mixed)
 STATUS:CONFIRMED
@@ -51,13 +53,14 @@ DTEND:20260228T160000Z
 LOCATION:Hallenbad Schermbeck\, Weseler Straße 11\, 46514 Schermbeck
 DESCRIPTION:Wettbewerb: U16 Ruhrgebietsliga mixed\nErgebnis: geplant\nSchie
  dsrichter: Rosenke\, Axel\nDetails: https://dsvdaten.dsv.de/Modules/WB/Gam
- e.aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=4
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=362&G
- roup=&LeagueKind=L&GameID=4
+ e.aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=4\nLive: https:
+ //lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdaten.dsv.de/Modules/WB/
+ Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_362__9@sgw-essen.local
-DTSTAMP:20260824T154430Z
+DTSTAMP:20260824T160726Z
 SUMMARY:ASC Duisburg 15:11 SG Wasserball Essen (U16 Ruhrgebietsliga mixed)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -66,13 +69,14 @@ DTEND:20260314T181500Z
 LOCATION:Schwimmstadion\, Margaretenstraße 11\, 47051 Duisburg
 DESCRIPTION:Wettbewerb: U16 Ruhrgebietsliga mixed\nErgebnis: 15:11\nSchieds
  richter: Depenbrock\, Hans-Jürgen\nDetails: https://dsvdaten.dsv.de/Modul
- es/WB/Game.aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=9
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=362&G
- roup=&LeagueKind=L&GameID=9
+ es/WB/Game.aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=9\nLiv
+ e: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdaten.dsv.de/Mo
+ dules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_362__7@sgw-essen.local
-DTSTAMP:20260824T154430Z
+DTSTAMP:20260824T160726Z
 SUMMARY:SG Wasserball Essen 21:3 WSG Oberhausen 97/27 (U16 Ruhrgebietsliga 
  mixed)
 STATUS:CONFIRMED
@@ -82,13 +86,14 @@ DTEND:20260426T143000Z
 LOCATION:Sportbad Thurmfeld\, Reckhammerweg 84\, 45141 Essen
 DESCRIPTION:Wettbewerb: U16 Ruhrgebietsliga mixed\nErgebnis: 21:3\nSchiedsr
  ichter: Niewind\, Holger\nDetails: https://dsvdaten.dsv.de/Modules/WB/Game
- .aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=7
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=362&G
- roup=&LeagueKind=L&GameID=7
+ .aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=7\nLive: https:/
+ /lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdaten.dsv.de/Modules/WB/I
+ ndex.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_362__6@sgw-essen.local
-DTSTAMP:20260824T154430Z
+DTSTAMP:20260824T160726Z
 SUMMARY:SG Wasserball Essen 9:5 Wassersportverein Schermbeck (U16 Ruhrgebie
  tsliga mixed)
 STATUS:CONFIRMED
@@ -98,8 +103,9 @@ DTEND:20260703T193000Z
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: U16 Ruhrgebietsliga mixed\nErgebnis: 9:5\nSchiedsri
  chter: Drobina\, Sladjan\nDetails: https://dsvdaten.dsv.de/Modules/WB/Game
- .aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=6
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=362&G
- roup=&LeagueKind=L&GameID=6
+ .aspx?Season=2025&LeagueID=362&Group=&LeagueKind=L&GameID=6\nLive: https:/
+ /lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdaten.dsv.de/Modules/WB/I
+ ndex.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 END:VCALENDAR

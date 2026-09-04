@@ -10,7 +10,7 @@ CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
 UID:2025_212__49@sgw-essen.local
-DTSTAMP:20260824T153939Z
+DTSTAMP:20260824T160227Z
 SUMMARY:SG Wasserball Essen II 21:10 Wfr. 1912 Mülheim Masters (Ruhrgebiet
  sliga männlich)
 STATUS:CONFIRMED
@@ -21,13 +21,13 @@ LOCATION:Schwimmleistungszentrum Essen\, von-Einem-Straße 77\, 45130 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 21:10\nSchieds
  richter: Clausmeyer\, Florian / Dillig\, Ralf\nDetails: https://dsvdaten.d
  sv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&Ga
- meID=49
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
- roup=&LeagueKind=L&GameID=49
+ meID=49\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdat
+ en.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__68@sgw-essen.local
-DTSTAMP:20260824T153939Z
+DTSTAMP:20260824T160227Z
 SUMMARY:Duisburger SV 1898 III 8:15 SG Wasserball Essen II (Ruhrgebietsliga
   männlich)
 STATUS:CONFIRMED
@@ -38,13 +38,13 @@ LOCATION:Schwimmstadion\, Margaretenstraße 11\, 47051 Duisburg
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 8:15\nSchiedsr
  ichter: Depenbrock\, Hans-Jürgen / Malorny\, Christian\nDetails: https://
  dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&Leagu
- eKind=L&GameID=68
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
- roup=&LeagueKind=L&GameID=68
+ eKind=L&GameID=68\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: http
+ s://dsvdaten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__21@sgw-essen.local
-DTSTAMP:20260824T153939Z
+DTSTAMP:20260824T160227Z
 SUMMARY:Wfr. 1912 Mülheim Masters 10:11 SG Wasserball Essen II (Ruhrgebiet
  sliga männlich)
 STATUS:CONFIRMED
@@ -55,13 +55,13 @@ LOCATION:Hallenbad Süd\, An den Sportstätten 2\, 45468 Mülheim (Ruhr)
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 10:11\nSchieds
  richter: Dillig\, Ralf / Rosenke\, Axel\nDetails: https://dsvdaten.dsv.de/
  Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&GameID=2
- 1
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
- roup=&LeagueKind=L&GameID=21
+ 1\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdaten.dsv
+ .de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__36@sgw-essen.local
-DTSTAMP:20260824T153939Z
+DTSTAMP:20260824T160227Z
 SUMMARY:WSG Oberhausen 97/27 14:23 SG Wasserball Essen II (Ruhrgebietsliga 
  männlich)
 STATUS:CONFIRMED
@@ -72,13 +72,13 @@ LOCATION:AquaPark Oberhausen\, Heinz-Schleußer-Str. 1\, 46047 Oberhausen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 14:23\nSchieds
  richter: Malorny\, Christian / Gomes\, Joel\nDetails: https://dsvdaten.dsv
  .de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&Game
- ID=36
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
- roup=&LeagueKind=L&GameID=36
+ ID=36\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdaten
+ .dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__50@sgw-essen.local
-DTSTAMP:20260824T153939Z
+DTSTAMP:20260824T160227Z
 SUMMARY:SG Wasserball Essen II 27:0 Kevelaerer SV Masters (Ruhrgebietsliga 
  männlich)
 STATUS:CONFIRMED
@@ -89,13 +89,13 @@ LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 27:0\nSchiedsr
  ichter: Clausmeyer\, Florian / Hinkler\, Wolfgang\nDetails: https://dsvdat
  en.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=
- L&GameID=50
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
- roup=&LeagueKind=L&GameID=50
+ L&GameID=50\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://ds
+ vdaten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__31@sgw-essen.local
-DTSTAMP:20260824T153939Z
+DTSTAMP:20260824T160227Z
 SUMMARY:WSG Oberhausen Masters 13:15 SG Wasserball Essen II (Ruhrgebietslig
  a männlich)
 STATUS:CONFIRMED
@@ -106,13 +106,13 @@ LOCATION:AquaPark Oberhausen\, Heinz-Schleußer-Str. 1\, 46047 Oberhausen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 13:15\nSchieds
  richter: Talaga\, Ralf / Theis\, Christian\nDetails: https://dsvdaten.dsv.
  de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&GameI
- D=31
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
- roup=&LeagueKind=L&GameID=31
+ D=31\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdaten.
+ dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__51@sgw-essen.local
-DTSTAMP:20260824T153939Z
+DTSTAMP:20260824T160227Z
 SUMMARY:SG Wasserball Essen II 12:14 Wassersportverein Schermbeck II (Ruhrg
  ebietsliga männlich)
 STATUS:CONFIRMED
@@ -123,13 +123,13 @@ LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 12:14\nSchieds
  richter: Blattau\, Rainer / Hinkler\, Wolfgang\nDetails: https://dsvdaten.
  dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&G
- ameID=51
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
- roup=&LeagueKind=L&GameID=51
+ ameID=51\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvda
+ ten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__52@sgw-essen.local
-DTSTAMP:20260824T153939Z
+DTSTAMP:20260824T160227Z
 SUMMARY:SG Wasserball Essen II 10:8 Duisburger SV 1898 III (Ruhrgebietsliga
   männlich)
 STATUS:CONFIRMED
@@ -140,13 +140,13 @@ LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 10:8\nSchiedsr
  ichter: Herrschaft\, Charlotte / Hinkler\, Wolfgang\nDetails: https://dsvd
  aten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKin
- d=L&GameID=52
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
- roup=&LeagueKind=L&GameID=52
+ d=L&GameID=52\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://
+ dsvdaten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__53@sgw-essen.local
-DTSTAMP:20260824T153939Z
+DTSTAMP:20260824T160227Z
 SUMMARY:SG Wasserball Essen II 0:10 WSG Oberhausen Masters (Ruhrgebietsliga
   männlich)
 STATUS:CONFIRMED
@@ -157,13 +157,13 @@ LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 0:10\nSchiedsr
  ichter: Arntzen\, Mirko / Wiechers\, Christoph\nDetails: https://dsvdaten.
  dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&G
- ameID=53
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
- roup=&LeagueKind=L&GameID=53
+ ameID=53\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvda
+ ten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__48@sgw-essen.local
-DTSTAMP:20260824T153939Z
+DTSTAMP:20260824T160227Z
 SUMMARY:PSV Duisburg Masters 8:14 SG Wasserball Essen II (Ruhrgebietsliga m
  ännlich)
 STATUS:CONFIRMED
@@ -175,13 +175,13 @@ LOCATION:Allwetterbad Walsum\, Scholte-Rahm-Straße 21\, 47178 Duisburg Wal
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 8:14\nSchiedsr
  ichter: Petrov\, Michael / Dillig\, Ralf\nDetails: https://dsvdaten.dsv.de
  /Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&GameID=
- 48
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
- roup=&LeagueKind=L&GameID=48
+ 48\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdaten.ds
+ v.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__14@sgw-essen.local
-DTSTAMP:20260824T153939Z
+DTSTAMP:20260824T160227Z
 SUMMARY:ASC Duisburg IV 15:16 SG Wasserball Essen II (Ruhrgebietsliga männ
  lich)
 STATUS:CONFIRMED
@@ -192,13 +192,13 @@ LOCATION:Schwimmstadion\, Margaretenstraße 11\, 47051 Duisburg
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 15:16\nSchieds
  richter: Kleinefeldt\, Maximilian / Clausmeyer\, Florian\nDetails: https:/
  /dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&Leag
- ueKind=L&GameID=14
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
- roup=&LeagueKind=L&GameID=14
+ ueKind=L&GameID=14\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: htt
+ ps://dsvdaten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__65@sgw-essen.local
-DTSTAMP:20260824T153939Z
+DTSTAMP:20260824T160227Z
 SUMMARY:Kevelaerer SV Masters 14:17 SG Wasserball Essen II (Ruhrgebietsliga
   männlich)
 STATUS:CONFIRMED
@@ -209,13 +209,13 @@ LOCATION:Freibad Kevelaer\, Dondertstraße 25\, 47623 Kevelaer
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 14:17\nSchieds
  richter: Rosenke\, Axel / Hinkler\, Wolfgang\nDetails: https://dsvdaten.ds
  v.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&Gam
- eID=65
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
- roup=&LeagueKind=L&GameID=65
+ eID=65\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdate
+ n.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__7@sgw-essen.local
-DTSTAMP:20260824T153939Z
+DTSTAMP:20260824T160227Z
 SUMMARY:Wassersportverein Schermbeck II 6:24 SG Wasserball Essen II (Ruhrge
  bietsliga männlich)
 STATUS:CONFIRMED
@@ -226,13 +226,13 @@ LOCATION:Hallenbad Schermbeck\, Weseler Straße 11\, 46514 Schermbeck
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 6:24\nSchiedsr
  ichter: Depenbrock\, Hans-Jürgen / Wiechers\, Christoph\nDetails: https:/
  /dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&Leag
- ueKind=L&GameID=7
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
- roup=&LeagueKind=L&GameID=7
+ ueKind=L&GameID=7\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: http
+ s://dsvdaten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__54@sgw-essen.local
-DTSTAMP:20260824T153939Z
+DTSTAMP:20260824T160227Z
 SUMMARY:SG Wasserball Essen II 19:8 PSV Duisburg Masters (Ruhrgebietsliga m
  ännlich)
 STATUS:CONFIRMED
@@ -243,13 +243,13 @@ LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 19:8\nSchiedsr
  ichter: Hümmelink\, Phil / Dillig\, Ralf\nDetails: https://dsvdaten.dsv.d
  e/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&GameID
- =54
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
- roup=&LeagueKind=L&GameID=54
+ =54\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdaten.d
+ sv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__55@sgw-essen.local
-DTSTAMP:20260824T153939Z
+DTSTAMP:20260824T160227Z
 SUMMARY:SG Wasserball Essen II 19:13 WSG Oberhausen 97/27 (Ruhrgebietsliga 
  männlich)
 STATUS:CONFIRMED
@@ -260,13 +260,13 @@ LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 19:13\nSchieds
  richter: Talaga\, Ralf / Wiechers\, Christoph\nDetails: https://dsvdaten.d
  sv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&Ga
- meID=55
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
- roup=&LeagueKind=L&GameID=55
+ meID=55\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdat
+ en.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__56@sgw-essen.local
-DTSTAMP:20260824T153939Z
+DTSTAMP:20260824T160227Z
 SUMMARY:SG Wasserball Essen II 18:10 ASC Duisburg IV (Ruhrgebietsliga männ
  lich)
 STATUS:CONFIRMED
@@ -277,13 +277,13 @@ LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga männlich\nErgebnis: 18:10\nSchieds
  richter: Hinkler\, Wolfgang / Blattau\, Rainer\nDetails: https://dsvdaten.
  dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&Group=&LeagueKind=L&G
- ameID=56
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=212&G
- roup=&LeagueKind=L&GameID=56
+ ameID=56\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvda
+ ten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_250__4@sgw-essen.local
-DTSTAMP:20260824T153939Z
+DTSTAMP:20260824T160227Z
 SUMMARY:Wassersportverein Schermbeck : SG Wasserball Essen II (Pokalrunde R
  uhrgebiet männlich)
 STATUS:CONFIRMED
@@ -293,8 +293,8 @@ DTEND:20260921T200000Z
 LOCATION:Hallenbad Schermbeck\, Weseler Straße 11\, 46514 Schermbeck
 DESCRIPTION:Wettbewerb: Pokalrunde Ruhrgebiet männlich\nErgebnis: geplant\
  nDetails: https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueI
- D=250&Group=&LeagueKind=C&GameID=4
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=250&G
- roup=&LeagueKind=C&GameID=4
+ D=250&Group=&LeagueKind=C&GameID=4\nLive: https://lizenz.dsv.de/Live.aspx\
+ nDSV-Portal: https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 END:VCALENDAR

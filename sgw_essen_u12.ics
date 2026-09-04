@@ -10,7 +10,7 @@ CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
 UID:2025_261_A_1@sgw-essen.local
-DTSTAMP:20260824T154503Z
+DTSTAMP:20260824T160800Z
 SUMMARY:SG Wasserball Essen : Duisburger SV 1898 (U12 Ruhrgebietsliga - Gru
  ppe A)
 STATUS:CONFIRMED
@@ -20,13 +20,13 @@ DTEND:20251207T123000Z
 LOCATION:Sportbad Thurmfeld\, Reckhammerweg 84\, 45141 Essen
 DESCRIPTION:Wettbewerb: U12 Ruhrgebietsliga - Gruppe A mixed\nErgebnis: gep
  lant\nDetails: https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&Le
- agueID=261&Group=A&LeagueKind=E&GameID=1
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=261&G
- roup=A&LeagueKind=E&GameID=1
+ agueID=261&Group=A&LeagueKind=E&GameID=1\nLive: https://lizenz.dsv.de/Live
+ .aspx\nDSV-Portal: https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_261_A_2@sgw-essen.local
-DTSTAMP:20260824T154503Z
+DTSTAMP:20260824T160800Z
 SUMMARY:SG Wasserball Essen : WSG Oberhausen 97/27 (U12 Ruhrgebietsliga - G
  ruppe A)
 STATUS:CONFIRMED
@@ -37,13 +37,13 @@ LOCATION:Sportbad Thurmfeld\, Reckhammerweg 84\, 45141 Essen
 DESCRIPTION:Wettbewerb: U12 Ruhrgebietsliga - Gruppe A mixed\nErgebnis: gep
  lant\nSchiedsrichter: Durmaz\, Adam Selim\nDetails: https://dsvdaten.dsv.d
  e/Modules/WB/Game.aspx?Season=2025&LeagueID=261&Group=A&LeagueKind=E&GameI
- D=2
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=261&G
- roup=A&LeagueKind=E&GameID=2
+ D=2\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdaten.d
+ sv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_261_A_6@sgw-essen.local
-DTSTAMP:20260824T154503Z
+DTSTAMP:20260824T160800Z
 SUMMARY:SG Wasserball Essen 5:6 Wassersportverein Schermbeck (U12 Ruhrgebie
  tsliga - Gruppe A)
 STATUS:CONFIRMED
@@ -53,13 +53,14 @@ DTEND:20260214T133000Z
 LOCATION:Sportbad Thurmfeld\, Reckhammerweg 84\, 45141 Essen
 DESCRIPTION:Wettbewerb: U12 Ruhrgebietsliga - Gruppe A mixed\nErgebnis: 5:6
  \nSchiedsrichter: Drobina\, Sladjan\nDetails: https://dsvdaten.dsv.de/Modu
- les/WB/Game.aspx?Season=2025&LeagueID=261&Group=A&LeagueKind=E&GameID=6
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=261&G
- roup=A&LeagueKind=E&GameID=6
+ les/WB/Game.aspx?Season=2025&LeagueID=261&Group=A&LeagueKind=E&GameID=6\nL
+ ive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdaten.dsv.de/
+ Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_261_A_9@sgw-essen.local
-DTSTAMP:20260824T154503Z
+DTSTAMP:20260824T160800Z
 SUMMARY:Wassersportverein Schermbeck 15:4 SG Wasserball Essen (U12 Ruhrgebi
  etsliga - Gruppe A)
 STATUS:CONFIRMED
@@ -70,13 +71,13 @@ LOCATION:Hallenbad Schermbeck\, Weseler Straße 11\, 46514 Schermbeck
 DESCRIPTION:Wettbewerb: U12 Ruhrgebietsliga - Gruppe A mixed\nErgebnis: 15:
  4\nSchiedsrichter: Depenbrock\, Hans-Jürgen\nDetails: https://dsvdaten.ds
  v.de/Modules/WB/Game.aspx?Season=2025&LeagueID=261&Group=A&LeagueKind=E&Ga
- meID=9
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=261&G
- roup=A&LeagueKind=E&GameID=9
+ meID=9\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdate
+ n.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_261_A_12@sgw-essen.local
-DTSTAMP:20260824T154503Z
+DTSTAMP:20260824T160800Z
 SUMMARY:WSG Oberhausen 97/27 7:5 SG Wasserball Essen (U12 Ruhrgebietsliga -
   Gruppe A)
 STATUS:CONFIRMED
@@ -86,13 +87,14 @@ DTEND:20260418T153000Z
 LOCATION:AquaPark Oberhausen\, Heinz-Schleußer-Str. 1\, 46047 Oberhausen
 DESCRIPTION:Wettbewerb: U12 Ruhrgebietsliga - Gruppe A mixed\nErgebnis: 7:5
  \nSchiedsrichter: Drobina\, Sladjan\nDetails: https://dsvdaten.dsv.de/Modu
- les/WB/Game.aspx?Season=2025&LeagueID=261&Group=A&LeagueKind=E&GameID=12
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=261&G
- roup=A&LeagueKind=E&GameID=12
+ les/WB/Game.aspx?Season=2025&LeagueID=261&Group=A&LeagueKind=E&GameID=12\n
+ Live: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdaten.dsv.de
+ /Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_261_A_20@sgw-essen.local
-DTSTAMP:20260824T154503Z
+DTSTAMP:20260824T160800Z
 SUMMARY:SG Wasserball Essen 3:13 ASC Duisburg (U12 Ruhrgebietsliga - Gruppe
   A)
 STATUS:CONFIRMED
@@ -102,8 +104,9 @@ DTEND:20260426T123000Z
 LOCATION:Sportbad Thurmfeld\, Reckhammerweg 84\, 45141 Essen
 DESCRIPTION:Wettbewerb: U12 Ruhrgebietsliga - Gruppe A mixed\nErgebnis: 3:1
  3\nSchiedsrichter: Blattau\, Rainer\nDetails: https://dsvdaten.dsv.de/Modu
- les/WB/Game.aspx?Season=2025&LeagueID=261&Group=A&LeagueKind=E&GameID=20
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=261&G
- roup=A&LeagueKind=E&GameID=20
+ les/WB/Game.aspx?Season=2025&LeagueID=261&Group=A&LeagueKind=E&GameID=20\n
+ Live: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdaten.dsv.de
+ /Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 END:VCALENDAR

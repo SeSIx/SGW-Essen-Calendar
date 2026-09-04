@@ -10,7 +10,7 @@ CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
 UID:2025_225__6@sgw-essen.local
-DTSTAMP:20260901T133134Z
+DTSTAMP:20260901T223735Z
 SUMMARY:Duisburger SSC 09/20 4:11 SG Wasserball Essen (Ruhrgebietsliga weib
  lich)
 STATUS:CONFIRMED
@@ -21,13 +21,13 @@ LOCATION:Kombibad Homberg\, Schillerstr. 162\, 47198 Duisburg
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: 4:11\nSchiedsri
  chter: Hümmelink\, Phil / Peifer\, Carsten\nDetails: https://dsvdaten.dsv
  .de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&Group=&LeagueKind=L&Game
- ID=6
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&G
- roup=&LeagueKind=L&GameID=6
+ ID=6\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdaten.
+ dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__7@sgw-essen.local
-DTSTAMP:20260901T133134Z
+DTSTAMP:20260901T223735Z
 SUMMARY:SG Wasserball Essen 12:11 Düsseldorfer SC 1898 (Ruhrgebietsliga we
  iblich)
 STATUS:CONFIRMED
@@ -38,13 +38,13 @@ LOCATION:Sportbad Thurmfeld\, Reckhammerweg 84\, 45141 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: 12:11\nSchiedsr
  ichter: Depenbrock\, Hans-Jürgen / Rosenke\, Axel\nDetails: https://dsvda
  ten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&Group=&LeagueKind
- =L&GameID=7
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&G
- roup=&LeagueKind=L&GameID=7
+ =L&GameID=7\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://ds
+ vdaten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__24@sgw-essen.local
-DTSTAMP:20260901T133134Z
+DTSTAMP:20260901T223735Z
 SUMMARY:WSG Oberhausen 97/27 5:8 SG Wasserball Essen (Ruhrgebietsliga weibl
  ich)
 STATUS:CONFIRMED
@@ -55,13 +55,13 @@ LOCATION:AquaPark Oberhausen\, Heinz-Schleußer-Str. 1\, 46047 Oberhausen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: 5:8\nSchiedsric
  hter: Peifer\, Carsten / Hümmelink\, Phil\nDetails: https://dsvdaten.dsv.
  de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&Group=&LeagueKind=L&GameI
- D=24
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&G
- roup=&LeagueKind=L&GameID=24
+ D=24\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdaten.
+ dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__12@sgw-essen.local
-DTSTAMP:20260901T133134Z
+DTSTAMP:20260901T223735Z
 SUMMARY:Duisburger SSC 09/20 II 5:17 SG Wasserball Essen (Ruhrgebietsliga w
  eiblich)
 STATUS:CONFIRMED
@@ -72,13 +72,13 @@ LOCATION:Kombibad Homberg\, Schillerstr. 162\, 47198 Duisburg
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: 5:17\nSchiedsri
  chter: Hümmelink\, Phil / Wiechers\, Christoph\nDetails: https://dsvdaten
  .dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&Group=&LeagueKind=L&
- GameID=12
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&G
- roup=&LeagueKind=L&GameID=12
+ GameID=12\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvd
+ aten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__29@sgw-essen.local
-DTSTAMP:20260901T133134Z
+DTSTAMP:20260901T223735Z
 SUMMARY:SGW Essen Masters 12:9 SG Wasserball Essen (Ruhrgebietsliga weiblic
  h)
 STATUS:CONFIRMED
@@ -89,13 +89,13 @@ LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: 12:9\nSchiedsri
  chter: Depenbrock\, Hans-Jürgen / Wiechers\, Christoph\nDetails: https://
  dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&Group=&Leagu
- eKind=L&GameID=29
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&G
- roup=&LeagueKind=L&GameID=29
+ eKind=L&GameID=29\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: http
+ s://dsvdaten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__30@sgw-essen.local
-DTSTAMP:20260901T133134Z
+DTSTAMP:20260901T223735Z
 SUMMARY:SG Wasserball Essen 5:12 WSG Oberhausen 97/27 (Ruhrgebietsliga weib
  lich)
 STATUS:CONFIRMED
@@ -106,13 +106,13 @@ LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: 5:12\nSchiedsri
  chter: Herrschaft\, Charlotte / Niewind\, Holger\nDetails: https://dsvdate
  n.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&Group=&LeagueKind=L
- &GameID=30
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&G
- roup=&LeagueKind=L&GameID=30
+ &GameID=30\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsv
+ daten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__33@sgw-essen.local
-DTSTAMP:20260901T133134Z
+DTSTAMP:20260901T223735Z
 SUMMARY:SG Wasserball Essen 11:6 WSG Vest (Ruhrgebietsliga weiblich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -122,13 +122,13 @@ LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: 11:6\nSchiedsri
  chter: Arntzen\, Mirko / Clausmeyer\, Florian\nDetails: https://dsvdaten.d
  sv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&Group=&LeagueKind=L&Ga
- meID=33
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&G
- roup=&LeagueKind=L&GameID=33
+ meID=33\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdat
+ en.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__36@sgw-essen.local
-DTSTAMP:20260901T133134Z
+DTSTAMP:20260901T223735Z
 SUMMARY:SG Wasserball Essen 9:15 Duisburger SSC 09/20 (Ruhrgebietsliga weib
  lich)
 STATUS:CONFIRMED
@@ -139,13 +139,13 @@ LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: 9:15\nSchiedsri
  chter: Clausmeyer\, Florian / Wandelt\, Thomas\nDetails: https://dsvdaten.
  dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&Group=&LeagueKind=L&G
- ameID=36
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&G
- roup=&LeagueKind=L&GameID=36
+ ameID=36\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvda
+ ten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__39@sgw-essen.local
-DTSTAMP:20260901T133134Z
+DTSTAMP:20260901T223735Z
 SUMMARY:WSG Vest 5:9 SG Wasserball Essen (Ruhrgebietsliga weiblich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -155,13 +155,13 @@ LOCATION:Freibad Mollbeck\, Nesselrodestr. 8\, 45659 Recklinghausen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: 5:9\nSchiedsric
  hter: Niewind\, Holger / Banse\, Pascal\nDetails: https://dsvdaten.dsv.de/
  Modules/WB/Game.aspx?Season=2025&LeagueID=225&Group=&LeagueKind=L&GameID=3
- 9
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&G
- roup=&LeagueKind=L&GameID=39
+ 9\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdaten.dsv
+ .de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__40@sgw-essen.local
-DTSTAMP:20260901T133134Z
+DTSTAMP:20260901T223735Z
 SUMMARY:SG Wasserball Essen 12:20 SGW Essen Masters (Ruhrgebietsliga weibli
  ch)
 STATUS:CONFIRMED
@@ -171,13 +171,14 @@ DTEND:20260704T193000Z
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: 12:20\nSchiedsr
  ichter: Wandelt\, Thomas\nDetails: https://dsvdaten.dsv.de/Modules/WB/Game
- .aspx?Season=2025&LeagueID=225&Group=&LeagueKind=L&GameID=40
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=225&G
- roup=&LeagueKind=L&GameID=40
+ .aspx?Season=2025&LeagueID=225&Group=&LeagueKind=L&GameID=40\nLive: https:
+ //lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdaten.dsv.de/Modules/WB/
+ Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_251__1@sgw-essen.local
-DTSTAMP:20260901T133134Z
+DTSTAMP:20260901T223735Z
 SUMMARY:SG Wasserball Essen : Duisburger SSC 09/20 (Pokalrunde Ruhrgebiet w
  eiblich)
 STATUS:CONFIRMED
@@ -187,8 +188,8 @@ DTEND:20260915T200000Z
 LOCATION:Sportbad Thurmfeld\, Reckhammerweg 84\, 45141 Essen
 DESCRIPTION:Wettbewerb: Pokalrunde Ruhrgebiet weiblich\nErgebnis: geplant\n
  Details: https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID
- =251&Group=&LeagueKind=C&GameID=1
-URL:https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID=251&G
- roup=&LeagueKind=C&GameID=1
+ =251&Group=&LeagueKind=C&GameID=1\nLive: https://lizenz.dsv.de/Live.aspx\n
+ DSV-Portal: https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 END:VCALENDAR
