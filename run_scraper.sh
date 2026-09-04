@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# run_scraper.sh — scrape DSV, rebuild sgw_termine.ics, push if changed.
+# run_scraper.sh — scrape DSV, rebuild every calendar, push if changed.
 # Designed to be called from cron; logs go to stdout (redirect in crontab).
 
 set -euo pipefail
