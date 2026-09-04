@@ -48,8 +48,6 @@ jobs:
           echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
 
       - name: Commit changed calendars
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "SGW Bot"
           git config user.email "bot@sgw-essen.local"
@@ -60,14 +58,21 @@ jobs:
             git commit -m "Auto-update: calendars $(date -u +'%Y-%m-%d %H:%M UTC')"
             git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
             git push origin "HEAD:${GITHUB_REF_NAME}"
-            # Subscribers from before the branch consolidation still poll the
-            # old sgw-scraper-rewrite URL; keep it pointing at the same commit.
-            # The checkout is shallow, so git has no remote-tracking ref to
-            # compare against and rejects the push with 'fetch first'. Moving
-            # the ref through the API lets the server check the fast-forward.
-            gh api -X PATCH "repos/${GITHUB_REPOSITORY}/git/refs/heads/sgw-scraper-rewrite" \
-              -f sha="$(git rev-parse HEAD)"
           fi
+
+      # Subscribers from before the branch consolidation still poll the old
+      # sgw-scraper-rewrite URL, so it has to follow the default branch on
+      # every run -- doing it only when a calendar changed left it ten days
+      # behind after a hand-written commit. Reading the target sha from the
+      # API rather than the shallow checkout keeps the move a fast-forward
+      # even if someone pushed while the scrape was running.
+      - name: Keep the legacy branch on the default branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          target=$(gh api "repos/${GITHUB_REPOSITORY}/git/refs/heads/${GITHUB_REF_NAME}" --jq .object.sha)
+          gh api -X PATCH "repos/${GITHUB_REPOSITORY}/git/refs/heads/sgw-scraper-rewrite" \
+            -f sha="$target" --jq '.ref + " -> " + .object.sha'
 
       - name: Raise alarm
         if: steps.scrape.outputs.exit_code != '0'
