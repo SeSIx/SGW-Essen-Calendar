@@ -10,15 +10,15 @@ automatisch aus dem DSV-Portal geholt und als Kalender-Abo bereitgestellt.
 Als **Abo** eintragen, nicht als Import — dann aktualisiert sich der Kalender von
 selbst, sobald sich Ansetzungen ändern oder Ergebnisse feststehen.
 
-| Mannschaft | Google Kalender | Apple, Outlook, Thunderbird |
-|---|---|---|
-| **Herren I + II** (Standard) | `https://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar/sgw_termine.ics` | `https://sesix.github.io/SGW-Essen-Calendar/sgw_termine.ics` |
-| Herren I | `https://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar/sgw_essen_herren_1.ics` | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_1.ics` |
-| Herren II | `https://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar/sgw_essen_herren_2.ics` | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_2.ics` |
-| Damen | `https://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar/sgw_essen_damen.ics` | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_damen.ics` |
-| U16 | `https://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar/sgw_essen_u16.ics` | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u16.ics` |
-| U14 | `https://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar/sgw_essen_u14.ics` | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u14.ics` |
-| U12 | `https://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar/sgw_essen_u12.ics` | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u12.ics` |
+| Mannschaft | Abo-URL |
+|---|---|
+| **Herren I + II** (Standard) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_termine.ics` |
+| Herren I | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_1.ics` |
+| Herren II | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_2.ics` |
+| Damen | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_damen.ics` |
+| U16 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u16.ics` |
+| U14 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u14.ics` |
+| U12 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u12.ics` |
 
 Im Standard-Kalender stehen zusätzlich die Vereinstermine (Mannschaftsbesprechung,
 Trainingsstart, Kampfrichter-Ausbildung), die es in den DSV-Daten nicht gibt.
@@ -37,20 +37,41 @@ automatisch auf dem Handy.
 Account hinzufügen → Andere → Kalenderabo. Outlook → Kalender hinzufügen → Aus
 dem Internet. Apple Kalender am Mac → Ablage → Neues Kalenderabo.
 
-### Google Kalender nimmt derzeit keine neuen Abos an
+GitHub Pages liefert den Feed als `text/calendar` mit `Cache-Control: max-age=600`
+aus — diese URL ist für alle Clients die richtige.
+`https://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar/<datei>.ics` spiegelt
+dieselben Bytes und ergänzt `charset=utf-8`, sendet aber `max-age=604800`: Wer
+sich daran hält, sieht Änderungen einmal pro Woche statt zweimal täglich. Nur als
+Ausweichadresse verwenden. Weder `github.com/…/raw/…` (302) noch
+`raw.githubusercontent.com/…` (`text/plain` plus `nosniff`) funktioniert
+irgendwo.
 
-**Stand 25.08.2026:** Googles Endpunkt `addcalendarfromurl` antwortet auf jeden
-Abo-Versuch mit `HTTP 200 OK` und dem leeren Rumpf
-`[["addcalendarfromurlaction.acfur"]]` — er meldet Erfolg und legt nichts an.
-Im Browser erscheint „Hoppla, dieser Kalender konnte nicht hinzugefügt werden".
+### Wenn Google Kalender das Abo ablehnt
 
-Das betrifft **jeden** neuen Feed, nicht nur diesen: In Tests wurde auch ein
-fremder, unbeteiligter Kalender abgelehnt, während bereits bekannte Feeds
-(Googles Feiertagskalender, officeholidays.com) angenommen wurden. Bestehende
-Abos laufen weiter. Gleiches ist am 23./24.08.2026 unabhängig dokumentiert
-worden.
+Google antwortet auf einen fehlgeschlagenen Versuch mit `HTTP 200 OK`, dem leeren
+Rumpf `[["addcalendarfromurlaction.acfur"]]` und der Meldung „Hoppla, dieser
+Kalender konnte nicht hinzugefügt werden" — einen Grund nennt es nie. Gegen den
+Live-Feed geprüft am 04.09.2026 erklärt nichts auf dieser Seite den Fehler:
 
-Bis Google das behebt:
+- Jede URL antwortet mit `200` und `text/calendar`, ohne Redirect, auch gegenüber
+  dem User-Agent `Google-Calendar-Importer` und über IPv4 wie IPv6.
+- Der Feed ist gültiges RFC 5545: durchgehend CRLF, Zeilen innerhalb von 75
+  Oktetts, Faltung auf Zeichengrenzen, eindeutige UIDs, jedes `VEVENT` mit
+  `DTSTART`, kein BOM, kein unescaptes `,` oder `;` in einem TEXT-Wert.
+
+Die Ursache liegt also im Konto oder im Browser, nicht im Feed. In dieser
+Reihenfolge eingrenzen:
+
+1. Dieselbe URL in einem **anderen Google-Konto** eintragen, oder in einem
+   frischen Browser-Profil ohne Erweiterungen. Ein Adblocker, der den
+   `batchexecute`-Aufruf blockiert, erzeugt genau diesen Fehler.
+2. Prüfen, ob das Konto Googles Obergrenze für abonnierte Kalender erreicht hat
+   und ob ein früherer Versuch die URL nicht schon in der Liste hinterlassen hat
+   — eine im selben Konto bereits bekannte URL lehnt Google ab.
+3. Bei mehreren gleichzeitig angemeldeten Konten darauf achten, dass das
+   `/u/<n>/` in der URL zum gemeinten Konto gehört.
+
+Wenn das nichts bringt:
 
 - **Apple Kalender, Outlook und Thunderbird** abonnieren den Feed problemlos.
 - Für Google Kalender: [GAS-ICS-Sync](https://github.com/derekantrican/GAS-ICS-Sync)

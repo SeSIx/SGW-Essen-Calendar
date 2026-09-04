@@ -15,15 +15,15 @@ iCalendar feeds. Runs unattended on GitHub Actions twice a day.
 Add these as a *subscription*, not an import, and new fixtures, venue changes and
 results appear automatically.
 
-| Team | Google Calendar | Apple, Outlook, Thunderbird |
-|---|---|---|
-| **Men I + II** (default) | `https://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar/sgw_termine.ics` | `https://sesix.github.io/SGW-Essen-Calendar/sgw_termine.ics` |
-| Men I | `https://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar/sgw_essen_herren_1.ics` | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_1.ics` |
-| Men II | `https://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar/sgw_essen_herren_2.ics` | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_2.ics` |
-| Women | `https://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar/sgw_essen_damen.ics` | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_damen.ics` |
-| U16 | `https://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar/sgw_essen_u16.ics` | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u16.ics` |
-| U14 | `https://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar/sgw_essen_u14.ics` | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u14.ics` |
-| U12 | `https://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar/sgw_essen_u12.ics` | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u12.ics` |
+| Team | Subscription URL |
+|---|---|
+| **Men I + II** (default) | `https://sesix.github.io/SGW-Essen-Calendar/sgw_termine.ics` |
+| Men I | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_1.ics` |
+| Men II | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_herren_2.ics` |
+| Women | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_damen.ics` |
+| U16 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u16.ics` |
+| U14 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u14.ics` |
+| U12 | `https://sesix.github.io/SGW-Essen-Calendar/sgw_essen_u12.ics` |
 
 The default feed also carries club dates (team meetings, training start, referee
 courses) that exist nowhere in the DSV data.
@@ -35,31 +35,46 @@ base64 by that app and produces a garbage calendar name. Add it once at
 [calendar.google.com](https://calendar.google.com) under Settings → Add calendar
 → From URL, and it appears on the phone by itself.
 
-Two hosts, because Google only accepts a feed served as
-`text/calendar; charset=utf-8`. GitHub Pages omits the charset, so Google gets
-the jsDelivr URL; jsDelivr caches for up to twelve hours, which costs nothing at
-Google's once-a-day polling. Clients that poll more often get the Pages URL.
-Neither `github.com/…/raw/…` (302) nor `raw.githubusercontent.com/…`
-(`text/plain` plus `nosniff`) works anywhere.
+GitHub Pages serves the feed as `text/calendar` with
+`Cache-Control: max-age=600`, which is what every client should use.
+`https://cdn.jsdelivr.net/gh/SeSIx/SGW-Essen-Calendar/<file>.ics` mirrors the
+same bytes and adds `charset=utf-8`, but sends `max-age=604800`: a client that
+honours it sees updates once a week instead of twice a day. Treat it as a
+fallback, not the default. Neither `github.com/…/raw/…` (302) nor
+`raw.githubusercontent.com/…` (`text/plain` plus `nosniff`) works anywhere.
 
 Each entry carries the result once played, the full venue address, the referees,
 and a link back to the DSV match page.
 
-### Google Calendar currently rejects new subscriptions
+### If Google Calendar refuses the subscription
 
-**As of 2026-08-25:** Google's `addcalendarfromurl` endpoint answers every
-subscription attempt with `HTTP 200 OK` and the empty payload
-`[["addcalendarfromurlaction.acfur"]]` — it reports success and creates nothing.
+Google answers a failed attempt with `HTTP 200 OK`, the empty payload
+`[["addcalendarfromurlaction.acfur"]]` and the generic message "Oops, this
+calendar could not be added" — it never says why. Checked against the live feed
+on 2026-09-04, nothing on this side explains it:
 
-This affects every new feed, not just this one: an unrelated third-party
-calendar was refused in the same account while feeds Google already knew were
-accepted, and existing subscriptions keep updating. The same behaviour was
-independently reported on 23/24 August 2026.
+- every URL answers `200` with `text/calendar` and no redirect, including to the
+  `Google-Calendar-Importer` user agent, over both IPv4 and IPv6,
+- the feed is valid RFC 5545: CRLF throughout, lines within 75 octets, folds on
+  character boundaries, unique UIDs, every `VEVENT` with a `DTSTART`, no BOM and
+  no unescaped `,` or `;` in any TEXT value.
 
-Until Google fixes it, Apple Calendar, Outlook and Thunderbird subscribe to the
-feed without trouble, and
+So the fault is in the account or the browser, not the feed. Isolate it in this
+order:
+
+1. Add the same URL from a **different Google account**, or from a clean browser
+   profile with extensions disabled. An ad blocker breaking the `batchexecute`
+   RPC produces exactly this failure.
+2. Check that the account is not at Google's cap on subscribed calendars, and
+   that a previous attempt did not already leave the URL in the list — Google
+   refuses a URL it has seen before in the same account.
+3. If you are signed into several accounts, make sure the `/u/<n>/` in the URL
+   matches the account you mean to add the calendar to.
+
+Failing that, Apple Calendar, Outlook and Thunderbird subscribe to the feed
+without trouble, and
 [GAS-ICS-Sync](https://github.com/derekantrican/GAS-ICS-Sync) writes the events
-into a Google calendar via the API, bypassing the broken endpoint entirely.
+into a Google calendar via the API, bypassing the endpoint entirely.
 
 ## What it does
 
