@@ -1,7 +1,7 @@
 """ics.py — write a RFC 5545 VCALENDAR from a per-team SGW Essen SQLite DB."""
 
 import sqlite3
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -111,7 +111,22 @@ def to_utc(date_str: str, time_str: str) -> datetime:
     return naive.replace(tzinfo=BERLIN).astimezone(UTC)
 
 
-def _build_vevent(row: dict, dtstamp: str) -> str:
+# The DSV's Game.aspx links answer 302 -> Index.aspx often enough to be useless
+# as a bookmark. Probing each one per run is not an option -- seventy requests
+# against a host that rate-limits would get the scraper blocked -- so the choice
+# is made from the date alone.
+LIVE_URL = "https://lizenz.dsv.de/Live.aspx"
+
+
+def event_url(row: dict, today: date) -> str:
+    """The link the event points at: the live scoreboard on match day, the DSV
+    page otherwise. The DSV link stays in the description either way."""
+    if row.get("game_date") == today.isoformat():
+        return LIVE_URL
+    return row.get("protocol_url") or row.get("detail_url") or ""
+
+
+def _build_vevent(row: dict, dtstamp: str, today: date) -> str:
     uid       = f"{row['id']}@sgw-essen.local"
     home      = row["home_team"] or ""
     away      = row["away_team"] or ""
@@ -185,8 +200,7 @@ def _build_vevent(row: dict, dtstamp: str) -> str:
     description = "\\n".join(_esc(p) for p in desc_parts)
     lines.append(_fold(f"DESCRIPTION:{description}"))
 
-    # URL — prefer protocol PDF, then detail page
-    url = row.get("protocol_url") or row.get("detail_url") or ""
+    url = event_url(row, today)
     if url:
         lines.append(_fold(f"URL:{url}"))
 
@@ -194,8 +208,10 @@ def _build_vevent(row: dict, dtstamp: str) -> str:
     return "\r\n".join(lines)
 
 
-def write_ics(db_path: str, ics_path: str, calendar_name: str = "SGW Essen") -> int:
+def write_ics(db_path: str, ics_path: str, calendar_name: str = "SGW Essen",
+              today: date | None = None) -> int:
     """Return number of events written."""
+    today = today or datetime.now(tz=BERLIN).date()
     Path(ics_path).parent.mkdir(parents=True, exist_ok=True)
 
     conn = sqlite3.connect(db_path)
@@ -206,7 +222,7 @@ def write_ics(db_path: str, ics_path: str, calendar_name: str = "SGW Essen") -> 
     ).fetchall()
     conn.close()
 
-    vevents = [v for v in (_build_vevent(dict(r), dtstamp) for r in rows) if v]
+    vevents = [v for v in (_build_vevent(dict(r), dtstamp, today) for r in rows) if v]
 
     cal = "\r\n".join([
         "BEGIN:VCALENDAR",

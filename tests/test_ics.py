@@ -1,6 +1,7 @@
 """ICS generation must produce calendars real clients accept (RFC 5545)."""
 
 import sqlite3
+from datetime import date
 
 import pytest
 from icalendar import Calendar
@@ -249,3 +250,32 @@ def test_calendar_name_is_plain_ascii(written):
     name = [line for line in path.read_bytes().decode("utf-8").split("\r\n")
             if line.startswith("X-WR-CALNAME:")][0]
     assert name.isascii(), f"non-ASCII in {name!r}"
+
+
+def test_game_link_survives_on_any_other_day(tmp_path):
+    """The DSV link is the right one; it just does not always resolve."""
+    db_path = tmp_path / "t.db"
+    conn = db.init_db(str(db_path))
+    db.upsert_game(conn, {**GAME_TIMED, "detail_url": "https://dsvdaten.dsv.de/x"})
+    conn.commit()
+    conn.close()
+    out = tmp_path / "t.ics"
+    ics.write_ics(str(db_path), str(out), today=date(2026, 1, 1))
+    assert "URL:https://dsvdaten.dsv.de/x" in out.read_text(encoding="utf-8")
+
+
+def test_on_the_day_the_event_points_at_the_live_page(tmp_path):
+    """Game.aspx answers 302 -> Index.aspx often enough to be useless as a
+    bookmark, so on the day itself the event has to lead somewhere that shows
+    the match. The DSV link stays in the description."""
+    db_path = tmp_path / "t.db"
+    conn = db.init_db(str(db_path))
+    db.upsert_game(conn, {**GAME_TIMED, "detail_url": "https://dsvdaten.dsv.de/x"})
+    conn.commit()
+    conn.close()
+    out = tmp_path / "t.ics"
+    ics.write_ics(str(db_path), str(out),
+                  today=date.fromisoformat(GAME_TIMED["game_date"]))
+    text = out.read_bytes().decode("utf-8")
+    assert "URL:https://lizenz.dsv.de/Live.aspx" in text
+    assert "Details: https://dsvdaten.dsv.de/x" in text.replace("\r\n ", "")

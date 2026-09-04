@@ -13,12 +13,12 @@ import argparse
 import json
 import sqlite3
 import uuid
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 import config
 import db
-from ics import _esc, _fold, data_dtstamp, to_utc, write_if_changed
+from ics import BERLIN, _esc, _fold, data_dtstamp, event_url, to_utc, write_if_changed
 
 OUTPUT_DIR = Path(__file__).parent / config.OUTPUT_DIR
 # Club dates live in a tracked JSON file, not in the gitignored databases:
@@ -178,7 +178,7 @@ def build_termine_db(output_dir: Path) -> tuple[int, int]:
 # ICS generation for sgw_termine (games + custom events)
 # ---------------------------------------------------------------------------
 
-def _build_game_vevent(row: dict, dtstamp: str) -> str:
+def _build_game_vevent(row: dict, dtstamp: str, today: date) -> str:
     uid = f"{row['id']}@sgw-essen.local"
     home = row["home_team"] or ""
     away = row["away_team"] or ""
@@ -237,7 +237,7 @@ def _build_game_vevent(row: dict, dtstamp: str) -> str:
         desc_parts.append(f"Details: {row['detail_url']}")
     lines.append(_fold(f"DESCRIPTION:{'\\n'.join(_esc(p) for p in desc_parts)}"))
 
-    url = row.get("protocol_url") or row.get("detail_url") or ""
+    url = event_url(row, today)
     if url:
         lines.append(_fold(f"URL:{url}"))
 
@@ -301,7 +301,8 @@ def _wrap_calendar(calname: str, caldesc: str, vevents: list[str]) -> str:
     ]) + "\r\n"
 
 
-def write_termine_ics(output_dir: Path) -> int:
+def write_termine_ics(output_dir: Path, today: date | None = None) -> int:
+    today = today or datetime.now(tz=BERLIN).date()
     termine_path = output_dir / "sgw_termine.db"
     ics_path = output_dir.parent / "sgw_termine.ics"
 
@@ -315,7 +316,7 @@ def write_termine_ics(output_dir: Path) -> int:
 
     vevents = []
     for r in game_rows:
-        v = _build_game_vevent(dict(r), dtstamp)
+        v = _build_game_vevent(dict(r), dtstamp, today)
         if v:
             vevents.append(v)
     for r in custom_rows:
