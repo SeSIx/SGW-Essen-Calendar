@@ -48,6 +48,8 @@ jobs:
           echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
 
       - name: Commit changed calendars
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "SGW Bot"
           git config user.email "bot@sgw-essen.local"
@@ -60,7 +62,11 @@ jobs:
             git push origin "HEAD:${GITHUB_REF_NAME}"
             # Subscribers from before the branch consolidation still poll the
             # old sgw-scraper-rewrite URL; keep it pointing at the same commit.
-            git push origin "HEAD:refs/heads/sgw-scraper-rewrite"
+            # The checkout is shallow, so git has no remote-tracking ref to
+            # compare against and rejects the push with 'fetch first'. Moving
+            # the ref through the API lets the server check the fast-forward.
+            gh api -X PATCH "repos/${GITHUB_REPOSITORY}/git/refs/heads/sgw-scraper-rewrite" \
+              -f sha="$(git rev-parse HEAD)"
           fi
 
       - name: Raise alarm
