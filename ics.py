@@ -5,6 +5,8 @@ from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+import config
+
 
 # ---------------------------------------------------------------------------
 # RFC 5545 §3.1: lines MUST be ≤75 octets; fold with CRLF + single SPACE.
@@ -111,19 +113,21 @@ def to_utc(date_str: str, time_str: str) -> datetime:
     return naive.replace(tzinfo=BERLIN).astimezone(UTC)
 
 
-# The DSV's Game.aspx links answer 302 -> Index.aspx often enough to be useless
-# as a bookmark. Probing each one per run is not an option -- seventy requests
-# against a host that rate-limits would get the scraper blocked -- so the choice
-# is made from the date alone.
+# Game.aspx serves the match only to requests carrying a dsvdaten.dsv.de
+# Referer -- the scraper sets one, a calendar client never does, so a reader
+# clicking the match link lands on Index.aspx every single time. The event
+# therefore points somewhere that opens, and the match link stays in the body
+# for anyone who wants to paste it.
 LIVE_URL = "https://lizenz.dsv.de/Live.aspx"
+PORTAL_URL = f"{config.BASE_URL}/Modules/WB/Index.aspx"
 
 
 def event_url(row: dict, today: date) -> str:
-    """The link the event points at: the live scoreboard on match day, the DSV
-    page otherwise. The DSV link stays in the description either way."""
+    """Where the event leads: the live scoreboard on match day, the DSV portal
+    on every other day. Never the match page itself."""
     if row.get("game_date") == today.isoformat():
         return LIVE_URL
-    return row.get("protocol_url") or row.get("detail_url") or ""
+    return PORTAL_URL
 
 
 def _build_vevent(row: dict, dtstamp: str, today: date) -> str:
@@ -197,6 +201,8 @@ def _build_vevent(row: dict, dtstamp: str, today: date) -> str:
         desc_parts.append(f"Spielprotokoll: {row['protocol_url']}")
     if row.get("detail_url"):
         desc_parts.append(f"Details: {row['detail_url']}")
+    desc_parts.append(f"Live: {LIVE_URL}")
+    desc_parts.append(f"DSV-Portal: {PORTAL_URL}")
     description = "\\n".join(_esc(p) for p in desc_parts)
     lines.append(_fold(f"DESCRIPTION:{description}"))
 

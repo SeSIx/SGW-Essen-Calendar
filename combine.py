@@ -18,7 +18,17 @@ from pathlib import Path
 
 import config
 import db
-from ics import BERLIN, _esc, _fold, data_dtstamp, event_url, to_utc, write_if_changed
+from ics import (
+    BERLIN,
+    LIVE_URL,
+    PORTAL_URL,
+    _esc,
+    _fold,
+    data_dtstamp,
+    event_url,
+    to_utc,
+    write_if_changed,
+)
 
 OUTPUT_DIR = Path(__file__).parent / config.OUTPUT_DIR
 # Club dates live in a tracked JSON file, not in the gitignored databases:
@@ -235,6 +245,8 @@ def _build_game_vevent(row: dict, dtstamp: str, today: date) -> str:
         desc_parts.append(f"Spielprotokoll: {row['protocol_url']}")
     if row.get("detail_url"):
         desc_parts.append(f"Details: {row['detail_url']}")
+    desc_parts.append(f"Live: {LIVE_URL}")
+    desc_parts.append(f"DSV-Portal: {PORTAL_URL}")
     lines.append(_fold(f"DESCRIPTION:{'\\n'.join(_esc(p) for p in desc_parts)}"))
 
     url = event_url(row, today)
