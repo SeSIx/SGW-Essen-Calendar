@@ -406,7 +406,7 @@ def cmd_list_events() -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Build sgw_termine.db + sgw_termine.ics")
+    parser = argparse.ArgumentParser(description="Build sgw_termine.db, sgw_termine.ics and sgw_vereinstermine.ics")
     parser.add_argument("--output-dir", default=str(OUTPUT_DIR),
                         help=f"Directory with per-team DBs (default: {OUTPUT_DIR})")
     parser.add_argument("--add-event", action="store_true",
@@ -425,6 +425,7 @@ def main() -> None:
     out = Path(args.output_dir)
     build_termine_db(out)
     write_termine_ics(out)
+    write_vereinstermine_ics(out)
 
 
 if __name__ == "__main__":

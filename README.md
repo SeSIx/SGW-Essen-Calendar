@@ -45,8 +45,12 @@ honours it sees updates once a week instead of twice a day. Treat it as a
 fallback, not the default. Neither `github.com/…/raw/…` (302) nor
 `raw.githubusercontent.com/…` (`text/plain` plus `nosniff`) works anywhere.
 
-Each entry carries the result once played, the full venue address, the referees,
-and a link back to the DSV match page.
+Each entry carries the result once played, the full venue address and the
+referees. On the day of a match the entry links the live scoreboard; on every
+other day it links the DSV portal. It never links the match page itself: that
+one is served only to requests carrying a `dsvdaten.dsv.de` referer, which no
+calendar client sends, so the link would always land on the portal front page.
+The match URL stays in the description for anyone who wants to paste it.
 
 ### If Google Calendar refuses the subscription
 
@@ -101,7 +105,7 @@ python main.py                 # scrape, rebuild every calendar, print a run rep
 python main.py --no-details    # fast pass: fixtures only, no detail pages
 python main.py --summary       # row counts from the existing databases
 python combine.py --add-event  # add a club date to the default calendar
-pytest                         # 56 offline tests, no network access
+pytest                         # 71 offline tests, no network access
 ruff check .
 ```
 
@@ -121,7 +125,7 @@ Python 3.12 · requests · BeautifulSoup/lxml · SQLite · pytest · ruff · Git
 | `scraper.py` | HTTP + HTML parsing for the DSV portal |
 | `db.py` | SQLite schema, non-destructive upserts, health queries |
 | `ics.py` | RFC 5545 calendar generation per team |
-| `combine.py` | Default calendar (Men I + II) plus club dates from `custom_events.json` |
+| `combine.py` | Default calendar (Men I + II) plus club dates from `custom_events.json`, and the club-dates-only calendar |
 | `config.py` | URLs, club id, season arithmetic |
 | `tests/` | Offline suite driven by captured DSV HTML |
 | `.github/workflows/` | Test, scrape and live-smoke automation |

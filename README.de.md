@@ -82,20 +82,12 @@ Wenn das nichts bringt:
   über die Kalender-API einträgt. Umgeht die defekte Abo-Funktion vollständig und
   synchronisiert häufiger als Googles 24-Stunden-Takt.
 
-### Warum zwei verschiedene Adressen?
-
-Google nimmt einen Feed nur an, wenn der Server ihn als
-`text/calendar; charset=utf-8` ausliefert. GitHub Pages sendet `text/calendar`
-ohne Zeichensatz, deshalb die jsDelivr-Adresse für Google; dafür cacht jsDelivr
-bis zu zwölf Stunden, was bei Googles täglichem Abrufrhythmus nicht auffällt.
-Alle anderen Apps fragen häufiger nach und bekommen die Pages-Adresse, die
-sofort aktuell ist.
-
-Nicht funktionieren: `github.com/…/raw/…` (Weiterleitung) und
-`raw.githubusercontent.com/…` (`text/plain` plus `nosniff`).
-
 Jeder Eintrag enthält das Ergebnis, sobald gespielt wurde, die vollständige
-Adresse der Schwimmhalle, die Schiedsrichter und einen Link zur DSV-Spielseite.
+Adresse der Schwimmhalle und die Schiedsrichter. Am Spieltag führt der Eintrag
+zum Live-Ticker, an allen anderen Tagen zum DSV-Portal. Nie zur Spielseite
+selbst: die liefert der DSV nur an Anfragen mit einem `dsvdaten.dsv.de`-Referer
+aus, den keine Kalender-App mitschickt — der Link würde also immer auf der
+Startseite landen. Die Spiel-URL steht zum Kopieren in der Beschreibung.
 
 ## Vereinstermine eintragen
 
@@ -108,8 +100,8 @@ python combine.py --list-events  # alle anzeigen
 python combine.py                # Kalender neu bauen
 ```
 
-Danach die geänderte `sgw_termine.ics` committen und pushen — beim nächsten Sync
-sehen alle Abonnenten den neuen Termin.
+Danach die geänderten `sgw_termine.ics` und `sgw_vereinstermine.ics` committen
+und pushen — beim nächsten Sync sehen alle Abonnenten den neuen Termin.
 
 ## Wenn der Kalender leer bleibt
 

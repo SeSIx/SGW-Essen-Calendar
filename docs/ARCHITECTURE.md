@@ -21,6 +21,7 @@ flowchart TD
     subgraph render["ics.py / combine.py"]
         TEAM["per-team .ics"]
         MERGE["sgw_termine.ics<br/>Men I + II + club dates"]
+        CLUBCAL["sgw_vereinstermine.ics<br/>club dates alone"]
     end
 
     CUSTOM[("custom_events.json<br/>club dates, version-controlled")]
@@ -45,7 +46,7 @@ flowchart TD
 | `scraper.py` | Everything that touches the network or raw HTML. Nothing else in the project parses markup |
 | `db.py` | Schema, idempotent upserts, and the health queries the run report is built on |
 | `ics.py` | RFC 5545 rendering for a single team |
-| `combine.py` | The default calendar: Men I + II plus hand-maintained club dates |
+| `combine.py` | The default calendar (Men I + II plus hand-maintained club dates) and the club-dates-only calendar |
 | `main.py` | Orchestration, run report, exit codes. Holds no parsing or SQL of its own |
 
 ## Design decisions
@@ -113,6 +114,16 @@ visible to the automation.
 Here it is the delivery mechanism: the file in the repository *is* the product.
 Databases stay out of version control — they are rebuildable from the DSV at any
 time.
+
+Events never link the DSV match page, even though that is the page a reader
+wants. `Game.aspx` serves it only to requests carrying a `dsvdaten.dsv.de`
+referer — the scraper sends one, a calendar client cannot — and answers
+`302 -> Index.aspx` to everyone else. Linking it would guarantee a dead end, so
+`event_url()` points the event at the live scoreboard on match day and at the
+DSV portal otherwise. The match URL stays in the description as text. The choice
+is made from the date alone: probing seventy links per run against a host that
+rate-limits is not an option, and the run that first investigated this earned a
+blanket `429` doing exactly that.
 
 Delivery goes through GitHub Pages rather than the repository URLs, because
 neither repository URL is usable by a calendar client: `github.com/…/raw/…`
