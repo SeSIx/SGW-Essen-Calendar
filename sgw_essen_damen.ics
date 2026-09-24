@@ -10,7 +10,7 @@ CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
 UID:2025_225__6@sgw-essen.local
-DTSTAMP:20260915T225440Z
+DTSTAMP:20260924T231345Z
 SUMMARY:Duisburger SSC 09/20 4:11 SG Wasserball Essen (Ruhrgebietsliga weib
  lich)
 STATUS:CONFIRMED
@@ -27,7 +27,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__7@sgw-essen.local
-DTSTAMP:20260915T225440Z
+DTSTAMP:20260924T231345Z
 SUMMARY:SG Wasserball Essen 12:11 Düsseldorfer SC 1898 (Ruhrgebietsliga we
  iblich)
 STATUS:CONFIRMED
@@ -44,7 +44,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__24@sgw-essen.local
-DTSTAMP:20260915T225440Z
+DTSTAMP:20260924T231345Z
 SUMMARY:WSG Oberhausen 97/27 5:8 SG Wasserball Essen (Ruhrgebietsliga weibl
  ich)
 STATUS:CONFIRMED
@@ -61,7 +61,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__12@sgw-essen.local
-DTSTAMP:20260915T225440Z
+DTSTAMP:20260924T231345Z
 SUMMARY:Duisburger SSC 09/20 II 5:17 SG Wasserball Essen (Ruhrgebietsliga w
  eiblich)
 STATUS:CONFIRMED
@@ -78,7 +78,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__29@sgw-essen.local
-DTSTAMP:20260915T225440Z
+DTSTAMP:20260924T231345Z
 SUMMARY:SGW Essen Masters 12:9 SG Wasserball Essen (Ruhrgebietsliga weiblic
  h)
 STATUS:CONFIRMED
@@ -95,7 +95,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__30@sgw-essen.local
-DTSTAMP:20260915T225440Z
+DTSTAMP:20260924T231345Z
 SUMMARY:SG Wasserball Essen 5:12 WSG Oberhausen 97/27 (Ruhrgebietsliga weib
  lich)
 STATUS:CONFIRMED
@@ -112,7 +112,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__33@sgw-essen.local
-DTSTAMP:20260915T225440Z
+DTSTAMP:20260924T231345Z
 SUMMARY:SG Wasserball Essen 11:6 WSG Vest (Ruhrgebietsliga weiblich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -128,7 +128,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__36@sgw-essen.local
-DTSTAMP:20260915T225440Z
+DTSTAMP:20260924T231345Z
 SUMMARY:SG Wasserball Essen 9:15 Duisburger SSC 09/20 (Ruhrgebietsliga weib
  lich)
 STATUS:CONFIRMED
@@ -145,7 +145,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__39@sgw-essen.local
-DTSTAMP:20260915T225440Z
+DTSTAMP:20260924T231345Z
 SUMMARY:WSG Vest 5:9 SG Wasserball Essen (Ruhrgebietsliga weiblich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -161,7 +161,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__40@sgw-essen.local
-DTSTAMP:20260915T225440Z
+DTSTAMP:20260924T231345Z
 SUMMARY:SG Wasserball Essen 12:20 SGW Essen Masters (Ruhrgebietsliga weibli
  ch)
 STATUS:CONFIRMED
@@ -178,19 +178,19 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_251__1@sgw-essen.local
-DTSTAMP:20260915T225440Z
-SUMMARY:SG Wasserball Essen : Duisburger SSC 09/20 (Pokalrunde Ruhrgebiet w
- eiblich)
+DTSTAMP:20260924T231345Z
+SUMMARY:SG Wasserball Essen 8:17 Duisburger SSC 09/20 (Pokalrunde Ruhrgebie
+ t weiblich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
 DTSTART:20260915T183000Z
 DTEND:20260915T200000Z
 LOCATION:Sportbad Thurmfeld\, Reckhammerweg 84\, 45141 Essen
-DESCRIPTION:Wettbewerb: Pokalrunde Ruhrgebiet weiblich\nErgebnis: geplant\n
- Schiedsrichter: Gomes\, Joel\nDetails: https://dsvdaten.dsv.de/Modules/WB/
- Game.aspx?Season=2025&LeagueID=251&Group=&LeagueKind=C&GameID=1\nLive: htt
- ps://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdaten.dsv.de/Modules/
- WB/Index.aspx
+DESCRIPTION:Wettbewerb: Pokalrunde Ruhrgebiet weiblich\nErgebnis: 8:17\nSch
+ iedsrichter: Gomes\, Joel\nDetails: https://dsvdaten.dsv.de/Modules/WB/Gam
+ e.aspx?Season=2025&LeagueID=251&Group=&LeagueKind=C&GameID=1\nLive: https:
+ //lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdaten.dsv.de/Modules/WB/
+ Index.aspx
 URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 END:VCALENDAR
