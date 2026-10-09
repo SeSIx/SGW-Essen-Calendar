@@ -23,12 +23,18 @@ class Item:
     start: date
     end: date
     sort_time: str
+    team: str | None = None  # game items only
 
 
 @dataclass(frozen=True)
 class Month:
     label: str
     items: list[Item]
+
+    def visible(self, teams: Iterable[str]) -> bool:
+        """Whether any item shows for this team selection (club dates always do)."""
+        chosen = set(teams)
+        return any(i.team is None or i.team in chosen for i in self.items)
 
 
 @dataclass(frozen=True)
@@ -65,7 +71,7 @@ def game_item(game: Game) -> Item:
     day = game.start_date
     clock = "" if game.all_day else f"{game.start:%H:%M}"
     return Item("game", game.uid, game.summary, WEEKDAYS[day.weekday()], str(day.day),
-                f"{clock or 'ganztägig'} · {game.team_label} · 🔒 DSV", day, day, clock)
+                f"{clock or 'ganztägig'} · {game.team_label} · 🔒 DSV", day, day, clock, game.team)
 
 
 def build(events: Iterable[dict], games: Iterable[Game], today: date, past: bool = False) -> list[Month]:

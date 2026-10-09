@@ -93,3 +93,7 @@ dl.facts dt { color: var(--muted); }
 dl.facts dd { margin: 0; overflow-wrap: anywhere; white-space: pre-line; }
 .compare { display: grid; gap: 10px; }
 @media (min-width: 560px) { .compare { grid-template-columns: 1fr 1fr; } }
+
+[hidden] { display: none !important; }
+.places { display: flex; flex-wrap: wrap; gap: 8px; }
+.places .button { flex: 1 1 auto; font-size: 14px; }

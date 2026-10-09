@@ -37,9 +37,16 @@
     </label>
   </div>
   <label>Ort
-    <input name="location" maxlength="200" value="{{ data.location }}">
+    <input name="location" maxlength="200" list="places" value="{{ data.location }}">
     {{ err(field_errors, 'location') }}
   </label>
+  <datalist id="places">
+    {% for _, address in pools %}<option value="{{ address }}">{% endfor %}
+  </datalist>
+  <div class="places">
+    {% for label, address in pools %}<button type="button" class="button secondary place" data-place="{{ address }}">{{ label }}</button>{% endfor %}
+    {% if maps_url %}<a class="button secondary" href="{{ maps_url }}" target="_blank" rel="noopener noreferrer">Karte öffnen</a>{% endif %}
+  </div>
   <label>Beschreibung
     <textarea name="description" maxlength="2000">{{ data.description }}</textarea>
     {{ err(field_errors, 'description') }}

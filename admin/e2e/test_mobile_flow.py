@@ -106,5 +106,57 @@ def test_full_flow(page):
         page.locator("a.chip.on").first.click()
         page.wait_for_load_state()
     expect(page.get_by_text("Keine Mannschaft gewählt – nur Vereinstermine")).to_be_visible()
-    expect(page.locator("a.item.game")).to_have_count(0)
+    expect(page.locator("li[data-team]:visible")).to_have_count(0)
     shot(page, "08-filter-keine")
+
+
+def test_instant_filter_survives_reload(page):
+    page.goto(BASE + "/?teams=herren_1")
+    page.evaluate("window.__sameDocument = true")  # lost if the browser loads a new document
+    games = page.locator("li[data-team]:visible")
+    before = games.count()
+    with page.expect_response(lambda r: r.url.endswith("/filter") and r.request.method == "POST") as saved:
+        page.get_by_role("link", name="U16", exact=True).click()
+    assert saved.value.status == 204
+    assert page.evaluate("window.__sameDocument") is True, "toggling a chip must not reload the page"
+    assert "teams=herren_1,u16" in page.url.replace("%2C", ",")
+    assert page.locator("a.chip.on", has_text="U16").count() == 1
+    assert games.count() >= before
+
+    while page.locator("a.chip.on").count():
+        with page.expect_response(lambda r: r.url.endswith("/filter")):
+            page.locator("a.chip.on").first.click()
+    assert page.evaluate("window.__sameDocument") is True
+    expect(page.get_by_text("Keine Mannschaft gewählt – nur Vereinstermine")).to_be_visible()
+    expect(page.locator("li[data-team]:visible")).to_have_count(0)
+    expect(page.locator("a.item.event").first).to_be_visible()  # club dates stay
+
+    with page.expect_response(lambda r: r.url.endswith("/filter")):
+        page.get_by_role("link", name="Damen", exact=True).click()
+    page.goto(BASE + "/")  # no query: the choice comes from the cookie
+    expect(page.locator("a.chip.on")).to_have_count(1)
+    expect(page.locator("a.chip.on")).to_have_text("Damen")
+    expect(page.get_by_text("Keine Mannschaft gewählt")).to_be_hidden()
+    expect(page.locator("li[data-team]:visible").first).to_contain_text("Damen")
+    shot(page, "09-filter-sofort")
+
+
+def test_pool_quick_picks_and_map_link(page):
+    page.goto(BASE + "/termin/neu")
+    expect(page.get_by_role("link", name="Karte öffnen")).to_have_count(0)
+    page.get_by_role("button", name="Thurmfeld").click()
+    expect(page.locator("input[name=location]")).to_have_value(
+        "Sportbad Thurmfeld, Reckhammerweg 84, 45141 Essen")
+    page.get_by_role("button", name="Hesse").click()
+    expect(page.locator("input[name=location]")).to_have_value(
+        'Freibad Dellwig "Hesse", Scheppmannskamp 6, 45357 Essen')
+    box = page.get_by_role("button", name="LZ Rüttenscheid").bounding_box()
+    assert box["height"] >= 44
+    shot(page, "10-orte")
+
+    page.goto(BASE + "/?teams=herren_1,herren_2,damen,u16,u14,u12")
+    page.locator("li[data-team]:visible a.item.game").first.click()
+    link = page.get_by_role("link", name="Karte öffnen")
+    expect(link).to_have_attribute("target", "_blank")
+    expect(link).to_have_attribute("rel", "noopener noreferrer")
+    assert "google.com/maps/search/?api=1&query=" in link.get_attribute("href")

@@ -10,6 +10,7 @@
     {% if game.location %}<dt>Wo</dt><dd>{{ game.location }}</dd>{% endif %}
     {% if game.description %}<dt>Details</dt><dd>{{ game.description }}</dd>{% endif %}
   </dl>
+  {% if maps_url %}<p><a class="button secondary" href="{{ maps_url }}" target="_blank" rel="noopener noreferrer">Karte öffnen</a></p>{% endif %}
   <p class="hint">🔒 Spiele kommen automatisch vom DSV und lassen sich hier nicht ändern.</p>
   <p><a class="button secondary" href="{{ url_for('main.index') }}">Zurück</a></p>
 </div>
