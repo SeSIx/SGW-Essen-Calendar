@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Passwort wählen · SGW Termine{% endblock %}
+{% block heading %}Passwort wählen{% endblock %}
+{% block content %}
+<form method="post" class="card form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <p>Hallo {{ link.display_name }}, wähle dein Passwort. Dein Name zum Anmelden ist <b>{{ link.login }}</b>.</p>
+  <input type="text" name="username" value="{{ link.login }}" autocomplete="username" hidden>
+  {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+  <label>Neues Passwort
+    <input name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required>
+  </label>
+  <label>Noch einmal
+    <input name="password2" type="password" autocomplete="new-password" minlength="12" maxlength="128" required>
+  </label>
+  <p class="hint">Mindestens 12 Zeichen. Am einfachsten übernimmst du das Passwort, das dein Handy vorschlägt – es wird dann gespeichert.</p>
+  <button type="submit" class="primary">Passwort speichern</button>
+</form>
+{% endblock %}

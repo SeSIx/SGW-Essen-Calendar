@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · SGW Termine{% endblock %}
+{% block heading %}{{ title }}{% endblock %}
+{% block content %}
+<div class="card">
+  <p>{{ text }}</p>
+  <p><a class="button secondary" href="{{ url_for('main.index') }}">Zur Übersicht</a></p>
+</div>
+{% endblock %}
