@@ -7,6 +7,7 @@ import os
 from collections.abc import Mapping
 from dataclasses import dataclass
 
+ENVIRONMENTS = ("production", "e2e", "test")
 PRODUCTION_HOST = "sgw-admin.srv1136792.hstgr.cloud"
 
 
@@ -29,9 +30,13 @@ class Settings:
 
 def from_env(environ: Mapping[str, str] = os.environ) -> Settings:
     env = environ.get("SGW_ADMIN_ENV", "production")
+    if env not in ENVIRONMENTS:
+        raise RuntimeError(f"SGW_ADMIN_ENV muss einer von {', '.join(ENVIRONMENTS)} sein")
     secret = environ.get("SECRET_KEY", "")
     if len(secret) < 32:
         raise RuntimeError("SECRET_KEY fehlt oder ist kürzer als 32 Zeichen")
+    if env == "production" and len(set(secret)) < 16:
+        raise RuntimeError("SECRET_KEY hat zu wenig verschiedene Zeichen")
     host = environ.get("SGW_ADMIN_HOST", PRODUCTION_HOST)
     scheme = environ.get("SGW_ADMIN_SCHEME", "https")
     fake = environ.get("SGW_ADMIN_FAKE_GITHUB") == "1"

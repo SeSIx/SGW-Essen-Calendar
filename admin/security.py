@@ -48,12 +48,14 @@ def _origin_ok() -> bool:
 
 
 def _check_post() -> None:
-    if request.method != "POST":
+    if request.method in ("GET", "HEAD", "OPTIONS"):
         return
     if not _origin_ok():
         abort(403)
     sent = request.form.get("csrf_token", "")
-    if not sent or not hmac.compare_digest(sent, csrf_token()):
+    # Compare bytes: compare_digest raises TypeError on non-ASCII str.
+    if not isinstance(sent, str) or not sent or not hmac.compare_digest(
+            sent.encode("utf-8"), csrf_token().encode("utf-8")):
         abort(400)
 
 

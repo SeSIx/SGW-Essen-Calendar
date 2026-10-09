@@ -43,5 +43,7 @@ def close_db(_exc: BaseException | None = None) -> None:
 
 def build_store(settings: Settings) -> Store:
     if settings.fake_github_dir:
+        if settings.env == "production":
+            raise RuntimeError("Fake-GitHub ist in production verboten")
         return FakeGitHubStore(settings.fake_github_dir)
     return GitHubStore(settings.github_token, settings.repo, settings.branch)

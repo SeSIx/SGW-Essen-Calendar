@@ -1,9 +1,9 @@
 """Checks every request passes and headers every response carries."""
 
 import pytest
-from admin.app import create_app
 
 from admin import security
+from admin.app import create_app
 from webadmin.testdata import BASE, HOST, HttpsClient
 
 CSP = ("default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; "
@@ -59,6 +59,9 @@ def test_pre_session_cookie_flags(probe):
 
 @pytest.mark.parametrize("data, headers, status", [
     ({}, {"Origin": BASE}, 400),
+    ({"csrf_token": "ä"}, {"Origin": BASE}, 400),
+    ({"csrf_token": "TOKEN"}, {"Sec-Fetch-Site": "same-site", "Origin": BASE}, 403),
+    ({"csrf_token": "TOKEN"}, {"Sec-Fetch-Site": "none", "Origin": BASE}, 403),
     ({"csrf_token": "falsch"}, {"Origin": BASE}, 400),
     ({"csrf_token": "TOKEN"}, {"Origin": "https://evil.example"}, 403),
     ({"csrf_token": "TOKEN"}, {"Sec-Fetch-Site": "cross-site", "Origin": BASE}, 403),
@@ -82,3 +85,48 @@ def test_token_of_another_browser_is_rejected(probe, settings, store, clock):
     foreign = other.test_client().get("/_probe").get_json()["csrf"]
     probe.get("/_probe")
     assert probe.post("/_probe", data={"csrf_token": foreign}, headers={"Origin": BASE}).status_code == 400
+
+
+def test_put_never_reaches_handler(settings, store, clock):
+    flask_app = create_app(settings, store=store, clock=clock)
+    flask_app.test_client_class = HttpsClient
+    reached = []
+    flask_app.add_url_rule("/_put", "put", lambda: reached.append(1) or "ok", methods=["PUT", "DELETE", "PATCH"])
+    c = flask_app.test_client()
+    for method in (c.put, c.delete, c.patch):
+        assert method("/_put").status_code in (400, 403)
+        assert method("/_put", headers={"Origin": BASE}).status_code == 400
+    assert reached == []
+    assert c.put("/healthz").status_code == 403
+
+
+def test_error_responses_carry_headers(client):
+    for r in (client.get("/healthz", base_url="https://evil.example"), client.post("/healthz")):
+        assert r.status_code in (400, 403)
+        assert r.headers["Cache-Control"] == "no-store"
+        assert r.headers["Content-Security-Policy"] == CSP
+
+
+def test_no_hsts_over_http(settings, store, clock):
+    from dataclasses import replace
+    s = replace(settings, scheme="http", host="localhost:8099")
+    c = create_app(s, store=store, clock=clock).test_client()
+    r = c.get("/healthz", base_url="http://localhost:8099")
+    assert r.status_code == 200 and "Strict-Transport-Security" not in r.headers
+
+
+def test_static_is_cacheable(client):
+    assert "no-store" not in client.get("/static/nothing.css").headers.get("Cache-Control", "")
+
+
+def test_pre_session_token_dies_at_login(app, client):
+    from webadmin.testdata import make_user
+
+    app.add_url_rule("/_probe", "probe_get", lambda: {"csrf": security.csrf_token()})
+    app.add_url_rule("/_probe", "probe_post", lambda: "ok", methods=["POST"])
+    pre = client.get("/_probe").get_json()["csrf"]
+    client.set_cookie("__Host-sid", make_user(app), domain=HOST)
+    assert client.post("/_probe", data={"csrf_token": pre}, headers={"Origin": BASE}).status_code == 400
+    sess = client.get("/_probe").get_json()["csrf"]
+    assert sess != pre
+    assert client.post("/_probe", data={"csrf_token": sess}, headers={"Origin": BASE}).status_code == 200
