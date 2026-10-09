@@ -8,6 +8,7 @@ import hashlib
 import re
 import secrets
 import sqlite3
+import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -25,7 +26,9 @@ IP_WINDOW = 15 * 60
 MAX_USERS = 3
 PASSWORD_MIN = 12
 PASSWORD_MAX = 128
-LOGIN_RE = re.compile(r"[a-z0-9-]{2,32}")
+LOGIN_RE = re.compile(r"[a-z0-9][a-z0-9-]{1,31}")
+LINK_PURPOSES = ("invite", "reset")
+_BAD_NAME_CATEGORIES = ("Cc", "Cf", "Zl", "Zp")  # controls, bidi/format marks, line/para separators
 
 GENERIC_LOGIN_ERROR = "Name oder Passwort falsch"
 TOO_MANY = "Zu viele Versuche – bitte in 15 Minuten erneut"
@@ -94,7 +97,8 @@ def create_user(conn: sqlite3.Connection, login: str, display_name: str, now: in
     if not LOGIN_RE.fullmatch(login):
         raise AuthError("Login: 2–32 Zeichen, nur a–z, 0–9 und -")
     display_name = display_name.strip()
-    if not 1 <= len(display_name) <= 40 or any(ord(c) < 32 for c in display_name):
+    if not 1 <= len(display_name) <= 40 or any(
+            unicodedata.category(c) in _BAD_NAME_CATEGORIES for c in display_name):
         raise AuthError("Anzeigename: 1–40 Zeichen, ohne Steuerzeichen")
     with db.transaction(conn):
         (count,) = conn.execute("SELECT COUNT(*) FROM users").fetchone()
@@ -118,6 +122,8 @@ def issue_token(conn: sqlite3.Connection, login: str, purpose: str, now: int) ->
     A reset also ends all sessions and clears the password, so a leaked password
     is useless from the moment the reset is issued.
     """
+    if purpose not in LINK_PURPOSES:
+        raise AuthError("Unbekannter Linktyp")
     raw = secrets.token_urlsafe(32)
     with db.transaction(conn):
         user = conn.execute(
@@ -169,49 +175,67 @@ def redeem_token(conn: sqlite3.Connection, raw: str, password: str, now: int) ->
             raise PasswordRejected(problem)
         conn.execute("UPDATE tokens SET used_at = ? WHERE token_hash = ?", (now, row["token_hash"]))
         conn.execute(
-            "UPDATE users SET password_hash = ?, failed_logins = 0, locked_until = NULL, "
-            "last_login_at = ? WHERE id = ?",
+            "UPDATE users SET password_hash = ?, last_login_at = ? WHERE id = ?",
             (_hasher.hash(password), now, row["id"]))
         return _new_session(conn, row["id"], now)
 
 
+def _locked_until(conn: sqlite3.Connection, name: str) -> int | None:
+    row = conn.execute(
+        "SELECT locked_until FROM login_failures WHERE login = ?", (name,)).fetchone()
+    return row["locked_until"] if row else None
+
+
 def login(conn: sqlite3.Connection, login: str, password: str, ip: str, now: int) -> LoginResult:
-    login = login.strip().lower()
+    """Failures and locks are keyed by the name typed, so unknown names behave the same."""
+    name = login.strip().lower()
     with db.transaction(conn):
         conn.execute("DELETE FROM login_attempts WHERE at <= ?", (now - IP_WINDOW,))
         conn.execute("DELETE FROM sessions WHERE expires_at <= ?", (now,))
+        conn.execute(
+            "DELETE FROM login_failures WHERE locked_until IS NOT NULL AND locked_until <= ?",
+            (now,))
         (recent,) = conn.execute(
             "SELECT COUNT(*) FROM login_attempts WHERE ip = ?", (ip,)).fetchone()
         if recent >= IP_LIMIT:
             return LoginResult(None, TOO_MANY)
         conn.execute("INSERT INTO login_attempts (ip, at) VALUES (?, ?)", (ip, now))
+        locked = _locked_until(conn, name)
         user = conn.execute(
-            "SELECT id, password_hash, locked_until FROM users WHERE login = ?",
-            (login,)).fetchone()
+            "SELECT id, password_hash FROM users WHERE login = ?", (name,)).fetchone()
 
-    if user is None or user["password_hash"] is None:
+    if locked is not None and locked > now:
         _verify(_DUMMY_HASH, password)
-        return LoginResult(None, GENERIC_LOGIN_ERROR)
-    if user["locked_until"] is not None and user["locked_until"] > now:
         return LoginResult(None, TOO_MANY)
+    stored = user["password_hash"] if user is not None else None
+    if stored is None:
+        _verify(_DUMMY_HASH, password)
+        ok = False
+    else:
+        ok = _verify(stored, password)
 
-    ok = _verify(user["password_hash"], password)
     with db.transaction(conn):
-        if not ok:
+        # Re-read: a reset or a lock may have landed while the hash was checked.
+        locked = _locked_until(conn, name)
+        if locked is not None and locked > now:
+            return LoginResult(None, TOO_MANY)
+        current = conn.execute(
+            "SELECT id, password_hash FROM users WHERE login = ?", (name,)).fetchone()
+        if not ok or current is None or current["password_hash"] != stored:
             conn.execute(
-                "UPDATE users SET failed_logins = failed_logins + 1 WHERE id = ?", (user["id"],))
+                "INSERT INTO login_failures (login, failures) VALUES (?, 1) "
+                "ON CONFLICT(login) DO UPDATE SET failures = failures + 1", (name,))
             conn.execute(
-                "UPDATE users SET failed_logins = 0, locked_until = ? "
-                "WHERE id = ? AND failed_logins >= ?",
-                (now + LOCK_SECONDS, user["id"], LOCK_AFTER))
+                "UPDATE login_failures SET failures = 0, locked_until = ? "
+                "WHERE login = ? AND failures >= ?",
+                (now + LOCK_SECONDS, name, LOCK_AFTER))
             return LoginResult(None, GENERIC_LOGIN_ERROR)
-        if _hasher.check_needs_rehash(user["password_hash"]):
+        conn.execute("DELETE FROM login_failures WHERE login = ?", (name,))
+        if _hasher.check_needs_rehash(stored):
             conn.execute("UPDATE users SET password_hash = ? WHERE id = ?",
-                         (_hasher.hash(password), user["id"]))
-        conn.execute(
-            "UPDATE users SET failed_logins = 0, locked_until = NULL, last_login_at = ? "
-            "WHERE id = ?", (now, user["id"]))
-        return LoginResult(_new_session(conn, user["id"], now), None)
+                         (_hasher.hash(password), current["id"]))
+        conn.execute("UPDATE users SET last_login_at = ? WHERE id = ?", (now, current["id"]))
+        return LoginResult(_new_session(conn, current["id"], now), None)
 
 
 def load_session(conn: sqlite3.Connection, raw: str, now: int) -> SessionInfo | None:

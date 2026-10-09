@@ -5,7 +5,7 @@ Events are not stored here. They live in custom_events.json on GitHub.
 
 import sqlite3
 from collections.abc import Iterator
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS users (
@@ -13,10 +13,13 @@ CREATE TABLE IF NOT EXISTS users (
     login          TEXT NOT NULL UNIQUE,
     display_name   TEXT NOT NULL,
     password_hash  TEXT,
-    failed_logins  INTEGER NOT NULL DEFAULT 0,
-    locked_until   INTEGER,
     created_at     INTEGER NOT NULL,
     last_login_at  INTEGER
+);
+CREATE TABLE IF NOT EXISTS login_failures (
+    login         TEXT PRIMARY KEY,
+    failures      INTEGER NOT NULL DEFAULT 0,
+    locked_until  INTEGER
 );
 CREATE TABLE IF NOT EXISTS sessions (
     id_hash     TEXT PRIMARY KEY,
@@ -46,7 +49,7 @@ def connect(path: str) -> sqlite3.Connection:
     # Autocommit mode: every multi-statement change goes through transaction(),
     # which takes the write lock up front so two gunicorn workers cannot both
     # redeem the same link.
-    conn = sqlite3.connect(path, isolation_level=None, timeout=10)
+    conn = sqlite3.connect(path, isolation_level=None)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA foreign_keys=ON")
@@ -63,7 +66,8 @@ def transaction(conn: sqlite3.Connection) -> Iterator[sqlite3.Connection]:
     conn.execute("BEGIN IMMEDIATE")
     try:
         yield conn
+        conn.execute("COMMIT")
     except BaseException:
-        conn.execute("ROLLBACK")
+        with suppress(Exception):  # the original error is the one worth reporting
+            conn.execute("ROLLBACK")
         raise
-    conn.execute("COMMIT")
