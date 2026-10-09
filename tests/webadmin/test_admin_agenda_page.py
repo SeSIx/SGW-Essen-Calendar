@@ -8,7 +8,7 @@ import pytest
 
 import custom_events
 from admin.github_store import CorruptFile, RateLimited, Unauthorized, Unavailable
-from webadmin.testdata import EVENT_TIMED, NOW
+from webadmin.testdata import EVENT_TIMED, HOST, NOW
 
 TEMPLATES = Path(__file__).resolve().parents[2] / "admin" / "templates"
 
@@ -48,6 +48,59 @@ def test_chips_toggle_one_team_each(user_client):
     body = unquote(text(user_client.get("/")))
     assert 'href="/?teams=herren_2"' in body
     assert 'href="/?teams=herren_1,herren_2,damen"' in body
+
+
+def test_last_team_chip_toggles_off_to_empty_selection(user_client):
+    one = unquote(text(user_client.get("/?teams=damen")))
+    assert 'href="/?teams="' in one
+
+
+def test_chip_links_keep_past_flag(user_client):
+    body = unquote(text(user_client.get("/?frueher=1")))
+    assert 'href="/?teams=herren_2&amp;frueher=1"' in body or 'href="/?teams=herren_2&frueher=1"' in body
+
+
+def test_empty_selection_shows_only_club_events_and_hint(user_client):
+    r = user_client.get("/?teams=")
+    body = text(r)
+    assert "Keine Mannschaft gewählt – nur Vereinstermine" in body
+    assert "Kampfrichter-Lehrgang" in body and "Trainingslager Duisburg" in body
+    assert "Iserlohn" not in body and "Duisburg 98" not in body and "/spiel/" not in body
+    assert 'class="chip on"' not in body
+    cookie = next(h for h in r.headers.getlist("Set-Cookie") if h.startswith("teams="))
+    assert cookie.startswith("teams=keine;")
+    for flag in ("Secure", "HttpOnly", "SameSite=Lax", "Path=/", "Max-Age=31536000"):
+        assert flag in cookie
+
+
+def test_hint_absent_with_selection(user_client):
+    assert "Keine Mannschaft gewählt" not in text(user_client.get("/"))
+
+
+def test_empty_selection_cookie_round_trip(user_client):
+    user_client.get("/?teams=")
+    body = text(user_client.get("/"))
+    assert "Keine Mannschaft gewählt" in body and "Iserlohn" not in body
+    user_client.get("/?teams=damen")
+    assert "Duisburg 98" in text(user_client.get("/"))
+
+
+def test_default_without_param_and_cookie(user_client):
+    body = text(user_client.get("/"))
+    assert "Iserlohn" in body and "Keine Mannschaft gewählt" not in body
+
+
+def test_keine_cookie_means_no_team(user_client):
+    user_client.set_cookie("teams", "keine", domain=HOST)
+    body = text(user_client.get("/"))
+    assert "Keine Mannschaft gewählt" in body and "Iserlohn" not in body
+
+
+@pytest.mark.parametrize("value", ["quatsch", "keinezz"])
+def test_garbage_cookie_falls_back_to_default(user_client, value):
+    user_client.set_cookie("teams", value, domain=HOST)
+    body = text(user_client.get("/"))
+    assert "Iserlohn" in body and "Keine Mannschaft gewählt" not in body
 
 
 def test_past_view(user_client):

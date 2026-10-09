@@ -9,10 +9,10 @@
 {% endif %}
 <nav class="chips" aria-label="Mannschaften">
   {% for chip in chips %}
-    {% if chip.href %}<a class="chip{% if chip.on %} on{% endif %}" href="{{ chip.href }}" aria-pressed="{{ 'true' if chip.on else 'false' }}">{{ chip.label }}</a>
-    {% else %}<span class="chip on" aria-pressed="true">{{ chip.label }}</span>{% endif %}
+    <a class="chip{% if chip.on %} on{% endif %}" href="{{ chip.href }}" aria-pressed="{{ 'true' if chip.on else 'false' }}">{{ chip.label }}</a>
   {% endfor %}
 </nav>
+{% if no_teams %}<p class="hint">Keine Mannschaft gewählt – nur Vereinstermine</p>{% endif %}
 {% if games_stale %}<p class="hint">Spiele gerade nicht ganz aktuell – GitHub antwortet nicht.</p>{% endif %}
 {% if broken %}
 <h2 class="month"><span>Fehlerhafte Einträge</span></h2>
