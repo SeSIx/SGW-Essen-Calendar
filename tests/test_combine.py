@@ -240,3 +240,33 @@ def test_removing_the_last_club_date_empties_the_club_feed(out):
     combine.save_custom_events([])
     assert _rebuild(out) == 0
     assert "BEGIN:VEVENT" not in (out.parent / "sgw_vereinstermine.ics").read_text()
+
+
+def _vevent_of(out, title):
+    cal = Calendar.from_ical((out.parent / "sgw_termine.ics").read_bytes())
+    return next(c for c in cal.walk("VEVENT") if str(c["SUMMARY"]) == title)
+
+
+def test_custom_event_with_location_gets_a_map_line(out):
+    _add_custom(title="Besprechung", start_date="2026-09-03",
+                location='Freibad "Hesse", A&B, Müll', description="Bitte pünktlich")
+    _add_custom(title="Nur Ort", start_date="2026-09-04", location="Halle 1")
+    combine.build_termine_db(out)
+    combine.write_termine_ics(out)
+    url = "https://www.google.com/maps/search/?api=1&query="
+    assert str(_vevent_of(out, "Nur Ort")["DESCRIPTION"]) == "Karte: " + url + "Halle%201"
+    parsed = str(_vevent_of(out, "Besprechung")["DESCRIPTION"])
+    assert parsed.startswith("Bitte pünktlich\n\nKarte: " + url + "Freibad%20%22Hesse%22")
+    # icalendar itself turns %2C back into a comma; the published bytes keep it escaped.
+    raw = (out.parent / "sgw_termine.ics").read_bytes().replace(b"\r\n ", b"").decode("utf-8")
+    assert ("Bitte pünktlich\\n\\nKarte: " + url
+            + "Freibad%20%22Hesse%22%2C%20A%26B%2C%20M%C3%BCll") in raw
+
+
+def test_custom_event_without_location_has_no_map_line(out):
+    _add_custom(title="Ohne Ort", start_date="2026-09-03", description="Nur Text")
+    _add_custom(title="Ganz leer", start_date="2026-09-04")
+    combine.build_termine_db(out)
+    combine.write_termine_ics(out)
+    assert str(_vevent_of(out, "Ohne Ort")["DESCRIPTION"]) == "Nur Text"
+    assert "DESCRIPTION" not in _vevent_of(out, "Ganz leer")
