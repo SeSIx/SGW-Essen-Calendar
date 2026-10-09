@@ -65,3 +65,18 @@ def test_broken_items():
     assert sorted((b.key or "", b.title) for b in broken) == [
         ("", "(ohne Titel)"), ("", "(ohne Titel)"), ("kaputt-1", "Feier")]
     assert all(b.problem for b in broken)
+
+
+def test_all_day_game_in_agenda():
+    [turnier] = _games("u16")
+    [item] = agenda.build([], [turnier], TODAY)[0].items
+    assert (item.kind, item.key, item.day_label, item.date_label) == ("game", "2025_4_A_1", "SA", "5")
+    assert item.detail == "ganztägig · U16 · 🔒 DSV"
+    assert item.sort_time == ""
+
+
+def test_event_ending_today_is_not_in_past_view():
+    ends_today = {**EVENT_TIMED, "start_date": "2026-10-08", "end_date": "2026-10-09"}
+    assert agenda.build([ends_today], [], TODAY, past=True) == []
+    upcoming = agenda.build([ends_today], [], TODAY)
+    assert [i.key for m in upcoming for i in m.items] == [EVENT_TIMED["id"]]

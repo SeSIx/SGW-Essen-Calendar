@@ -23,6 +23,7 @@ TEAMS = (
 TEAM_LABELS = dict(TEAMS)
 DEFAULT_TEAMS = ("herren_1", "herren_2")
 TTL = 300
+RETRY_AFTER = 60
 GAME_UID_RE = re.compile(r"[A-Za-z0-9_-]{1,64}")
 
 
@@ -58,17 +59,39 @@ def _text(component, key: str) -> str | None:
     return str(value) if value else None
 
 
+def _berlin(value: datetime) -> datetime:
+    # Floating times in the feed are Berlin wall-clock time, not the server's zone.
+    if value.tzinfo is None:
+        return value.replace(tzinfo=BERLIN)
+    return value.astimezone(BERLIN)
+
+
+def _vevent(comp, team: str) -> Game:
+    """One VEVENT; raises on anything that makes the game unusable."""
+    if not comp.get("UID"):
+        raise ValueError("VEVENT ohne UID")
+    if comp.get("DTSTART") is None:
+        raise ValueError("VEVENT ohne DTSTART")
+    start = comp.decoded("DTSTART")
+    end = comp.decoded("DTEND") if comp.get("DTEND") else start
+    if isinstance(start, datetime) != isinstance(end, datetime):
+        raise ValueError("DTSTART und DTEND haben verschiedene Typen")
+    if isinstance(start, datetime):
+        start, end = _berlin(start), _berlin(end)
+    return Game(
+        uid=str(comp.get("UID")).removesuffix("@sgw-essen.local"),
+        team=team, summary=str(comp.get("SUMMARY", "")), start=start, end=end,
+        location=_text(comp, "LOCATION"), description=_text(comp, "DESCRIPTION"))
+
+
 def parse_ics(text: str, team: str) -> list[Game]:
+    """Games of one team file. A broken VEVENT is skipped, the others are kept."""
     found = []
     for comp in Calendar.from_ical(text).walk("VEVENT"):
-        start = comp.decoded("DTSTART")
-        end = comp.decoded("DTEND") if comp.get("DTEND") else start
-        if isinstance(start, datetime):
-            start, end = start.astimezone(BERLIN), end.astimezone(BERLIN)
-        found.append(Game(
-            uid=str(comp.get("UID", "")).removesuffix("@sgw-essen.local"),
-            team=team, summary=str(comp.get("SUMMARY", "")), start=start, end=end,
-            location=_text(comp, "LOCATION"), description=_text(comp, "DESCRIPTION")))
+        try:
+            found.append(_vevent(comp, team))
+        except (KeyError, ValueError, TypeError, AttributeError):
+            continue
     return found
 
 
@@ -76,7 +99,7 @@ def parse_teams(value: str | None) -> tuple[str, ...] | None:
     """Known team slugs from a comma list, in canonical order; unknown ones are ignored."""
     if value is None:
         return None
-    wanted = set(value.split(","))
+    wanted = {part.strip() for part in value.split(",")}
     return tuple(slug for slug, _ in TEAMS if slug in wanted)
 
 
@@ -85,23 +108,29 @@ class GameCache:
         self._store = store
         self._clock = clock
         self._ttl = ttl
-        self._cache: dict[str, tuple[float, list[Game]]] = {}
+        # team -> (valid until, games, whether the games are fresh)
+        self._cache: dict[str, tuple[float, list[Game], bool]] = {}
 
     def games(self, teams: Iterable[str]) -> tuple[list[Game], bool]:
         out: list[Game] = []
         stale = False
         for team in teams:
             cached = self._cache.get(team)
-            if cached is not None and self._clock() - cached[0] < self._ttl:
+            if cached is not None and self._clock() < cached[0]:
                 out.extend(cached[1])
+                stale |= not cached[2]
                 continue
             try:
                 fresh = parse_ics(self._store.read_text(team_file(team)), team)
-            except (StoreError, ValueError):
+            except (StoreError, ValueError, KeyError, AttributeError, TypeError):
+                # Outage or unreadable calendar: serve the last good copy and do not
+                # retry for RETRY_AFTER seconds, so a down GitHub is not hit per request.
+                kept = cached[1] if cached else []
+                self._cache[team] = (self._clock() + RETRY_AFTER, kept, False)
                 stale = True
-                out.extend(cached[1] if cached else [])
+                out.extend(kept)
                 continue
-            self._cache[team] = (self._clock(), fresh)
+            self._cache[team] = (self._clock() + self._ttl, fresh, True)
             out.extend(fresh)
         return out, stale
 
