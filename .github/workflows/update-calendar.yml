@@ -6,6 +6,11 @@ on:
     - cron: "15 8 * * *"
     - cron: "15 20 * * *"
   workflow_dispatch:
+  # The admin app commits club dates; republish them without a full scrape.
+  push:
+    branches: [main]
+    paths:
+      - custom_events.json
 
 permissions:
   contents: write
@@ -42,10 +47,25 @@ jobs:
 
       - name: Scrape DSV and rebuild calendars
         id: scrape
+        if: github.event_name != 'push'
         run: |
           set +e
           python main.py 2>&1 | tee run.log
           echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+
+      # Only club dates changed: rebuild from the cached fixtures (~1 min instead
+      # of a 3-4 min scrape). Without the cache the fixtures would vanish from
+      # sgw_termine.ics, so fall back to the full scrape then.
+      - name: Rebuild calendars from cached data
+        id: rebuild
+        if: github.event_name == 'push'
+        run: |
+          if [ -f output/sgw_essen_herren_1.db ] && [ -f output/sgw_essen_herren_2.db ]; then
+            python combine.py
+          else
+            echo "No cached fixtures - running the full scrape."
+            python main.py
+          fi
 
       - name: Commit changed calendars
         run: |
@@ -75,7 +95,7 @@ jobs:
             -f sha="$target" --jq '.ref + " -> " + .object.sha'
 
       - name: Raise alarm
-        if: steps.scrape.outputs.exit_code != '0'
+        if: github.event_name != 'push' && steps.scrape.outputs.exit_code != '0'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
