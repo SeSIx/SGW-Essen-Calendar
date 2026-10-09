@@ -1,5 +1,13 @@
 """Shared test data for the admin app tests."""
 
+import re
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+from flask.testing import FlaskClient
+
+from admin import auth, db
+
 EVENT_TIMED = {
     "id": "0b6f3f9e-8a8e-4a57-9a3c-1c2f5e8f0a11", "title": "Kampfrichter-Lehrgang",
     "start_date": "2026-11-21", "start_time": "09:00", "end_date": None, "end_time": "15:00",
@@ -36,3 +44,50 @@ def team_ics(games) -> str:
                   f"SUMMARY:{summary}", *when, "LOCATION:Sportbad Thurmfeld\\, Essen", "END:VEVENT"]
     lines.append("END:VCALENDAR")
     return "\r\n".join(lines) + "\r\n"
+
+
+HOST = "sgw-admin.srv1136792.hstgr.cloud"
+BASE = f"https://{HOST}"
+NOW = int(datetime(2026, 10, 9, 12, 0, tzinfo=ZoneInfo("Europe/Berlin")).timestamp())
+PW = "Wasserball-Essen-2026!"
+
+
+class Clock:
+    def __init__(self, t: int = NOW):
+        self.t = t
+
+    def __call__(self) -> int:
+        return self.t
+
+
+class HttpsClient(FlaskClient):
+    """Talks to the app like a browser on the real host (the cookies are Secure)."""
+
+    def open(self, *args, **kwargs):
+        if args and isinstance(args[0], str):
+            kwargs.setdefault("base_url", BASE)
+        return super().open(*args, **kwargs)
+
+
+def csrf_of(resp) -> str:
+    match = re.search(r'name="csrf_token" value="([^"]+)"', resp.get_data(as_text=True))
+    assert match, "page has no CSRF field"
+    return match.group(1)
+
+
+def post_form(client, path, data, *, origin=BASE, page=None):
+    """POST like a same-origin browser form; CSRF comes from `page` or a GET of `path`."""
+    token = csrf_of(page if page is not None else client.get(path))
+    return client.post(path, data={**data, "csrf_token": token},
+                       headers={"Origin": origin, "Sec-Fetch-Site": "same-origin"})
+
+
+def make_user(app, login="julius", name="Julius", password=PW) -> str:
+    """Create an account with a password; returns a raw session id."""
+    svc = app.extensions["sgw"]
+    conn = db.connect(svc.settings.db_path)
+    try:
+        auth.create_user(conn, login, name, svc.now())
+        return auth.redeem_token(conn, auth.issue_token(conn, login, "invite", svc.now()), password, svc.now())
+    finally:
+        conn.close()
