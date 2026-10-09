@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Termin löschen · SGW Termine{% endblock %}
+{% block heading %}Termin löschen{% endblock %}
+{% block content %}
+<div class="card">
+  <p><b>Termin wirklich löschen?</b></p>
+  <p>{{ title }}</p>
+  <form method="post" class="actions" action="{{ url_for('main.delete_event', event_id=event_id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="rev" value="{{ rev }}">
+    <input type="hidden" name="title" value="{{ title }}">
+    <a class="button secondary" href="{{ url_for('main.edit_event', event_id=event_id) }}">Abbrechen</a>
+    <button type="submit" class="danger">Löschen</button>
+  </form>
+</div>
+{% endblock %}

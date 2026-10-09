@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% macro facts(d) %}
+<dl class="facts">
+  <dt>Titel</dt><dd>{{ d.title }}</dd>
+  <dt>Wann</dt><dd>{{ d.start_date }}{% if not d.all_day %} {{ d.start_time }}{% endif %}{% if d.multi_day %} – {{ d.end_date }}{% endif %}{% if not d.all_day and d.end_time %} bis {{ d.end_time }}{% endif %}</dd>
+  {% if d.location %}<dt>Ort</dt><dd>{{ d.location }}</dd>{% endif %}
+  {% if d.description %}<dt>Beschreibung</dt><dd>{{ d.description }}</dd>{% endif %}
+</dl>
+{% endmacro %}
+{% block title %}Inzwischen geändert · SGW Termine{% endblock %}
+{% block heading %}Inzwischen geändert{% endblock %}
+{% block content %}
+<div class="card">
+  <p class="error" role="alert">Dieser Termin wurde inzwischen von {{ who }} {{ 'geändert' if theirs else 'gelöscht' }}.</p>
+</div>
+<div class="compare">
+  {% if theirs %}<div class="card"><h3>Aktueller Stand</h3>{{ facts(theirs) }}</div>{% endif %}
+  {% if kind == 'edit' %}<div class="card"><h3>Deine Eingaben</h3>{{ facts(mine) }}</div>{% endif %}
+</div>
+{% if kind == 'edit' %}
+<form method="post" class="actions" action="{{ url_for('main.edit_event', event_id=event_id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="rev" value="{{ rev }}">
+  <input type="hidden" name="title" value="{{ mine.title }}">
+  <input type="hidden" name="start_date" value="{{ mine.start_date }}">
+  <input type="hidden" name="start_time" value="{{ mine.start_time }}">
+  <input type="hidden" name="end_date" value="{{ mine.end_date }}">
+  <input type="hidden" name="end_time" value="{{ mine.end_time }}">
+  <input type="hidden" name="location" value="{{ mine.location }}">
+  <input type="hidden" name="description" value="{{ mine.description }}">
+  {% if mine.all_day %}<input type="hidden" name="all_day" value="1">{% endif %}
+  {% if mine.multi_day %}<input type="hidden" name="multi_day" value="1">{% endif %}
+  <a class="button secondary" href="{{ url_for('main.index') }}">Verwerfen</a>
+  <button type="submit" class="primary">Meine Version speichern</button>
+</form>
+{% else %}
+<form method="post" class="actions" action="{{ url_for('main.delete_event', event_id=event_id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="rev" value="{{ rev }}">
+  <input type="hidden" name="title" value="{{ theirs.title }}">
+  <a class="button secondary" href="{{ url_for('main.index') }}">Abbrechen</a>
+  <button type="submit" class="danger">Trotzdem löschen</button>
+</form>
+{% endif %}
+{% endblock %}
