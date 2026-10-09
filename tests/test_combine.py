@@ -209,3 +209,34 @@ def test_add_event_refuses_while_the_file_has_broken_entries(monkeypatch, capsys
     combine.cmd_add_event()
     assert json.loads(combine.CUSTOM_EVENTS_JSON.read_text())[1] == {"id": "bad"}
     assert "fix custom_events.json first" in capsys.readouterr().out
+
+
+def _rebuild(out):
+    combine.build_termine_db(out)
+    combine.write_termine_ics(out)
+    return combine.write_vereinstermine_ics(out)
+
+
+def test_deleted_club_date_leaves_both_calendars(out):
+    """The termine DB survives between scheduled runs via the actions cache, so
+    a date removed from the JSON must be removed from the DB as well."""
+    _add_custom(title="Weihnachtsfeier", start_date="2026-12-19")
+    _add_custom(title="Mannschaftsbesprechung", start_date="2026-09-03")
+    _rebuild(out)
+
+    combine.save_custom_events(
+        [e for e in combine.load_custom_events() if e["title"] != "Weihnachtsfeier"])
+    assert _rebuild(out) == 1
+
+    for name in ("sgw_termine.ics", "sgw_vereinstermine.ics"):
+        text = (out.parent / name).read_text(encoding="utf-8")
+        assert "Weihnachtsfeier" not in text, name
+        assert "Mannschaftsbesprechung" in text, name
+
+
+def test_removing_the_last_club_date_empties_the_club_feed(out):
+    _add_custom(title="Weihnachtsfeier", start_date="2026-12-19")
+    _rebuild(out)
+    combine.save_custom_events([])
+    assert _rebuild(out) == 0
+    assert "BEGIN:VEVENT" not in (out.parent / "sgw_vereinstermine.ics").read_text()

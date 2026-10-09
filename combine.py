@@ -142,7 +142,13 @@ def _upsert_game(conn: sqlite3.Connection, row: dict) -> None:
 
 
 def _sync_custom_events(termine_conn: sqlite3.Connection) -> None:
-    for event in load_custom_events():
+    events = load_custom_events()
+    # sgw_termine.db outlives a run through the actions cache: drop what the
+    # JSON no longer lists, or deleted dates stay published forever.
+    ids = [e["id"] for e in events]
+    termine_conn.execute(
+        f"DELETE FROM custom_events WHERE id NOT IN ({','.join('?' * len(ids))})", ids)
+    for event in events:
         termine_conn.execute(
             "INSERT INTO custom_events (id, title, start_date, start_time, "
             "end_date, end_time, location, description) "
