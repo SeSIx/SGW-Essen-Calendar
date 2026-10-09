@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% macro err(errors, name) %}{% if errors.get(name) %}<span class="field-error" role="alert">{{ errors[name] }}</span>{% endif %}{% endmacro %}
+{% block title %}{{ 'Neuer Termin' if mode == 'new' else 'Termin bearbeiten' }} · SGW Termine{% endblock %}
+{% block heading %}{{ 'Neuer Termin' if mode == 'new' else 'Termin bearbeiten' }}{% endblock %}
+{% block content %}
+<form method="post" class="card form event-form" action="{{ url_for('main.new_event') if mode == 'new' else url_for('main.edit_event', event_id=event_id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="id" value="{{ event_id }}">
+  <input type="hidden" name="rev" value="{{ rev }}">
+  {% if notice %}<p class="notice" role="status">{{ notice }}</p>{% endif %}
+  {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+  {% if save_blocked %}<p class="error" role="alert">Speichern ist gesperrt, bis Julius den GitHub-Zugang erneuert hat.</p>{% endif %}
+  <label>Titel
+    <input name="title" required maxlength="120" value="{{ data.title }}">
+    {{ err(field_errors, 'title') }}
+  </label>
+  <label class="toggle">Ganztägig <input type="checkbox" name="all_day" value="1"{% if data.all_day %} checked{% endif %}></label>
+  <label class="toggle">Mehrtägig <input type="checkbox" name="multi_day" value="1"{% if data.multi_day %} checked{% endif %}></label>
+  <div class="row">
+    <label>Beginn
+      <input type="date" name="start_date" required value="{{ data.start_date }}">
+      {{ err(field_errors, 'start_date') }}
+    </label>
+    <label data-timed>Uhrzeit
+      <input type="time" name="start_time" step="60" value="{{ data.start_time }}">
+      {{ err(field_errors, 'start_time') }}
+    </label>
+  </div>
+  <div class="row">
+    <label data-multi>Ende
+      <input type="date" name="end_date" value="{{ data.end_date }}">
+      {{ err(field_errors, 'end_date') }}
+    </label>
+    <label data-timed>Bis
+      <input type="time" name="end_time" step="60" value="{{ data.end_time }}">
+      {{ err(field_errors, 'end_time') }}
+    </label>
+  </div>
+  <label>Ort
+    <input name="location" maxlength="200" value="{{ data.location }}">
+    {{ err(field_errors, 'location') }}
+  </label>
+  <label>Beschreibung
+    <textarea name="description" maxlength="2000">{{ data.description }}</textarea>
+    {{ err(field_errors, 'description') }}
+  </label>
+  <div class="actions">
+    <a class="button secondary" href="{{ url_for('main.index') }}">Abbrechen</a>
+    <button type="submit" class="primary"{% if save_blocked %} disabled{% endif %}>Sichern</button>
+  </div>
+</form>
+{% if mode == 'edit' %}
+<a class="button danger" href="{{ url_for('main.delete_event', event_id=event_id) }}">Termin löschen</a>
+{% endif %}
+{% endblock %}

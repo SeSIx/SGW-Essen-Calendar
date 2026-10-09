@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Anmelden · SGW Termine{% endblock %}
+{% block heading %}Anmelden{% endblock %}
+{% block content %}
+<form method="post" class="card form" action="{{ url_for('main.login') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+  <label>Name
+    <input name="login" autocomplete="username" autocapitalize="none" spellcheck="false" required maxlength="32" value="{{ login_name }}">
+  </label>
+  <label>Passwort
+    <input name="password" type="password" autocomplete="current-password" required maxlength="128">
+  </label>
+  <button type="submit" class="primary">Anmelden</button>
+</form>
+<p class="hint">Passwort vergessen? Julius schickt dir einen neuen Link.</p>
+{% endblock %}

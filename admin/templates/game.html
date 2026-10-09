@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Spiel · SGW Termine{% endblock %}
+{% block heading %}Spiel{% endblock %}
+{% block content %}
+<div class="card">
+  <p class="what"><span class="t">{{ game.summary }}</span></p>
+  <dl class="facts">
+    <dt>Mannschaft</dt><dd>{{ game.team_label }}</dd>
+    <dt>Wann</dt><dd>{{ when }}</dd>
+    {% if game.location %}<dt>Wo</dt><dd>{{ game.location }}</dd>{% endif %}
+    {% if game.description %}<dt>Details</dt><dd>{{ game.description }}</dd>{% endif %}
+  </dl>
+  <p class="hint">🔒 Spiele kommen automatisch vom DSV und lassen sich hier nicht ändern.</p>
+  <p><a class="button secondary" href="{{ url_for('main.index') }}">Zurück</a></p>
+</div>
+{% endblock %}

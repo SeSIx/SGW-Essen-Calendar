@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Fehler · SGW Termine{% endblock %}
+{% block heading %}Fehler{% endblock %}
+{% block content %}
+<div class="card">
+  <p>Da ist etwas schiefgelaufen. Bitte nochmal versuchen.</p>
+  <p class="meta">Fehler-ID: {{ ref }}</p>
+  <p><a class="button secondary" href="{{ url_for('main.index') }}">Zur Übersicht</a></p>
+</div>
+{% endblock %}
