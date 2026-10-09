@@ -52,6 +52,12 @@ Jeder Befehl gibt einen Link aus, der einmal und 48 Stunden lang funktioniert. S
 3. `cd /root/sgw-admin && docker compose -f admin/compose.yml up -d`
 4. `docker exec sgw-admin sgw-admin token-status`
 
+## Betrieb: Hinweise zu Traefik
+
+- Traefik leitet erst weiter, wenn der Container „healthy“ ist, also ca. 30 s nach `up -d`. Bis dahin liefert die Adresse 404; das ist normal.
+- Traefik darf `X-Forwarded-*`-Header von Clients nicht übernehmen (Standard `forwardedHeaders.insecure=false`, keine `trustedIPs`). Der Einstiegspunkt `websecure` in `/root/docker-compose.yml` setzt dazu nichts und nutzt damit den sicheren Standard. Bei Änderungen daran nachprüfen.
+- Die Einladungslinks stehen im Pfad (`/einladung/<token>`) und dürfen in keinem Traefik-Access-Log landen. In `/root/docker-compose.yml` ist kein Access-Log aktiviert (kein `--accesslog`); wer es einschaltet, muss `/einladung/` ausfiltern. Gunicorn loggt Zugriffe ebenfalls nicht.
+
 ## Entwickeln
 
 ```bash

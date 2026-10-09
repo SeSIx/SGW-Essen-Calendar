@@ -39,6 +39,13 @@ def test_update_replaces_only_the_target():
     assert changes.update(snap(EVENT_TIMED, EVENT_MULTI), EVENT_TIMED["id"], rev, new) == [new, EVENT_MULTI]
 
 
+def test_update_to_what_is_already_stored_is_a_no_op():
+    # A re-submitted edit: the stored event already equals the new one, whatever the rev says.
+    stale_rev = custom_events.event_rev(EVENT_MULTI)
+    new = edited(EVENT_TIMED, title="Lehrgang (verschoben)")
+    assert changes.update(snap(new, EVENT_MULTI), EVENT_TIMED["id"], stale_rev, dict(new)) is None
+
+
 def test_update_after_someone_else_changed_it_is_a_conflict():
     rev = custom_events.event_rev(EVENT_TIMED)
     theirs = edited(EVENT_TIMED, location="Hauptbad")

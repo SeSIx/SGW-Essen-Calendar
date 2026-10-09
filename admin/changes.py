@@ -47,6 +47,10 @@ def _rev(entry: object) -> str:
     return custom_events.event_rev(entry) if isinstance(entry, dict) else ""
 
 
+def _same_event(a: dict, b: dict) -> bool:
+    return all(a.get(k) == b.get(k) for k in custom_events.FIELDS)
+
+
 def create(snapshot: Snapshot, event: dict) -> list | None:
     existing = find(snapshot, event["id"])
     if existing is not None:
@@ -58,6 +62,8 @@ def create(snapshot: Snapshot, event: dict) -> list | None:
 
 def update(snapshot: Snapshot, event_id: str, rev: str, event: dict) -> list:
     current = find(snapshot, event_id)
+    if isinstance(current, dict) and _same_event(current, event):
+        return None  # a re-submitted edit: already stored, nothing to write
     if current is None and rev == "":
         return entries(snapshot) + [event]  # "keep my version" of a deleted event
     if current is None or _rev(current) != rev:
@@ -75,15 +81,18 @@ def delete(snapshot: Snapshot, event_id: str, rev: str) -> list | None:
 
 
 def commit(store: Store, mutate: Callable[[Snapshot], list | None],
-           message: str, author: Author) -> None:
-    """Load, apply, save; if GitHub reports a concurrent write, try exactly once more."""
+           message: str | Callable[[], str], author: Author) -> None:
+    """Load, apply, save; if GitHub reports a concurrent write, try exactly once more.
+
+    A callable message is evaluated after `mutate` ran, so it can use what mutate saw.
+    """
     for attempt in range(2):
         snapshot = store.load()
         new_entries = mutate(snapshot)
         if new_entries is None:
             return
         try:
-            store.save(new_entries, snapshot.sha, message, author)
+            store.save(new_entries, snapshot.sha, message() if callable(message) else message, author)
             return
         except Conflict:
             if attempt == 1:

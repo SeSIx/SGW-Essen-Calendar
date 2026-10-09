@@ -165,3 +165,25 @@ def test_find_searches_all_teams(fake_dir):
     cache = games.GameCache(FakeGitHubStore(fake_dir))
     assert cache.find("2025_3_A_1").team == "damen"
     assert cache.find("gibt-es-nicht") is None
+
+
+def test_cache_survives_concurrent_requests(fake_dir):
+    import threading
+
+    cache = games.GameCache(FakeGitHubStore(fake_dir), ttl=0)  # every call refetches and writes
+    errors = []
+
+    def hammer():
+        try:
+            for _ in range(50):
+                found, _stale = cache.games(slug for slug, _ in games.TEAMS)
+                assert found
+        except Exception as exc:  # noqa: BLE001 - reported below
+            errors.append(exc)
+
+    threads = [threading.Thread(target=hammer) for _ in range(4)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    assert not errors

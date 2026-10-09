@@ -148,7 +148,23 @@ def test_unknown_user_gets_generic_error_and_still_hashes(conn, monkeypatch):
     monkeypatch.setattr(auth, "_verify", lambda h, p: calls.append(h) or real(h, p))
     result = auth.login(conn, "niemand", PW, "1.1.1.1", NOW)
     assert result.error == auth.GENERIC_LOGIN_ERROR
-    assert calls == [auth._DUMMY_HASH]
+    assert calls == [auth._dummy_hash()]
+
+
+def test_dummy_hash_is_computed_on_first_use_and_cached(monkeypatch):
+    assert not hasattr(auth, "_DUMMY_HASH"), "no Argon2 work at import time"
+    auth._dummy_hash.cache_clear()
+    made = []
+    real = auth._hasher
+
+    class Counting:
+        def hash(self, password):
+            made.append(password)
+            return real.hash(password)
+
+    monkeypatch.setattr(auth, "_hasher", Counting())
+    first = auth._dummy_hash()
+    assert auth._dummy_hash() == first and len(made) == 1
 
 
 def test_account_locks_after_ten_failures_for_15_minutes(conn):

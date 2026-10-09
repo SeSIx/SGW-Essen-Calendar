@@ -1,6 +1,7 @@
 """DSV fixtures from the six team calendars in the repo: shown, never edited."""
 
 import re
+import threading
 import time
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
@@ -110,12 +111,15 @@ class GameCache:
         self._ttl = ttl
         # team -> (valid until, games, whether the games are fresh)
         self._cache: dict[str, tuple[float, list[Game], bool]] = {}
+        # gunicorn runs threads: guard the dict, never the slow GitHub fetch.
+        self._lock = threading.Lock()
 
     def games(self, teams: Iterable[str]) -> tuple[list[Game], bool]:
         out: list[Game] = []
         stale = False
         for team in teams:
-            cached = self._cache.get(team)
+            with self._lock:
+                cached = self._cache.get(team)
             if cached is not None and self._clock() < cached[0]:
                 out.extend(cached[1])
                 stale |= not cached[2]
@@ -126,11 +130,13 @@ class GameCache:
                 # Outage or unreadable calendar: serve the last good copy and do not
                 # retry for RETRY_AFTER seconds, so a down GitHub is not hit per request.
                 kept = cached[1] if cached else []
-                self._cache[team] = (self._clock() + RETRY_AFTER, kept, False)
+                with self._lock:
+                    self._cache[team] = (self._clock() + RETRY_AFTER, kept, False)
                 stale = True
                 out.extend(kept)
                 continue
-            self._cache[team] = (self._clock() + self._ttl, fresh, True)
+            with self._lock:
+                self._cache[team] = (self._clock() + self._ttl, fresh, True)
             out.extend(fresh)
         return out, stale
 

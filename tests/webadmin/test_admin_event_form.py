@@ -318,6 +318,45 @@ def test_head_on_delete_page_changes_nothing(user_client, store, fake_dir):
     assert store.saves == 0 and "Kampfrichter-Lehrgang" in titles(fake_dir)
 
 
+def test_resubmitting_the_same_edit_saves_once_and_never_conflicts(user_client, store, fake_dir):
+    page = user_client.get(edit_path(EVENT_TIMED))
+    first = submit(user_client, edit_path(EVENT_TIMED), page, **TIMED_FORM)
+    second = submit(user_client, edit_path(EVENT_TIMED), page, **TIMED_FORM)
+    assert (first.status_code, second.status_code) == (302, 302)
+    assert second.headers["Location"].endswith("/?ok=gespeichert")
+    assert store.saves == 1 and "Mein Titel" in titles(fake_dir)
+
+
+def test_delete_loads_the_file_once_per_attempt(user_client, store, monkeypatch):
+    path = f"/termin/{EVENT_TIMED['id']}/loeschen"
+    confirm = user_client.get(path)
+    loads = []
+    real = store.load
+    monkeypatch.setattr(store, "load", lambda: loads.append(1) or real())
+    assert submit(user_client, path, confirm, with_form=False).status_code == 302
+    assert len(loads) == 1
+    assert store.last_commit()[2] == "Julius: „Kampfrichter-Lehrgang“ gelöscht"
+
+
+def test_delete_pages_carry_no_title_field(user_client, store):
+    path = f"/termin/{EVENT_TIMED['id']}/loeschen"
+    confirm = user_client.get(path)
+    assert "title" not in hidden(confirm)
+    store.save([{**EVENT_TIMED, "location": "Hauptbad"}, EVENT_MULTI], store.load().sha, "x", KAPITAEN)
+    conflict = submit(user_client, path, confirm, with_form=False)
+    assert conflict.status_code == 409 and "title" not in hidden(conflict)
+
+
+def test_conflict_page_blocks_saving_while_token_is_invalid(user_client, store, monkeypatch):
+    page = user_client.get(edit_path(EVENT_TIMED))
+    store.save([{**EVENT_TIMED, "location": "Hauptbad"}, EVENT_MULTI], store.load().sha, "x", KAPITAEN)
+    # Looking up who changed it hits GitHub, which now rejects the token.
+    monkeypatch.setattr(store, "last_author", lambda: setattr(store, "unauthorized", True))
+    r = submit(user_client, edit_path(EVENT_TIMED), page, **TIMED_FORM)
+    assert r.status_code == 409
+    assert re.search(r'<button type="submit" class="primary" disabled>', r.get_data(as_text=True))
+
+
 def test_post_with_malformed_id_is_rejected(user_client, store):
     page = user_client.get("/termin/neu")
     assert submit(user_client, "/termin/a_b", page).status_code in (400, 404)

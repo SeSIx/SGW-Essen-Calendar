@@ -59,12 +59,13 @@ def test_ignore_patterns_cover_env_and_databases():
 def test_gunicorn_keeps_tokens_out_of_logs():
     cmd = next(line for line in read("admin/Dockerfile").splitlines() if line.startswith("CMD"))
     assert "--access-logfile" not in cmd
-    assert '"--timeout", "60"' in cmd and '"--graceful-timeout", "30"' in cmd
+    assert '"--timeout", "90"' in cmd and '"--graceful-timeout", "30"' in cmd
+    assert '"--threads", "2"' in cmd, "a slow GitHub call must not starve /healthz"
 
 
 def test_production_compose_limits_resources():
     c = read("admin/compose.yml")
-    for needle in ("mem_limit: 256m", "pids_limit: 128", "cpus: 1.0", "/tmp:size=16m,noexec,nosuid,nodev"):
+    for needle in ("mem_limit: 512m", "pids_limit: 128", "cpus: 1.0", "/tmp:size=16m,noexec,nosuid,nodev"):
         assert needle in c, needle
 
 

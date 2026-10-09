@@ -66,7 +66,9 @@ def test_pre_session_cookie_flags(probe):
     ({"csrf_token": "TOKEN"}, {"Origin": "https://evil.example"}, 403),
     ({"csrf_token": "TOKEN"}, {"Sec-Fetch-Site": "cross-site", "Origin": BASE}, 403),
     ({"csrf_token": "TOKEN"}, {}, 403),
-    ({"csrf_token": "TOKEN"}, {"Origin": "null"}, 403),
+    # Older Safari sends no Sec-Fetch-Site; the CSRF token is still required.
+    ({"csrf_token": "TOKEN"}, {"Origin": "null"}, 200),
+    ({"csrf_token": "falsch"}, {"Origin": "null"}, 400),
     ({"csrf_token": "TOKEN"}, {"Sec-Fetch-Site": "same-origin"}, 200),
     # What Chrome really sends for a form post under Referrer-Policy: no-referrer:
     ({"csrf_token": "TOKEN"}, {"Sec-Fetch-Site": "same-origin", "Origin": "null"}, 200),

@@ -38,13 +38,14 @@ def _check_host() -> None:
 
 def _origin_ok() -> bool:
     # Referrer-Policy: no-referrer makes browsers send "Origin: null" on form posts,
-    # so Fetch Metadata is the main signal; Origin decides only for browsers without it.
+    # so Fetch Metadata is the main signal. Browsers without it (older Safari) must send
+    # our own origin or "null"; the CSRF token is still required either way.
     expected = services().settings.origin
     site = request.headers.get("Sec-Fetch-Site")
     origin = request.headers.get("Origin")
     if site is not None:
         return site == "same-origin" and origin in (None, "null", expected)
-    return origin == expected
+    return origin in (expected, "null")
 
 
 def _check_post() -> None:

@@ -10,6 +10,7 @@ import secrets
 import sqlite3
 import unicodedata
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 
 from argon2 import PasswordHasher
@@ -34,8 +35,17 @@ GENERIC_LOGIN_ERROR = "Name oder Passwort falsch"
 TOO_MANY = "Zu viele Versuche – bitte in 15 Minuten erneut"
 
 _hasher = PasswordHasher()  # argon2-cffi defaults: Argon2id
-# Unknown names are checked against this hash so they take as long as real ones.
-_DUMMY_HASH = _hasher.hash("timing-dummy-not-a-real-password")
+
+
+@lru_cache(maxsize=1)
+def _dummy_hash() -> str:
+    """Unknown names are checked against this hash so they take as long as real ones.
+
+    Computed on first use: hashing at import would cost every worker start-up time.
+    """
+    return _hasher.hash("timing-dummy-not-a-real-password")
+
+
 _COMMON = frozenset(
     line.strip().lower()
     for line in (Path(__file__).parent / "data" / "common-passwords.txt")
@@ -205,11 +215,11 @@ def login(conn: sqlite3.Connection, login: str, password: str, ip: str, now: int
             "SELECT id, password_hash FROM users WHERE login = ?", (name,)).fetchone()
 
     if locked is not None and locked > now:
-        _verify(_DUMMY_HASH, password)
+        _verify(_dummy_hash(), password)
         return LoginResult(None, TOO_MANY)
     stored = user["password_hash"] if user is not None else None
     if stored is None:
-        _verify(_DUMMY_HASH, password)
+        _verify(_dummy_hash(), password)
         ok = False
     else:
         ok = _verify(stored, password)

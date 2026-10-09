@@ -223,8 +223,9 @@ def _who() -> str:
 def _conflict(kind, event_id, mine, current):
     theirs = forms.from_event(current) if isinstance(current, dict) else None
     rev = custom_events.event_rev(current) if isinstance(current, dict) else ""
-    return render_template("conflict.html", kind=kind, event_id=event_id, mine=mine,
-                           theirs=theirs, rev=rev, who=_who()), 409
+    who = _who()  # may hit GitHub, so read the token state afterwards
+    return render_template("conflict.html", kind=kind, event_id=event_id, mine=mine, theirs=theirs,
+                           rev=rev, who=who, save_blocked=services().store.unauthorized), 409
 
 
 def _load_entry(event_id):
@@ -312,11 +313,18 @@ def delete_event(event_id):
     if services().store.unauthorized:
         return render_template("message.html", title="Nicht gelöscht", text=store_problem(Unauthorized())), 503
     rev = request.form.get("rev", "")[:64]
+    titles = []
+
+    def mutate(snapshot):
+        # Take the commit-message title from the snapshot commit() loaded.
+        entry = changes.find(snapshot, event_id)
+        if isinstance(entry, dict):
+            titles.append(forms.from_event(entry).title)
+        return changes.delete(snapshot, event_id, rev)
+
     try:
-        entry = changes.find(services().store.load(), event_id)
-        title = forms.from_event(entry).title or event_id
-        changes.commit(services().store, lambda s: changes.delete(s, event_id, rev),
-                       changes.message(g.user.display_name, title, "gelöscht"), _author())
+        changes.commit(services().store, mutate, lambda: changes.message(
+            g.user.display_name, titles[-1] if titles and titles[-1] else event_id, "gelöscht"), _author())
     except changes.EventConflict as conflict:
         return _conflict("delete", event_id, forms.from_event(conflict.current), conflict.current)
     except changes.SaveConflict:
