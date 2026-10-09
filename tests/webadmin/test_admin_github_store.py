@@ -150,3 +150,69 @@ def test_check_token_calls_rate_limit():
     s, http = store(resp(body={}, headers={"GitHub-Authentication-Token-Expiration": "2027-10-12 09:00:00 UTC"}))
     assert s.check_token() == datetime(2027, 10, 12, 9, 0, tzinfo=UTC)
     assert http.calls[0][1] == "https://api.github.com/rate_limit"
+
+
+def _non_json_200():
+    return resp(status=200, text="<html>Wartungsarbeiten</html>")
+
+
+def test_load_non_json_body_is_unavailable():
+    s, _ = store(_non_json_200())
+    with pytest.raises(gs.Unavailable):
+        s.load()
+
+
+@pytest.mark.parametrize("body", [
+    {"sha": "abc"},                                                     # no content
+    {"content": None, "sha": "abc"},                                    # wrong type
+    {"content": "", "encoding": "none"},                                # no sha
+    [{"content": "x"}],                                                 # listing, not a file
+    {"content": "%%%not-base64%%%", "sha": "abc"},                      # bad base64
+    {"content": base64.b64encode(b"\xff\xfe").decode(), "sha": "abc"},  # not UTF-8
+])
+def test_load_malformed_200_body_is_corrupt(body):
+    s, _ = store(resp(status=200, body=body))
+    with pytest.raises(gs.CorruptFile):
+        s.load()
+
+
+def test_last_author_unexpected_shape_is_none():
+    s, _ = store(resp(body={"message": "surprise"}), resp(body=[{"commit": None}]),
+                 resp(body=[]), _non_json_200())
+    assert [s.last_author() for _ in range(4)] == [None, None, None, None]
+
+
+def test_save_ignores_non_json_2xx_body():
+    s, _ = store(_non_json_200())
+    s.save([], "sha", "m", gs.Author("A", "a@b"))
+
+
+def test_read_text_non_utf8_is_corrupt():
+    undecodable = resp(text="")
+    undecodable._content = b"\xff\xfe\x00"
+    s, _ = store(undecodable)
+    with pytest.raises(gs.CorruptFile):
+        s.read_text("sgw_essen_damen.ics")
+
+
+def test_non_ascii_save_payload_decodes_to_the_same_event():
+    event = {**EVENT_TIMED, "title": "„Weihnachtsfeier“ in Düsseldorf",
+             "location": "Löwenbad Düsseldorf"}
+    s, http = store(resp(status=200, body={"content": {"sha": "new"}}))
+    s.save([event], "abc123", "Trainer: „Weihnachtsfeier“ angelegt",
+           gs.Author("Trainer", "admin+trainer@sgw-essen.local"))
+    raw = base64.b64decode(http.calls[0][2]["json"]["content"]).decode("utf-8")
+    parsed = custom_events.parse(raw).valid[0]
+    assert parsed["title"] == "„Weihnachtsfeier“ in Düsseldorf"
+    assert parsed["location"] == "Löwenbad Düsseldorf"
+
+
+def test_token_never_appears_in_repr_or_errors():
+    token = "ghp_GEHEIM_42"
+    http = StubHttp(requests.ConnectionError(f"verbindung mit {token} abgebrochen"))
+    s = gs.GitHubStore(token, "SeSIx/SGW-Essen-Calendar", "main", http=http)
+    assert token not in repr(s) and token not in str(s)
+    with pytest.raises(gs.StoreError) as info:
+        s.load()
+    assert token not in str(info.value) and token not in repr(info.value)
+    assert token not in repr(info.value.args)

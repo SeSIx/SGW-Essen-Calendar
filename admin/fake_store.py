@@ -6,6 +6,8 @@ and all of them must see the same "repository".
 
 import fcntl
 import hashlib
+import os
+import tempfile
 from datetime import datetime
 from pathlib import Path
 
@@ -41,9 +43,32 @@ class FakeGitHubStore:
             raise exc
         self.unauthorized = False
 
+    def _read_events(self) -> bytes:
+        try:
+            return (self._dir / EVENTS_PATH).read_bytes()
+        except FileNotFoundError as exc:
+            raise StoreError(f"{EVENTS_PATH} fehlt") from exc
+
+    @staticmethod
+    def _write_atomic(path: Path, text: str) -> None:
+        """Write to a temp file in the same directory, then rename over the target.
+
+        A reader sees either the old or the new complete content, never a partial file.
+        """
+        fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as fh:
+                fh.write(text)
+                fh.flush()
+                os.fsync(fh.fileno())
+            os.replace(tmp, path)
+        except BaseException:
+            Path(tmp).unlink(missing_ok=True)
+            raise
+
     def load(self) -> Snapshot:
         self._maybe_fail("load")
-        data = (self._dir / EVENTS_PATH).read_bytes()
+        data = self._read_events()
         try:
             result = custom_events.parse(data.decode("utf-8"))
         except ValueError as exc:
@@ -55,11 +80,11 @@ class FakeGitHubStore:
         path = self._dir / EVENTS_PATH
         with open(self._dir / ".lock", "w") as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)
-            if self._sha(path.read_bytes()) != sha:
+            if self._sha(self._read_events()) != sha:
                 raise Conflict("409 (fake)")
-            path.write_text(custom_events.serialize(entries), encoding="utf-8")
-            (self._dir / ".last-commit").write_text(
-                f"{author.name}\n{author.email}\n{message}\n", encoding="utf-8")
+            self._write_atomic(path, custom_events.serialize(entries))
+            self._write_atomic(self._dir / ".last-commit",
+                               f"{author.name}\n{author.email}\n{message}\n")
         self.saves += 1
 
     def read_text(self, path: str) -> str:

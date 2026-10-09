@@ -2,6 +2,7 @@
 
 import pytest
 
+import custom_events
 from admin import github_store as gs
 from admin.fake_store import FakeGitHubStore
 from webadmin.testdata import EVENT_MULTI, EVENT_TIMED
@@ -54,3 +55,63 @@ def test_corrupt_file(fake_dir):
     (fake_dir / "custom_events.json").write_text("{kaputt", encoding="utf-8")
     with pytest.raises(gs.CorruptFile):
         FakeGitHubStore(fake_dir).load()
+
+
+def test_missing_events_file_is_a_store_error(fake_dir):
+    (fake_dir / "custom_events.json").unlink()
+    store = FakeGitHubStore(fake_dir)
+    with pytest.raises(gs.StoreError) as info:
+        store.load()
+    assert not isinstance(info.value, FileNotFoundError)
+    with pytest.raises(gs.StoreError):
+        store.save([EVENT_TIMED], "irgendwas", "m", AUTHOR)
+
+
+def test_save_leaves_no_temp_files_and_complete_content(fake_dir):
+    store = FakeGitHubStore(fake_dir)
+    store.save([EVENT_TIMED, EVENT_MULTI], store.load().sha, "m", AUTHOR)
+    names = sorted(p.name for p in fake_dir.iterdir())
+    teams = ["herren_1", "herren_2", "damen", "u16", "u14", "u12"]
+    assert names == sorted(["custom_events.json", ".lock", ".last-commit"]
+                           + [f"sgw_essen_{t}.ics" for t in teams])
+    content = (fake_dir / "custom_events.json").read_text(encoding="utf-8")
+    assert content == custom_events.serialize([EVENT_TIMED, EVENT_MULTI])
+
+
+def test_save_replaces_the_file_atomically(fake_dir, monkeypatch):
+    import os
+    from pathlib import Path
+
+    from admin import fake_store
+
+    seen = []
+    real_replace = os.replace
+
+    def spy(src, dst):
+        # At the moment of the rename the temp file must already be complete,
+        # and the target must still hold the old, complete content.
+        if Path(dst).name == "custom_events.json":
+            seen.append((Path(src).read_text(encoding="utf-8"),
+                         Path(dst).read_text(encoding="utf-8")))
+        return real_replace(src, dst)
+
+    monkeypatch.setattr(fake_store.os, "replace", spy)
+    store = FakeGitHubStore(fake_dir)
+    old_text = (fake_dir / "custom_events.json").read_text(encoding="utf-8")
+    store.save([EVENT_TIMED], store.load().sha, "m", AUTHOR)
+    assert len(seen) == 1
+    tmp_text, target_text = seen[0]
+    assert tmp_text == custom_events.serialize([EVENT_TIMED])
+    assert target_text == old_text
+    assert store.load().result.valid[0]["id"] == EVENT_TIMED["id"]
+
+
+def test_non_ascii_round_trip(fake_dir):
+    event = {**EVENT_TIMED, "title": "„Weihnachtsfeier“ in Düsseldorf",
+             "location": "Löwenbad Düsseldorf"}
+    store = FakeGitHubStore(fake_dir)
+    store.save([event], store.load().sha, "Trainer: „Weihnachtsfeier“ angelegt", AUTHOR)
+    loaded = store.load().result.valid
+    assert loaded[0]["title"] == "„Weihnachtsfeier“ in Düsseldorf"
+    assert loaded[0]["location"] == "Löwenbad Düsseldorf"
+    assert store.last_commit()[2] == "Trainer: „Weihnachtsfeier“ angelegt"

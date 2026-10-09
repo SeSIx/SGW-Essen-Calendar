@@ -100,8 +100,10 @@ class GitHubStore:
             headers["Accept"] = accept
         try:
             resp = self._http.request(method, url, headers=headers, timeout=TIMEOUT, **kwargs)
-        except requests.RequestException as exc:
-            raise Unavailable(str(exc)) from exc
+        except requests.RequestException:
+            # Not chained and without the exception text: the transport error may
+            # echo request details, and the token must never end up in a message.
+            raise Unavailable("GitHub ist nicht erreichbar") from None
         expiry = parse_expiry(resp.headers.get("GitHub-Authentication-Token-Expiration"))
         if expiry is not None:
             self.token_expiry = expiry
@@ -125,13 +127,25 @@ class GitHubStore:
         return resp
 
     def load(self) -> Snapshot:
-        body = self._call("GET", self._contents_url(EVENTS_PATH), params={"ref": self._branch}).json()
-        text = base64.b64decode(body["content"]).decode("utf-8")
+        resp = self._call("GET", self._contents_url(EVENTS_PATH), params={"ref": self._branch})
+        try:
+            body = resp.json()
+        except ValueError:
+            raise Unavailable("GitHub hat keine lesbare Antwort geschickt") from None
+        try:
+            text = base64.b64decode(body["content"]).decode("utf-8")
+            sha = body["sha"]
+            if not isinstance(sha, str):
+                raise TypeError("sha ist kein Text")
+        except (KeyError, TypeError, ValueError):
+            # KeyError/TypeError: no usable content or sha (e.g. encoding "none" for
+            # files over 1 MB, or a directory listing). ValueError: bad base64 or UTF-8.
+            raise CorruptFile("custom_events.json ist nicht lesbar") from None
         try:
             result = custom_events.parse(text)
         except ValueError as exc:
             raise CorruptFile(str(exc)) from exc
-        return Snapshot(result=result, sha=body["sha"])
+        return Snapshot(result=result, sha=sha)
 
     def save(self, entries: list, sha: str, message: str, author: Author) -> None:
         content = custom_events.serialize(entries).encode("utf-8")
@@ -146,12 +160,20 @@ class GitHubStore:
     def read_text(self, path: str) -> str:
         resp = self._call("GET", self._contents_url(path), params={"ref": self._branch},
                           accept="application/vnd.github.raw+json")
-        return resp.content.decode("utf-8")
+        try:
+            return resp.content.decode("utf-8")
+        except UnicodeDecodeError:
+            raise CorruptFile(f"{path} ist kein UTF-8") from None
 
     def last_author(self) -> str | None:
-        commits = self._call("GET", f"{API}/repos/{self._repo}/commits", params={
-            "path": EVENTS_PATH, "sha": self._branch, "per_page": 1}).json()
-        return commits[0]["commit"]["author"]["name"] if commits else None
+        # Informational only: anything unexpected means "unknown", never an error.
+        resp = self._call("GET", f"{API}/repos/{self._repo}/commits", params={
+            "path": EVENTS_PATH, "sha": self._branch, "per_page": 1})
+        try:
+            name = resp.json()[0]["commit"]["author"]["name"]
+        except (ValueError, KeyError, IndexError, TypeError):
+            return None
+        return name if isinstance(name, str) else None
 
     def check_token(self) -> datetime | None:
         self._call("GET", f"{API}/rate_limit")
