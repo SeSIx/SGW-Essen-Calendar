@@ -33,6 +33,7 @@ def test_push_run_only_recombines():
     assert "if: github.event_name == 'push'" in step
     assert "python combine.py" in step
     assert "python main.py" in step, "full scrape when the cache is gone"
+    assert "::warning::Full scrape exited with $?" in step, "a failed fallback must still publish"
 
 
 def test_rebuild_requires_every_source_db():
@@ -51,3 +52,22 @@ def test_alarm_never_fires_for_push_runs():
 def test_commit_and_legacy_branch_steps_still_run_on_every_event():
     for name in ("Commit changed calendars", "Keep the legacy branch on the default branch"):
         assert "\n        if:" not in _step(name).split("\n        run:")[0], name
+
+
+def test_cache_is_restored_before_any_build():
+    step = _step("Restore scraped data")
+    assert "uses: actions/cache/restore@v6" in step
+    assert WORKFLOW.index("- name: Restore scraped data") < WORKFLOW.index(
+        "- name: Scrape DSV and rebuild calendars")
+    assert WORKFLOW.index("- name: Restore scraped data") < WORKFLOW.index(
+        "- name: Rebuild calendars from cached data")
+
+
+def test_cache_is_saved_even_after_a_failed_scrape():
+    step = _step("Save scraped data")
+    assert "uses: actions/cache/save@v6" in step
+    assert "if: ${{ !cancelled() }}" in step
+    assert "path: output" in step
+    assert "key: dsv-data-${{ github.run_id }}" in step
+    assert WORKFLOW.index("- name: Commit changed calendars") < WORKFLOW.index(
+        "- name: Save scraped data")

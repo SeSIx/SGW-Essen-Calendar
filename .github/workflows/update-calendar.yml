@@ -38,7 +38,7 @@ jobs:
       # run would refetch all ~75 throttled detail pages instead of the handful
       # that actually changed.
       - name: Restore scraped data
-        uses: actions/cache@v6
+        uses: actions/cache/restore@v6
         with:
           path: output
           key: dsv-data-${{ github.run_id }}
@@ -64,7 +64,7 @@ jobs:
             python combine.py
           else
             echo "No cached fixtures - running the full scrape."
-            python main.py
+            python main.py || echo "::warning::Full scrape exited with $? - committing the rebuilt calendars anyway; scheduled runs raise the alarm if this persists."
           fi
 
       - name: Commit changed calendars
@@ -79,6 +79,15 @@ jobs:
             git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
             git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
+
+      # Save even when the scrape failed: the calendars were committed anyway, and
+      # push runs rebuild from this cache, so it has to match what is published.
+      - name: Save scraped data
+        if: ${{ !cancelled() }}
+        uses: actions/cache/save@v6
+        with:
+          path: output
+          key: dsv-data-${{ github.run_id }}
 
       # Subscribers from before the branch consolidation still poll the old
       # sgw-scraper-rewrite URL, so it has to follow the default branch on
