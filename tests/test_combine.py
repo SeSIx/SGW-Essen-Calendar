@@ -149,3 +149,94 @@ def test_club_dates_are_published_on_their_own(out):
     assert summaries == {"Mannschaftsbesprechung"}
     assert "X-WR-CALNAME:SGW Essen Vereinstermine" in path.read_text(encoding="utf-8"), \
         "a distinct name, or clients show two calendars called the same thing"
+
+
+def _write_raw(entries):
+    combine.CUSTOM_EVENTS_JSON.write_text(json.dumps(entries), encoding="utf-8")
+
+
+VALID = {"id": "ok-1", "title": "Besprechung", "start_date": "2026-09-03",
+         "start_time": "19:30", "end_date": None, "end_time": "21:30",
+         "location": None, "description": None}
+
+
+def test_invalid_club_date_is_skipped_not_fatal(out, capsys):
+    _write_raw([VALID, {"id": "bad", "title": "", "start_date": "2026-13-01"}])
+    games, custom = combine.build_termine_db(out)
+    assert (games, custom) == (2, 1), "fixtures and the good club date still publish"
+    assert "skipping invalid custom event bad" in capsys.readouterr().out
+
+
+def test_unparseable_file_still_fails_loudly(out):
+    combine.CUSTOM_EVENTS_JSON.write_text("[{broken", encoding="utf-8")
+    with pytest.raises(ValueError):
+        combine.build_termine_db(out)
+
+
+@pytest.mark.usefixtures("out")
+def test_save_writes_the_canonical_layout():
+    combine.save_custom_events([VALID])
+    text = combine.CUSTOM_EVENTS_JSON.read_text(encoding="utf-8")
+    assert text == json.dumps([VALID], indent=2, ensure_ascii=False) + "\n"
+
+
+def _answers(monkeypatch, *values):
+    it = iter(values)
+    monkeypatch.setattr("builtins.input", lambda _prompt="": next(it))
+
+
+@pytest.mark.usefixtures("out")
+def test_add_event_stores_a_valid_date(monkeypatch):
+    _answers(monkeypatch, "Feier", "2026-12-19", "18:00", "", "", "Vereinsheim", "")
+    combine.cmd_add_event()
+    [event] = combine.load_custom_events()
+    assert (event["title"], event["start_time"], event["location"]) == \
+        ("Feier", "18:00", "Vereinsheim")
+
+
+@pytest.mark.usefixtures("out")
+def test_add_event_rejects_invalid_input(monkeypatch, capsys):
+    _answers(monkeypatch, "Feier", "2026-02-30", "", "", "", "", "")
+    combine.cmd_add_event()
+    assert not combine.CUSTOM_EVENTS_JSON.exists()
+    assert "Invalid" in capsys.readouterr().out
+
+
+@pytest.mark.usefixtures("out")
+def test_add_event_refuses_while_the_file_has_broken_entries(monkeypatch, capsys):
+    _write_raw([VALID, {"id": "bad"}])
+    monkeypatch.setattr("builtins.input", lambda _p="": pytest.fail("prompted"))
+    combine.cmd_add_event()
+    assert json.loads(combine.CUSTOM_EVENTS_JSON.read_text())[1] == {"id": "bad"}
+    assert "fix custom_events.json first" in capsys.readouterr().out
+
+
+def _rebuild(out):
+    combine.build_termine_db(out)
+    combine.write_termine_ics(out)
+    return combine.write_vereinstermine_ics(out)
+
+
+def test_deleted_club_date_leaves_both_calendars(out):
+    """The termine DB survives between scheduled runs via the actions cache, so
+    a date removed from the JSON must be removed from the DB as well."""
+    _add_custom(title="Weihnachtsfeier", start_date="2026-12-19")
+    _add_custom(title="Mannschaftsbesprechung", start_date="2026-09-03")
+    _rebuild(out)
+
+    combine.save_custom_events(
+        [e for e in combine.load_custom_events() if e["title"] != "Weihnachtsfeier"])
+    assert _rebuild(out) == 1
+
+    for name in ("sgw_termine.ics", "sgw_vereinstermine.ics"):
+        text = (out.parent / name).read_text(encoding="utf-8")
+        assert "Weihnachtsfeier" not in text, name
+        assert "Mannschaftsbesprechung" in text, name
+
+
+def test_removing_the_last_club_date_empties_the_club_feed(out):
+    _add_custom(title="Weihnachtsfeier", start_date="2026-12-19")
+    _rebuild(out)
+    combine.save_custom_events([])
+    assert _rebuild(out) == 0
+    assert "BEGIN:VEVENT" not in (out.parent / "sgw_vereinstermine.ics").read_text()
