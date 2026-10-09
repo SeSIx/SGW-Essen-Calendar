@@ -1,0 +1,40 @@
+name: sgw-admin
+
+services:
+  sgw-admin:
+    build:
+      context: ..
+      dockerfile: admin/Dockerfile
+    image: sgw-admin:latest
+    container_name: sgw-admin
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      SGW_ADMIN_ENV: production
+      SGW_ADMIN_DB: /data/sgw-admin.db
+    volumes:
+      - sgw-admin-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - root_default
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=root_default
+      - traefik.http.routers.sgw-admin.rule=Host(`sgw-admin.srv1136792.hstgr.cloud`)
+      - traefik.http.routers.sgw-admin.entrypoints=websecure
+      - traefik.http.routers.sgw-admin.tls=true
+      - traefik.http.routers.sgw-admin.tls.certresolver=mytlschallenge
+      - traefik.http.services.sgw-admin.loadbalancer.server.port=8000
+
+volumes:
+  sgw-admin-data:
+
+networks:
+  root_default:
+    external: true

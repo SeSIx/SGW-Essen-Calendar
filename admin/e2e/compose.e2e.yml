@@ -1,0 +1,25 @@
+# Local end-to-end run with the fake GitHub store. Never deployed.
+name: sgw-admin-e2e
+
+services:
+  sgw-admin:
+    build:
+      context: ../..
+      dockerfile: admin/Dockerfile
+    image: sgw-admin:e2e
+    environment:
+      SGW_ADMIN_ENV: e2e
+      SGW_ADMIN_SCHEME: http
+      SGW_ADMIN_HOST: localhost:8099
+      SGW_ADMIN_FAKE_GITHUB: "1"
+      SGW_ADMIN_FAKE_DIR: /fake
+      SGW_ADMIN_DB: /data/sgw-admin.db
+      SECRET_KEY: e2e-only-secret-key-0123456789abcdef
+    ports:
+      - "127.0.0.1:8099:8000"
+    volumes:
+      - ${SGW_E2E_FAKE_DIR:?run admin/e2e/run.sh instead}:/fake
+      - /data
+    read_only: true
+    tmpfs:
+      - /tmp
