@@ -379,6 +379,11 @@ def write_vereinstermine_ics(output_dir: Path) -> int:
 # ---------------------------------------------------------------------------
 
 def cmd_add_event() -> None:
+    result = _read_custom_events()
+    if result.invalid:
+        print(f"[Combine] {len(result.invalid)} broken entry/entries — "
+              "fix custom_events.json first, nothing was added.")
+        return
     print("Add custom event (Ctrl+C to cancel)\n")
     title = input("Title: ").strip()
     if not title:
@@ -399,11 +404,6 @@ def cmd_add_event() -> None:
         event = custom_events.validate(raw)
     except custom_events.ValidationError as err:
         print(f"[Combine] Invalid {err.field}: {err.message}")
-        return
-    result = _read_custom_events()
-    if result.invalid:
-        print(f"[Combine] {len(result.invalid)} broken entry/entries — "
-              "fix custom_events.json first, nothing was added.")
         return
     save_custom_events([*result.valid, event])
     print(f"[Combine] Added '{event['title']}' to {CUSTOM_EVENTS_JSON.name} — "

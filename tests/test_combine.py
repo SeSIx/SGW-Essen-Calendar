@@ -205,7 +205,7 @@ def test_add_event_rejects_invalid_input(monkeypatch, capsys):
 @pytest.mark.usefixtures("out")
 def test_add_event_refuses_while_the_file_has_broken_entries(monkeypatch, capsys):
     _write_raw([VALID, {"id": "bad"}])
-    _answers(monkeypatch, "Feier", "2026-12-19", "", "", "", "", "")
+    monkeypatch.setattr("builtins.input", lambda _p="": pytest.fail("prompted"))
     combine.cmd_add_event()
     assert json.loads(combine.CUSTOM_EVENTS_JSON.read_text())[1] == {"id": "bad"}
     assert "fix custom_events.json first" in capsys.readouterr().out
