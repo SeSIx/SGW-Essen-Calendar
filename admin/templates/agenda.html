@@ -12,6 +12,7 @@
     <a class="chip{% if chip.on %} on{% endif %}" data-team="{{ chip.slug }}" href="{{ chip.href }}" aria-pressed="{{ 'true' if chip.on else 'false' }}">{{ chip.label }}</a>
   {% endfor %}
 </nav>
+<p class="error" role="status" data-save-failed hidden>Auswahl konnte nicht gespeichert werden</p>
 <p class="hint" data-no-teams{% if not no_teams %} hidden{% endif %}>Keine Mannschaft gewählt – nur Vereinstermine</p>
 {% if games_stale %}<p class="hint">Spiele gerade nicht ganz aktuell – GitHub antwortet nicht.</p>{% endif %}
 {% if broken %}

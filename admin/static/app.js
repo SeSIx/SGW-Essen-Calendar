@@ -89,8 +89,11 @@ function initTeamFilter(nav) {
       teams: slugs.filter((s) => selected.has(s)).join(","),
       csrf_token: nav.dataset.csrf,
     });
-    // Best effort: the view is already updated, and the URL carries the choice on reload.
-    fetch(nav.dataset.filterUrl, { method: "POST", body, credentials: "same-origin" }).catch(() => {});
+    // The view is already updated and the URL carries the choice; only warn that it was not remembered.
+    const warn = document.querySelector("[data-save-failed]");
+    const failed = (bad) => { if (warn) warn.hidden = !bad; };
+    fetch(nav.dataset.filterUrl, { method: "POST", body, credentials: "same-origin" })
+      .then((resp) => failed(!resp.ok), () => failed(true));
   };
 
   chipEls.forEach((chip) => {

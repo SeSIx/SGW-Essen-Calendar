@@ -45,15 +45,18 @@ def test_hint_is_hidden_with_selection(user_client):
     assert re.search(r'<p class="hint"[^>]*data-no-teams[^>]*\shidden[^>]*>', text(user_client.get("/")))
 
 
+def month_sections(body):
+    """{month label: whether the section carries hidden}"""
+    found = re.findall(r'<section([^>]*data-month[^>]*)>\s*<h2 class="month"><span>([^<]+)</span>', body)
+    return {label: bool(re.search(r"\shidden(\s|$|=)", attrs)) for attrs, label in found}
+
+
 def test_month_without_visible_game_is_hidden(user_client):
-    body = text(user_client.get("/?teams="))
-    assert 'data-month' in body
-    for section in re.findall(r"<section[^>]*data-month[^>]*>", body):
-        assert "Dezember" not in section
-    # December 2026 only holds a u16 game (plus nothing else): hidden by default
-    default = text(user_client.get("/"))
-    dec = re.search(r"<section([^>]*)>\s*<h2 class=\"month\"><span>Dezember 2026", default)
-    assert dec and "hidden" in dec.group(1)
+    # December 2026 only holds a u16 game; November has club dates and stays visible.
+    assert month_sections(text(user_client.get("/?teams="))) == {
+        "November 2026": False, "Dezember 2026": True}
+    assert month_sections(text(user_client.get("/"))) == {"November 2026": False, "Dezember 2026": True}
+    assert month_sections(text(user_client.get("/?teams=u16")))["Dezember 2026"] is False
 
 
 def test_chips_carry_filter_endpoint_and_token(user_client):
@@ -109,9 +112,10 @@ def test_filter_rejects_foreign_origin(user_client):
 
 
 def test_filter_requires_login(client):
-    r = client.post("/filter", data={"teams": "damen", "csrf_token": "x"}, headers=HDR)
-    assert r.status_code in (302, 303, 400, 401) and cookie(r) is None
-    assert r.status_code != 204
+    token = csrf_of(client.get("/login"))  # a valid pre-session token, so CSRF passes
+    r = client.post("/filter", data={"teams": "damen", "csrf_token": token}, headers=HDR)
+    assert r.status_code == 302 and r.headers["Location"].endswith("/login")
+    assert cookie(r) is None
 
 
 def test_filter_get_not_allowed(user_client):
