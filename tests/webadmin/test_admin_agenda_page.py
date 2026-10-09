@@ -1,5 +1,6 @@
 """The start screen: agenda, team filter, banners and the game page."""
 
+import re
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from urllib.parse import unquote
@@ -14,7 +15,9 @@ TEMPLATES = Path(__file__).resolve().parents[2] / "admin" / "templates"
 
 
 def text(resp):
-    return resp.get_data(as_text=True)
+    """What a person sees without JS: markup carrying the hidden attribute is dropped."""
+    body = resp.get_data(as_text=True)
+    return re.sub(r"<(li|section|p)\b[^>]*\shidden[^>]*>.*?</\1>", "", body, flags=re.S)
 
 
 def test_default_shows_mens_games_and_events(user_client):
@@ -148,7 +151,7 @@ def test_store_problems_still_render(user_client, store, exc, message):
 def test_unauthorized_shows_red_banner(user_client, store):
     # A dead token fails every call, the team calendars included.
     store.fail["load"].append(Unauthorized("401"))
-    store.fail["read_text"] += [Unauthorized("401"), Unauthorized("401")]
+    store.fail["read_text"] += [Unauthorized("401")] * 6  # all six team calendars are read
     body = text(user_client.get("/"))
     assert "banner-red" in body and "Speichern ist gesperrt" in body
 

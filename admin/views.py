@@ -8,7 +8,7 @@ from types import SimpleNamespace
 from flask import Blueprint, abort, g, make_response, redirect, render_template, request, url_for
 
 import custom_events
-from admin import agenda, auth, changes, forms, games, security
+from admin import agenda, auth, changes, forms, games, places, security
 from admin.github_store import CorruptFile, RateLimited, StoreError, Unauthorized
 from admin.security import SESSION_COOKIE
 from admin.services import get_db, services
@@ -60,13 +60,18 @@ def _selected_teams() -> tuple[str, ...]:
     return games.DEFAULT_TEAMS
 
 
+def _remember_teams(resp, selected: tuple[str, ...]) -> None:
+    resp.set_cookie(TEAMS_COOKIE, ",".join(selected) or games.NO_TEAMS, max_age=365 * 24 * 3600,
+                    secure=True, httponly=True, samesite="Lax", path="/")
+
+
 def _chips(selected: tuple[str, ...], past: bool) -> list[SimpleNamespace]:
     chips = []
     for slug, label in games.TEAMS:
         toggled = [s for s, _ in games.TEAMS if (s in selected) != (s == slug)]
         extra = {"frueher": 1} if past else {}
         href = url_for("main.index", teams=",".join(toggled), **extra)
-        chips.append(SimpleNamespace(label=label, on=slug in selected, href=href))
+        chips.append(SimpleNamespace(slug=slug, label=label, on=slug in selected, href=href))
     return chips
 
 
@@ -99,16 +104,30 @@ def index():
         broken = agenda.broken_items(snapshot.result.invalid)
     except StoreError as exc:
         problem = store_problem(exc)
-    found, stale = svc.games.games(selected)
+    # Every team is rendered; the chips only hide items, so toggling needs no reload.
+    found, stale = svc.games.games(slug for slug, _ in games.TEAMS)
     today = datetime.fromtimestamp(svc.clock(), games.BERLIN).date()
+    months = agenda.build(events, found, today, past=past)
     resp = make_response(render_template(
-        "agenda.html", months=agenda.build(events, found, today, past=past), broken=broken,
+        "agenda.html", months=months, selected=selected, anything_shown=any(m.visible(selected) for m in months),
+        broken=broken,
         chips=_chips(selected, past), no_teams=not selected, past=past, problem=problem, games_stale=stale,
         notice=NOTICES.get(request.args.get("ok", "")),
         today_label=f"Heute: {today.day}. {agenda.MONTHS[today.month - 1][:3]}"))
     if request.args.get("teams") is not None:
-        resp.set_cookie(TEAMS_COOKIE, ",".join(selected) or games.NO_TEAMS, max_age=365 * 24 * 3600,
-                        secure=True, httponly=True, samesite="Lax", path="/")
+        _remember_teams(resp, selected)
+    return resp
+
+
+@bp.post("/filter")
+@login_required
+def filter_teams():
+    """Background save of the chip selection (the page itself updates without a reload)."""
+    chosen = games.parse_selection(request.form.get("teams"))
+    if chosen is None:
+        abort(400)
+    resp = make_response("", 204)
+    _remember_teams(resp, chosen)
     return resp
 
 
@@ -124,7 +143,8 @@ def game(uid):
     when = f"{agenda.WEEKDAYS[day.weekday()].capitalize()} {day:%d.%m.%Y}"
     if not found.all_day:
         when += f", {found.start:%H:%M} Uhr"
-    return render_template("game.html", game=found, when=when)
+    return render_template("game.html", game=found, when=when,
+                           maps_url=places.maps_url(found.location) if found.location else None)
 
 
 @bp.route("/login", methods=["GET", "POST"])
@@ -205,7 +225,9 @@ def _author():
 def _form(mode, data, event_id, rev, *, error=None, field_errors=None, notice=None, status=200):
     return render_template(
         "event_form.html", mode=mode, data=data, event_id=event_id, rev=rev, error=error, notice=notice,
-        field_errors=field_errors or {}, save_blocked=services().store.unauthorized), status
+        field_errors=field_errors or {}, save_blocked=services().store.unauthorized,
+        pools=places.POOLS, maps_url=places.maps_url(data.location) if mode == "edit" and data.location else None,
+    ), status
 
 
 def _invalid(mode, data, event_id, rev, err):
