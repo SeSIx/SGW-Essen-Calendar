@@ -10,7 +10,7 @@ CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
 UID:2025_197_B_3@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen 22:8 TPSK 1925 (NRW Verbandsliga - Gruppe B)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -26,7 +26,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_B_28@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen 18:6 SV Blau-Weiß Bochum II (NRW Verbandsliga 
  - Gruppe B)
 STATUS:CONFIRMED
@@ -43,7 +43,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_B_8@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SGW SC Solingen/Wfr. Wuppertal II 17:15 SG Wasserball Essen (NRW Ve
  rbandsliga - Gruppe B)
 STATUS:CONFIRMED
@@ -60,7 +60,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_132__10@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen 10:0 Uerdinger Schwimmverein 08 II (NRW Pokal m
  ännlich)
 STATUS:CONFIRMED
@@ -77,7 +77,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_B_12@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen 10:0 Kevelaerer SV (NRW Verbandsliga - Gruppe B
  )
 STATUS:CONFIRMED
@@ -94,7 +94,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__49@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen II 21:10 Wfr. 1912 Mülheim Masters (Ruhrgebiet
  sliga männlich)
 STATUS:CONFIRMED
@@ -111,7 +111,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_B_15@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen 25:9 SV Rheinhausen 1913 II (NRW Verbandsliga -
   Gruppe B)
 STATUS:CONFIRMED
@@ -128,7 +128,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__68@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:Duisburger SV 1898 III 8:15 SG Wasserball Essen II (Ruhrgebietsliga
   männlich)
 STATUS:CONFIRMED
@@ -145,7 +145,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_B_17@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen 12:6 SGW SC Solingen/Wfr. Wuppertal II (NRW Ver
  bandsliga - Gruppe B)
 STATUS:CONFIRMED
@@ -162,7 +162,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_B_20@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SV Rheinhausen 1913 II 10:26 SG Wasserball Essen (NRW Verbandsliga 
  - Gruppe B)
 STATUS:CONFIRMED
@@ -179,7 +179,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_B_24@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:TPSK 1925 12:16 SG Wasserball Essen (NRW Verbandsliga - Gruppe B)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -195,7 +195,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_132__22@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wassersport Iserlohn II 12:23 SG Wasserball Essen (NRW Pokal mä
  nnlich)
 STATUS:CONFIRMED
@@ -212,7 +212,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__21@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:Wfr. 1912 Mülheim Masters 10:11 SG Wasserball Essen II (Ruhrgebiet
  sliga männlich)
 STATUS:CONFIRMED
@@ -229,7 +229,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__36@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:WSG Oberhausen 97/27 14:23 SG Wasserball Essen II (Ruhrgebietsliga 
  männlich)
 STATUS:CONFIRMED
@@ -246,7 +246,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_B_27@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:Kevelaerer SV 10:23 SG Wasserball Essen (NRW Verbandsliga - Gruppe 
  B)
 STATUS:CONFIRMED
@@ -263,7 +263,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_B_4@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SV Blau-Weiß Bochum II 8:23 SG Wasserball Essen (NRW Verbandsliga 
  - Gruppe B)
 STATUS:CONFIRMED
@@ -280,7 +280,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_132__28@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen 16:25 SV Krefeld 1972 II (NRW Pokal männlich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -296,7 +296,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_C_1@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:Bocholter WSV 1920 11:17 SG Wasserball Essen (NRW Verbandsliga - Gr
  uppe C)
 STATUS:CONFIRMED
@@ -313,7 +313,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__50@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen II 27:0 Kevelaerer SV Masters (Ruhrgebietsliga 
  männlich)
 STATUS:CONFIRMED
@@ -330,7 +330,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_C_21@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen 27:16 SV Rheinhausen 1913 II (NRW Verbandsliga 
  - Gruppe C)
 STATUS:CONFIRMED
@@ -347,7 +347,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__31@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:WSG Oberhausen Masters 13:15 SG Wasserball Essen II (Ruhrgebietslig
  a männlich)
 STATUS:CONFIRMED
@@ -364,7 +364,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_C_17@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SV Lünen 08 11:13 SG Wasserball Essen (NRW Verbandsliga - Gruppe C
  )
 STATUS:CONFIRMED
@@ -381,7 +381,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__51@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen II 12:14 Wassersportverein Schermbeck II (Ruhrg
  ebietsliga männlich)
 STATUS:CONFIRMED
@@ -398,7 +398,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_C_7@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SVg Münster von 1891 10:12 SG Wasserball Essen (NRW Verbandsliga -
   Gruppe C)
 STATUS:CONFIRMED
@@ -415,7 +415,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_C_28@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SGW SC Solingen/Wfr. Wuppertal II 12:16 SG Wasserball Essen (NRW Ve
  rbandsliga - Gruppe C)
 STATUS:CONFIRMED
@@ -432,7 +432,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__52@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen II 10:8 Duisburger SV 1898 III (Ruhrgebietsliga
   männlich)
 STATUS:CONFIRMED
@@ -449,7 +449,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_C_22@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen 17:11 SV Lünen 08 (NRW Verbandsliga - Gruppe C
  )
 STATUS:CONFIRMED
@@ -466,7 +466,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__53@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen II 0:10 WSG Oberhausen Masters (Ruhrgebietsliga
   männlich)
 STATUS:CONFIRMED
@@ -483,7 +483,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__48@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:PSV Duisburg Masters 8:14 SG Wasserball Essen II (Ruhrgebietsliga m
  ännlich)
 STATUS:CONFIRMED
@@ -501,7 +501,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_C_23@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen 20:12 SGW SC Solingen/Wfr. Wuppertal II (NRW Ve
  rbandsliga - Gruppe C)
 STATUS:CONFIRMED
@@ -518,7 +518,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__14@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:ASC Duisburg IV 15:16 SG Wasserball Essen II (Ruhrgebietsliga männ
  lich)
 STATUS:CONFIRMED
@@ -535,7 +535,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__65@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:Kevelaerer SV Masters 14:17 SG Wasserball Essen II (Ruhrgebietsliga
   männlich)
 STATUS:CONFIRMED
@@ -552,7 +552,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__7@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:Wassersportverein Schermbeck II 6:24 SG Wasserball Essen II (Ruhrge
  bietsliga männlich)
 STATUS:CONFIRMED
@@ -569,7 +569,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_C_25@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen 34:12 SVg Münster von 1891 (NRW Verbandsliga -
   Gruppe C)
 STATUS:CONFIRMED
@@ -586,7 +586,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__54@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen II 19:8 PSV Duisburg Masters (Ruhrgebietsliga m
  ännlich)
 STATUS:CONFIRMED
@@ -603,7 +603,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_197_C_15@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SV Rheinhausen 1913 II 10:18 SG Wasserball Essen (NRW Verbandsliga 
  - Gruppe C)
 STATUS:CONFIRMED
@@ -620,7 +620,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__55@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen II 19:13 WSG Oberhausen 97/27 (Ruhrgebietsliga 
  männlich)
 STATUS:CONFIRMED
@@ -637,7 +637,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_212__56@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen II 18:10 ASC Duisburg IV (Ruhrgebietsliga männ
  lich)
 STATUS:CONFIRMED
@@ -654,7 +654,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_250__4@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:Wassersportverein Schermbeck 15:13 SG Wasserball Essen II (Pokalrun
  de Ruhrgebiet männlich)
 STATUS:CONFIRMED
@@ -671,7 +671,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_299__1@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:Wolfenbütteler SV 1921 11:13 SG Wasserball Essen (Deutscher Wasser
  ball Pokal Männer)
 STATUS:CONFIRMED
@@ -688,7 +688,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_196__26@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen : Iserlohn Schleddenhofer SV (NRW Oberliga män
  nlich)
 STATUS:CONFIRMED
@@ -704,7 +704,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_197__39@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:TPSK 1925 : SG Wasserball Essen II (NRW Verbandsliga männlich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -719,7 +719,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_197__17@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen II : SV Krefeld 1972 III (NRW Verbandsliga män
  nlich)
 STATUS:CONFIRMED
@@ -735,7 +735,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_197__58@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:Kevelaerer SV : SG Wasserball Essen II (NRW Verbandsliga männlich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -750,7 +750,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_196__27@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen : SGW SC Solingen/Wfr. Wuppertal (NRW Oberliga 
  männlich)
 STATUS:CONFIRMED
@@ -766,7 +766,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_197__29@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen II : WSG Vest (NRW Verbandsliga männlich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -781,7 +781,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_196__52@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:Stolberger SV 1910 : SG Wasserball Essen (NRW Oberliga männlich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -796,7 +796,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_197__12@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:Wassersportverein Schermbeck : SG Wasserball Essen II (NRW Verbands
  liga männlich)
 STATUS:CONFIRMED
@@ -812,7 +812,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_197__99@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SC Aqua Köln II : SG Wasserball Essen II (NRW Verbandsliga männli
  ch)
 STATUS:CONFIRMED
@@ -828,7 +828,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_196__34@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SVg Münster von 1891 : SG Wasserball Essen (NRW Oberliga männlich
  )
 STATUS:CONFIRMED
@@ -844,7 +844,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_196__20@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SGW Rhenania/BW Poseidon Köln : SG Wasserball Essen (NRW Oberliga 
  männlich)
 STATUS:CONFIRMED
@@ -860,7 +860,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_197__23@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SV Lünen 08 : SG Wasserball Essen II (NRW Verbandsliga männlich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -875,7 +875,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_197__87@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:Aachener SV 06 II : SG Wasserball Essen II (NRW Verbandsliga männl
  ich)
 STATUS:CONFIRMED
@@ -891,7 +891,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_196__28@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen : Aachener SV 06 (NRW Oberliga männlich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -906,7 +906,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_197__31@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen II : Bocholter WSV 1920 (NRW Verbandsliga männ
  lich)
 STATUS:CONFIRMED
@@ -922,7 +922,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_196__3@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SV Rheinhausen 1913 : SG Wasserball Essen (NRW Oberliga männlich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -937,7 +937,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_197__32@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen II : TPSK 1925 (NRW Verbandsliga männlich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -952,7 +952,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_196__43@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:Iserlohn Schleddenhofer SV : SG Wasserball Essen (NRW Oberliga män
  nlich)
 STATUS:CONFIRMED
@@ -968,7 +968,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_197__70@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SV Krefeld 1972 III : SG Wasserball Essen II (NRW Verbandsliga män
  nlich)
 STATUS:CONFIRMED
@@ -984,7 +984,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_197__33@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen II : Kevelaerer SV (NRW Verbandsliga männlich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -999,7 +999,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_196__29@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen : ASC Duisburg III (NRW Oberliga männlich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -1014,7 +1014,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_197__52@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:WSG Vest : SG Wasserball Essen II (NRW Verbandsliga männlich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -1029,7 +1029,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_197__34@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen II : Wassersportverein Schermbeck (NRW Verbands
  liga männlich)
 STATUS:CONFIRMED
@@ -1045,7 +1045,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_196__30@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen : Stolberger SV 1910 (NRW Oberliga männlich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -1060,7 +1060,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_196__31@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen : SVg Münster von 1891 (NRW Oberliga männlich
  )
 STATUS:CONFIRMED
@@ -1076,7 +1076,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_197__30@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen II : SC Aqua Köln II (NRW Verbandsliga männli
  ch)
 STATUS:CONFIRMED
@@ -1092,7 +1092,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_197__35@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen II : SV Lünen 08 (NRW Verbandsliga männlich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -1107,7 +1107,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_196__32@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen : SGW Rhenania/BW Poseidon Köln (NRW Oberliga 
  männlich)
 STATUS:CONFIRMED
@@ -1123,7 +1123,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_197__36@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen II : Aachener SV 06 II (NRW Verbandsliga männl
  ich)
 STATUS:CONFIRMED
@@ -1139,7 +1139,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_196__16@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:Aachener SV 06 : SG Wasserball Essen (NRW Oberliga männlich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -1154,7 +1154,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_196__33@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:SG Wasserball Essen : SV Rheinhausen 1913 (NRW Oberliga männlich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -1169,7 +1169,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_197__9@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:Bocholter WSV 1920 : SG Wasserball Essen II (NRW Verbandsliga männ
  lich)
 STATUS:CONFIRMED
@@ -1185,7 +1185,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:custom-e7548548-4818-4bda-ac36-20f8bf0fc1e9@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:Mannschaftsbesprechung
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -1196,7 +1196,7 @@ DESCRIPTION:Mannschaftsbesprechung zum Saisonstart
 END:VEVENT
 BEGIN:VEVENT
 UID:custom-c5a7f6fb-7448-4b99-a5c1-382cb642584f@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:Trainingsstart — Eingewöhnung
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -1206,7 +1206,7 @@ DESCRIPTION:Beginn der Eingewöhnungswoche
 END:VEVENT
 BEGIN:VEVENT
 UID:custom-e5d0dc6e-449c-4078-81f7-53e611eae34a@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:Kampfrichter-Ausbildung
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -1216,12 +1216,23 @@ DESCRIPTION:Ort steht noch aus
 END:VEVENT
 BEGIN:VEVENT
 UID:custom-9155eb15-13ee-4c8b-b9e8-a6fd06172eca@sgw-essen.local
-DTSTAMP:20261008T001716Z
+DTSTAMP:20261009T184836Z
 SUMMARY:Training 100%
 STATUS:CONFIRMED
 TRANSP:OPAQUE
 DTSTART:20260914T170000Z
 DTEND:20260914T200000Z
 DESCRIPTION:Ab jetzt volles Trainingsprogramm
+END:VEVENT
+BEGIN:VEVENT
+UID:custom-6b380bfa-c508-4e89-86d0-de44a2d4aa90@sgw-essen.local
+DTSTAMP:20261009T184836Z
+SUMMARY:Test – bitte ignorieren
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+DTSTART;VALUE=DATE:20270115
+DTEND;VALUE=DATE:20270116
+DESCRIPTION:Automatischer Test der Admin-Umstellung\, wird gleich wieder ge
+ löscht
 END:VEVENT
 END:VCALENDAR
