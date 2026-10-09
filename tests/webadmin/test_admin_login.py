@@ -148,7 +148,7 @@ def test_logout_everywhere(app, client):
 
 def test_start_page_greets_inside_main(user_client):
     html = user_client.get("/").get_data(as_text=True)
-    assert re.search(r"<main>.*Angemeldet\..*</main>", html, re.S)
+    assert re.search(r"<main>.*Frühere Termine anzeigen.*</main>", html, re.S)
 
 
 def _heights(css, selector):

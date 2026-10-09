@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+{% if notice %}<p class="notice" role="status">{{ notice }}</p>{% endif %}
+{% if problem %}
+<div class="card">
+  <p class="error" role="alert">{{ problem }}</p>
+  <p><a class="button secondary" href="{{ url_for('main.index') }}">Erneut versuchen</a></p>
+</div>
+{% endif %}
+<nav class="chips" aria-label="Mannschaften">
+  {% for chip in chips %}
+    {% if chip.href %}<a class="chip{% if chip.on %} on{% endif %}" href="{{ chip.href }}" aria-pressed="{{ 'true' if chip.on else 'false' }}">{{ chip.label }}</a>
+    {% else %}<span class="chip on" aria-pressed="true">{{ chip.label }}</span>{% endif %}
+  {% endfor %}
+</nav>
+{% if games_stale %}<p class="hint">Spiele gerade nicht ganz aktuell – GitHub antwortet nicht.</p>{% endif %}
+{% if broken %}
+<h2 class="month"><span>Fehlerhafte Einträge</span></h2>
+<ul class="items">
+  {% for b in broken %}
+  <li>
+    {% if b.key %}<a class="item broken" href="{{ url_for('main.edit_event', event_id=b.key) }}">{% else %}<div class="item broken">{% endif %}
+      <div class="what">
+        <div class="t">{{ b.title }}</div>
+        <div class="s">fehlerhaft – {{ 'bitte korrigieren' if b.key else 'bitte Julius Bescheid geben' }}: {{ b.problem }}</div>
+      </div>
+    {% if b.key %}</a>{% else %}</div>{% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% for month in months %}
+<h2 class="month"><span>{{ month.label }}</span>{% if loop.first and not past %}<span class="today">{{ today_label }}</span>{% endif %}</h2>
+<ul class="items">
+  {% for item in month.items %}
+  <li>
+    <a class="item {{ item.kind }}" href="{{ url_for('main.edit_event', event_id=item.key) if item.kind == 'event' else url_for('main.game', uid=item.key) }}">
+      <div class="day"><i>{{ item.day_label }}</i><b{% if '–' in item.date_label %} class="span"{% endif %}>{{ item.date_label }}</b></div>
+      <div class="what"><div class="t">{{ item.title }}</div><div class="s">{{ item.detail }}</div></div>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="empty">{{ 'Keine früheren Termine.' if past else 'Keine kommenden Termine.' }}</p>
+{% endfor %}
+{% if past %}<a class="more" href="{{ url_for('main.index') }}">Kommende Termine anzeigen</a>
+{% else %}<a class="more" href="{{ url_for('main.index', frueher=1) }}">Frühere Termine anzeigen</a>{% endif %}
+<a class="fab" href="{{ url_for('main.new_event') }}" aria-label="Neuer Termin">+</a>
+{% endblock %}

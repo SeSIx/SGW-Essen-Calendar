@@ -2,11 +2,13 @@
 
 import functools
 import re
+from datetime import UTC, datetime, timedelta
+from types import SimpleNamespace
 
-from flask import Blueprint, abort, g, redirect, render_template, request, url_for
+from flask import Blueprint, abort, g, make_response, redirect, render_template, request, url_for
 
 import custom_events
-from admin import auth, changes, forms, security
+from admin import agenda, auth, changes, forms, games, security
 from admin.github_store import CorruptFile, RateLimited, StoreError, Unauthorized
 from admin.security import SESSION_COOKIE
 from admin.services import get_db, services
@@ -40,10 +42,88 @@ def healthz():
     return "ok", 200, {"Content-Type": "text/plain; charset=utf-8"}
 
 
+NOTICES = {
+    "gespeichert": "Gespeichert ✓ – Kalender in ca. 1 Min. aktuell",
+    "geloescht": "Gelöscht ✓ – Kalender in ca. 1 Min. aktuell",
+}
+TEAMS_COOKIE = "teams"
+WARN_BEFORE = timedelta(days=14)
+RED_BANNER = ("Zugang zu GitHub abgelaufen oder ungültig – Speichern ist gesperrt. "
+              "Bitte Julius Bescheid geben.")
+
+
+def _selected_teams() -> tuple[str, ...]:
+    for raw in (request.args.get("teams"), request.cookies.get(TEAMS_COOKIE)):
+        chosen = games.parse_teams(raw)
+        if chosen:
+            return chosen
+    return games.DEFAULT_TEAMS
+
+
+def _chips(selected: tuple[str, ...]) -> list[SimpleNamespace]:
+    chips = []
+    for slug, label in games.TEAMS:
+        toggled = [s for s, _ in games.TEAMS if (s in selected) != (s == slug)]
+        href = url_for("main.index", teams=",".join(toggled)) if toggled else None
+        chips.append(SimpleNamespace(label=label, on=slug in selected, href=href))
+    return chips
+
+
+@bp.app_context_processor
+def _banner():
+    if g.get("user") is None:
+        return {}
+    store = services().store
+    if store.unauthorized:
+        return {"banner": SimpleNamespace(level="red", text=RED_BANNER)}
+    expiry = store.token_expiry
+    if expiry is not None and expiry - datetime.fromtimestamp(services().clock(), UTC) <= WARN_BEFORE:
+        return {"banner": SimpleNamespace(
+            level="yellow",
+            text=f"Zugang zu GitHub läuft am {expiry.astimezone(games.BERLIN):%d.%m.%Y} ab – "
+                 "bitte Julius Bescheid geben.")}
+    return {}
+
+
 @bp.get("/")
 @login_required
 def index():
-    return render_template("start.html")
+    svc = services()
+    selected = _selected_teams()
+    past = request.args.get("frueher") == "1"
+    problem, events, broken = None, [], []
+    try:
+        snapshot = svc.store.load()
+        events = snapshot.result.valid
+        broken = agenda.broken_items(snapshot.result.invalid)
+    except StoreError as exc:
+        problem = store_problem(exc)
+    found, stale = svc.games.games(selected)
+    today = datetime.fromtimestamp(svc.clock(), games.BERLIN).date()
+    resp = make_response(render_template(
+        "agenda.html", months=agenda.build(events, found, today, past=past), broken=broken,
+        chips=_chips(selected), past=past, problem=problem, games_stale=stale,
+        notice=NOTICES.get(request.args.get("ok", "")),
+        today_label=f"Heute: {today.day}. {agenda.MONTHS[today.month - 1][:3]}"))
+    if request.args.get("teams") is not None:
+        resp.set_cookie(TEAMS_COOKIE, ",".join(selected), max_age=365 * 24 * 3600,
+                        secure=True, httponly=True, samesite="Lax", path="/")
+    return resp
+
+
+@bp.get("/spiel/<uid>")
+@login_required
+def game(uid):
+    if not games.GAME_UID_RE.fullmatch(uid):
+        abort(404)
+    found = services().games.find(uid)
+    if found is None:
+        abort(404)
+    day = found.start_date
+    when = f"{agenda.WEEKDAYS[day.weekday()].capitalize()} {day:%d.%m.%Y}"
+    if not found.all_day:
+        when += f", {found.start:%H:%M} Uhr"
+    return render_template("game.html", game=found, when=when)
 
 
 @bp.route("/login", methods=["GET", "POST"])
