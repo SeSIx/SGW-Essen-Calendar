@@ -10,13 +10,12 @@ to sgw_termine.ics next to this file.
 """
 
 import argparse
-import json
 import sqlite3
-import uuid
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
 import config
+import custom_events
 import db
 from ics import (
     BERLIN,
@@ -101,12 +100,9 @@ _GAME_COLS = (
 )
 
 
-def load_custom_events() -> list[dict]:
-    """Read club dates, migrating a legacy custom_events.db on first use."""
-    if CUSTOM_EVENTS_JSON.exists():
-        return json.loads(CUSTOM_EVENTS_JSON.read_text(encoding="utf-8"))
-
-    if LEGACY_CUSTOM_EVENTS_DB.exists():
+def _read_custom_events() -> custom_events.ParseResult:
+    """Parse club dates, migrating a legacy custom_events.db on first use."""
+    if not CUSTOM_EVENTS_JSON.exists() and LEGACY_CUSTOM_EVENTS_DB.exists():
         legacy = sqlite3.connect(str(LEGACY_CUSTOM_EVENTS_DB))
         legacy.row_factory = sqlite3.Row
         rows = [dict(r) for r in legacy.execute("SELECT * FROM events ORDER BY start_date")]
@@ -114,15 +110,23 @@ def load_custom_events() -> list[dict]:
         for row in rows:
             row.pop("added_at", None)
         save_custom_events(rows)
-        return rows
+    if not CUSTOM_EVENTS_JSON.exists():
+        return custom_events.ParseResult([], [])
+    return custom_events.parse(CUSTOM_EVENTS_JSON.read_text(encoding="utf-8"))
 
-    return []
+
+def load_custom_events() -> list[dict]:
+    """Valid club dates only; a broken entry is reported and left out rather
+    than stopping the run, so fixtures keep updating while someone fixes it."""
+    result = _read_custom_events()
+    for bad in result.invalid:
+        ident = bad.raw.get("id") if isinstance(bad.raw, dict) else None
+        print(f"[Combine] WARNING: skipping invalid custom event {ident or '?'}: {bad.error}")
+    return result.valid
 
 
-def save_custom_events(events: list[dict]) -> None:
-    events = sorted(events, key=lambda e: (e["start_date"], e.get("start_time") or ""))
-    CUSTOM_EVENTS_JSON.write_text(
-        json.dumps(events, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+def save_custom_events(events: list) -> None:
+    CUSTOM_EVENTS_JSON.write_text(custom_events.serialize(events), encoding="utf-8")
 
 
 def _init_termine_db(path: str) -> sqlite3.Connection:
@@ -375,8 +379,8 @@ def cmd_add_event() -> None:
         print("Title required.")
         return
     start_date = input("Start date (yyyy-mm-dd): ").strip()
-    event = {
-        "id": str(uuid.uuid4()),
+    raw = {
+        "id": custom_events.new_id(),
         "title": title,
         "start_date": start_date,
         "start_time": input("Start time (HH:MM, or blank for all-day): ").strip() or None,
@@ -385,10 +389,18 @@ def cmd_add_event() -> None:
         "location": input("Location (or blank): ").strip() or None,
         "description": input("Description (or blank): ").strip() or None,
     }
-    events = load_custom_events()
-    events.append(event)
-    save_custom_events(events)
-    print(f"[Combine] Added '{title}' to {CUSTOM_EVENTS_JSON.name} — "
+    try:
+        event = custom_events.validate(raw)
+    except custom_events.ValidationError as err:
+        print(f"[Combine] Invalid {err.field}: {err.message}")
+        return
+    result = _read_custom_events()
+    if result.invalid:
+        print(f"[Combine] {len(result.invalid)} broken entry/entries — "
+              "fix custom_events.json first, nothing was added.")
+        return
+    save_custom_events([*result.valid, event])
+    print(f"[Combine] Added '{event['title']}' to {CUSTOM_EVENTS_JSON.name} — "
           f"run combine.py, then commit the file and the calendar.")
 
 
