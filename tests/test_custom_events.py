@@ -136,3 +136,9 @@ def test_event_rev_ignores_unknown_keys_but_sees_every_field():
 
 def test_new_id_is_a_valid_id():
     assert ce.validate(_raw(id=ce.new_id()))
+
+
+def test_repository_club_dates_are_all_valid():
+    """A broken hand edit should turn CI red before it silently drops a date."""
+    text = (Path(__file__).resolve().parent.parent / "custom_events.json").read_text(encoding="utf-8")
+    assert ce.parse(text).invalid == []
