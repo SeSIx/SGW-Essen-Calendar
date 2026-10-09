@@ -23,4 +23,4 @@ USER sgw
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD python -c "import os, sys, urllib.request; r = urllib.request.Request('http://127.0.0.1:8000/healthz', headers={'Host': os.environ.get('SGW_ADMIN_HOST', 'sgw-admin.srv1136792.hstgr.cloud'), 'X-Forwarded-Proto': 'https'}); sys.exit(0 if urllib.request.urlopen(r, timeout=3).status == 200 else 1)"
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "2", "--access-logfile", "-", "admin.wsgi:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "60", "--graceful-timeout", "30", "admin.wsgi:app"]

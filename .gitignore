@@ -48,7 +48,6 @@ output/*.ics
 # Virtual env
 .venv/
 docs/superpowers/
-admin/.env
-admin/e2e/screenshots/
-admin/.env
+admin/.env*
+!admin/.env.example
 admin/e2e/screenshots/

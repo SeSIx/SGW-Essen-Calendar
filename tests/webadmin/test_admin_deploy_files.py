@@ -46,3 +46,36 @@ def test_e2e_only_binds_localhost():
     e = read("admin/e2e/compose.e2e.yml")
     assert '"127.0.0.1:8099:8000"' in e and "SGW_ADMIN_ENV: e2e" in e
     assert "container_name" not in e and "root_default" not in e
+
+
+def test_ignore_patterns_cover_env_and_databases():
+    ignore = read("admin/Dockerfile.dockerignore")
+    for pat in ("admin/.env*", "**/*.db", "**/*.db-*", "**/__pycache__", "admin/e2e/"):
+        assert pat in ignore.splitlines(), pat
+    git = read(".gitignore").splitlines()
+    assert "admin/.env*" in git and git.count("admin/.env") == 0
+
+
+def test_gunicorn_keeps_tokens_out_of_logs():
+    cmd = next(line for line in read("admin/Dockerfile").splitlines() if line.startswith("CMD"))
+    assert "--access-logfile" not in cmd
+    assert '"--timeout", "60"' in cmd and '"--graceful-timeout", "30"' in cmd
+
+
+def test_production_compose_limits_resources():
+    c = read("admin/compose.yml")
+    for needle in ("mem_limit: 256m", "pids_limit: 128", "cpus: 1.0", "/tmp:size=16m,noexec,nosuid,nodev"):
+        assert needle in c, needle
+
+
+def test_e2e_mirrors_production_hardening():
+    e = read("admin/e2e/compose.e2e.yml")
+    for needle in ("read_only: true", "- ALL", "no-new-privileges:true", "/tmp:size=16m,noexec,nosuid,nodev"):
+        assert needle in e, needle
+    assert "USER sgw" in read("admin/Dockerfile")
+
+
+def test_e2e_run_script_is_robust():
+    r = read("admin/e2e/run.sh")
+    for needle in ("--remove-orphans", "--renew-anon-volumes", "logs --no-color", "python -m pip", "-rA"):
+        assert needle in r, needle

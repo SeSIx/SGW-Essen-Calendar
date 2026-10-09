@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 
 import pytest
+from playwright.sync_api import Error as PlaywrightError
 from playwright.sync_api import expect, sync_playwright
 
 BASE = "http://localhost:8099"
@@ -35,7 +36,14 @@ def ours():
 
 def shot(page, name):
     SHOTS.mkdir(parents=True, exist_ok=True)
-    page.screenshot(path=str(SHOTS / f"{name}.png"), full_page=True)
+    path = str(SHOTS / f"{name}.png")
+    try:
+        page.screenshot(path=path, full_page=True)
+    except PlaywrightError:
+        try:
+            page.screenshot(path=path, full_page=True)
+        except PlaywrightError:
+            page.screenshot(path=path, full_page=False)
 
 
 def test_full_flow(page):
@@ -91,4 +99,5 @@ def test_full_flow(page):
 
     page.get_by_role("link", name="Damen", exact=True).click()
     assert "teams=" in page.url
+    expect(page.locator("a.item", has_text="Damen").first).to_be_visible()
     shot(page, "07-filter-damen")

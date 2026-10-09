@@ -4,6 +4,7 @@ Events are not stored here. They live in custom_events.json on GitHub.
 """
 
 import sqlite3
+import time
 from collections.abc import Iterator
 from contextlib import contextmanager, suppress
 
@@ -51,9 +52,19 @@ def connect(path: str) -> sqlite3.Connection:
     # redeem the same link.
     conn = sqlite3.connect(path, isolation_level=None)
     conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA journal_mode=WAL")
-    conn.execute("PRAGMA foreign_keys=ON")
     conn.execute("PRAGMA busy_timeout=10000")
+    # Switching a fresh file to WAL fails at once with "locked" (no busy wait)
+    # when another worker is doing the same, so retry for a few seconds.
+    deadline = time.monotonic() + 10
+    while True:
+        try:
+            conn.execute("PRAGMA journal_mode=WAL")
+            break
+        except sqlite3.OperationalError:
+            if time.monotonic() > deadline:
+                raise
+            time.sleep(0.05)
+    conn.execute("PRAGMA foreign_keys=ON")
     return conn
 
 

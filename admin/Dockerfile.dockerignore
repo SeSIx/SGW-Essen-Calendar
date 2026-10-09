@@ -1,6 +1,8 @@
 **
 !custom_events.py
 !admin/
-admin/.env
-admin/e2e/
+admin/.env*
+**/*.db
+**/*.db-*
 **/__pycache__
+admin/e2e/

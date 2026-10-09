@@ -15,8 +15,11 @@ services:
     volumes:
       - sgw-admin-data:/data
     read_only: true
+    mem_limit: 256m
+    pids_limit: 128
+    cpus: 1.0
     tmpfs:
-      - /tmp
+      - /tmp:size=16m,noexec,nosuid,nodev
     cap_drop:
       - ALL
     security_opt:
