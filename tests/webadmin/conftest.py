@@ -1,11 +1,11 @@
 """Fixtures for the admin app tests."""
 
 import pytest
-from admin.app import create_app
-from admin.settings import Settings
 
 import custom_events
+from admin.app import create_app
 from admin.fake_store import FakeGitHubStore
+from admin.settings import Settings
 from webadmin.testdata import (
     EVENT_MULTI,
     EVENT_TIMED,
