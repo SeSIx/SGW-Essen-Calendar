@@ -7,8 +7,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const allDay = form.querySelector("input[name=all_day]");
     const multiDay = form.querySelector("input[name=multi_day]");
     const sync = () => {
-      form.querySelectorAll("[data-timed]").forEach((el) => { el.hidden = allDay.checked; });
-      form.querySelectorAll("[data-multi]").forEach((el) => { el.hidden = !multiDay.checked; });
+      // Hidden inputs are disabled too, so they are not sent and cannot clash with the switches.
+      const show = (selector, visible) => form.querySelectorAll(selector).forEach((el) => {
+        el.hidden = !visible;
+        el.querySelectorAll("input").forEach((input) => { input.disabled = !visible; });
+      });
+      show("[data-timed]", !allDay.checked);
+      show("[data-multi]", multiDay.checked);
     };
     allDay.addEventListener("change", sync);
     multiDay.addEventListener("change", sync);

@@ -41,7 +41,7 @@ def from_event(entry: object) -> FormData:
 
 
 def from_request(form) -> FormData:
-    # Cut far above the model's limits so over-long input is still reported, not silently trimmed.
+    # The caps sit well above the model's limits: they only bound the work, over-long input still fails validation.
     def text(name: str, limit: int) -> str:
         return form.get(name, "")[:limit]
 
@@ -55,6 +55,11 @@ def from_request(form) -> FormData:
 def to_event(data: FormData, event_id: str) -> dict:
     if not data.all_day and not data.start_time:
         raise custom_events.ValidationError("start_time", "Uhrzeit fehlt – oder „Ganztägig“ wählen")
+    if not data.multi_day and data.end_date and data.end_date != data.start_date:
+        raise custom_events.ValidationError("end_date", "Mehrtägig einschalten oder Ende leeren")
+    if data.all_day and (data.start_time or data.end_time):
+        field = "start_time" if data.start_time else "end_time"
+        raise custom_events.ValidationError(field, "Ganztägig ausschalten oder Uhrzeiten leeren")
     if data.multi_day and not data.end_date:
         raise custom_events.ValidationError("end_date", "Enddatum fehlt – oder „Mehrtägig“ ausschalten")
     return custom_events.validate({

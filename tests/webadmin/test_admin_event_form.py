@@ -7,7 +7,7 @@ import re
 import pytest
 
 import custom_events
-from admin.github_store import Author, Conflict, Unauthorized, Unavailable
+from admin.github_store import Author, Conflict, CorruptFile, RateLimited, Unauthorized, Unavailable
 from webadmin.testdata import BASE, EVENT_MULTI, EVENT_TIMED, csrf_of
 
 BROKEN = {"id": "kaputt-1", "title": "Feier", "start_date": "2026-13-01"}
@@ -57,7 +57,7 @@ def test_create_timed_event(user_client, store, fake_dir):
 
 def test_create_multi_day_all_day_event(user_client, fake_dir):
     submit(user_client, "/termin/neu", user_client.get("/termin/neu"),
-           all_day="1", multi_day="1", end_date="2026-12-21")
+           all_day="1", multi_day="1", end_date="2026-12-21", start_time="", end_time="")
     [new] = [e for e in stored(fake_dir) if e["title"] == "Weihnachtsfeier"]
     assert (new["start_time"], new["end_time"], new["end_date"]) == (None, None, "2026-12-21")
 
@@ -208,3 +208,119 @@ def test_unknown_or_malformed_ids_are_404(user_client):
 
 def test_anonymous_is_sent_to_login(client):
     assert client.get("/termin/neu").headers["Location"].endswith("/login")
+
+
+# --- fix round 1 ---
+
+NASTY = {"title": 'A & B <i> "q" \'s\'', "description": "Zeile 1\nZeile 2", "start_date": "2026-11-21",
+         "start_time": "", "all_day": "1", "multi_day": "1", "end_date": "2026-11-23", "end_time": ""}
+
+
+def test_end_date_without_multi_day_is_an_error(user_client, fake_dir):
+    before = stored(fake_dir)
+    r = submit(user_client, "/termin/neu", user_client.get("/termin/neu"), end_date="2026-12-21")
+    body = r.get_data(as_text=True)
+    assert r.status_code == 400 and "Mehrtägig einschalten oder Ende leeren" in body
+    assert stored(fake_dir) == before
+
+
+def test_times_with_all_day_are_an_error(user_client, fake_dir):
+    before = stored(fake_dir)
+    r = submit(user_client, "/termin/neu", user_client.get("/termin/neu"), all_day="1")
+    body = r.get_data(as_text=True)
+    assert r.status_code == 400 and "Ganztägig ausschalten oder Uhrzeiten leeren" in body
+    assert stored(fake_dir) == before
+
+
+def test_js_like_submission_with_hidden_fields_omitted_saves(user_client, fake_dir):
+    r = submit(user_client, "/termin/neu", user_client.get("/termin/neu"),
+               all_day="1", start_time=None, end_time=None, end_date=None)
+    assert r.status_code == 302
+    [new] = [e for e in stored(fake_dir) if e["title"] == "Weihnachtsfeier"]
+    assert new["start_time"] is None
+
+
+def test_duplicate_id_with_other_content_redirects_to_edit_page(user_client, fake_dir):
+    page = user_client.get("/termin/neu")
+    event_id = hidden(page)["id"]
+    submit(user_client, "/termin/neu", page)
+    r = submit(user_client, "/termin/neu", page, title="Anderer Titel")
+    assert r.status_code == 303
+    assert r.headers["Location"].endswith(f"/termin/{event_id}?hinweis=schon-gespeichert")
+    assert titles(fake_dir).count("Weihnachtsfeier") == 1 and "Anderer Titel" not in titles(fake_dir)
+    assert "bereits gespeichert" in user_client.get(r.headers["Location"]).get_data(as_text=True)
+
+
+def _assert_nasty_saved(fake_dir, event_id):
+    [saved] = [e for e in stored(fake_dir) if e["id"] == event_id]
+    assert saved["title"] == NASTY["title"] and saved["description"] == NASTY["description"]
+    assert (saved["start_time"], saved["end_date"]) == (None, "2026-11-23")
+
+
+def test_keep_my_version_after_conflict_stores_exact_input(user_client, store, fake_dir):
+    page = user_client.get(edit_path(EVENT_TIMED))
+    store.save([{**EVENT_TIMED, "location": "Hauptbad"}, EVENT_MULTI], store.load().sha, "x", KAPITAEN)
+    r = submit(user_client, edit_path(EVENT_TIMED), page, **NASTY)
+    assert r.status_code == 409
+    assert submit(user_client, edit_path(EVENT_TIMED), r, with_form=False).status_code == 302
+    _assert_nasty_saved(fake_dir, EVENT_TIMED["id"])
+
+
+def test_recreate_after_deletion_stores_exact_input(user_client, store, fake_dir):
+    page = user_client.get(edit_path(EVENT_TIMED))
+    store.save([EVENT_MULTI], store.load().sha, "x", KAPITAEN)
+    r = submit(user_client, edit_path(EVENT_TIMED), page, **NASTY)
+    assert r.status_code == 409
+    assert submit(user_client, edit_path(EVENT_TIMED), r, with_form=False).status_code == 302
+    _assert_nasty_saved(fake_dir, EVENT_TIMED["id"])
+
+
+def test_delete_commit_message_uses_stored_title(user_client, store):
+    path = f"/termin/{EVENT_TIMED['id']}/loeschen"
+    confirm = user_client.get(path)
+    submit(user_client, path, confirm, with_form=False, title="Gefälscht")
+    assert store.last_commit()[2] == "Julius: „Kampfrichter-Lehrgang“ gelöscht"
+
+
+def test_delete_blocked_while_unauthorized(user_client, store, fake_dir):
+    path = f"/termin/{EVENT_TIMED['id']}/loeschen"
+    confirm = user_client.get(path)
+    store.unauthorized = True
+    assert "disabled" in user_client.get(path).get_data(as_text=True)
+    store.unauthorized = True
+    r = submit(user_client, path, confirm, with_form=False)
+    assert r.status_code == 503 and "Kampfrichter-Lehrgang" in titles(fake_dir)
+
+
+@pytest.mark.parametrize("exc, text", [(RateLimited("429"), "Zu viele Anfragen"),
+                                       (CorruptFile("bad"), "beschädigt")])
+def test_other_store_problems_on_save(user_client, store, exc, text):
+    page = user_client.get("/termin/neu")
+    store.fail["save"].append(exc)
+    r = submit(user_client, "/termin/neu", page)
+    assert r.status_code == 503 and text in r.get_data(as_text=True)
+
+
+def test_delete_under_store_error_and_save_conflict(user_client, store, fake_dir):
+    path = f"/termin/{EVENT_TIMED['id']}/loeschen"
+    confirm = user_client.get(path)
+    store.fail["save"].append(Unavailable("down"))
+    r = submit(user_client, path, confirm, with_form=False)
+    assert r.status_code == 503 and "nicht erreichbar" in r.get_data(as_text=True)
+    store.fail["save"] += [Conflict("409"), Conflict("409")]
+    r = submit(user_client, path, confirm, with_form=False)
+    assert r.status_code == 409 and "bitte nochmal speichern" in r.get_data(as_text=True)
+    assert "Kampfrichter-Lehrgang" in titles(fake_dir)
+
+
+def test_head_on_delete_page_changes_nothing(user_client, store, fake_dir):
+    assert user_client.head(f"/termin/{EVENT_TIMED['id']}/loeschen").status_code == 200
+    assert store.saves == 0 and "Kampfrichter-Lehrgang" in titles(fake_dir)
+
+
+def test_post_with_malformed_id_is_rejected(user_client, store):
+    page = user_client.get("/termin/neu")
+    assert submit(user_client, "/termin/a_b", page).status_code in (400, 404)
+    assert submit(user_client, "/termin/a_b/loeschen", page, with_form=False).status_code in (400, 404)
+    assert submit(user_client, "/termin/neu", page, id="a_b").status_code in (400, 404)
+    assert store.saves == 0

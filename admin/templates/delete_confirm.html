@@ -5,12 +5,13 @@
 <div class="card">
   <p><b>Termin wirklich löschen?</b></p>
   <p>{{ title }}</p>
+  {% if save_blocked %}<p class="error" role="alert">Löschen ist gesperrt, bis Julius den GitHub-Zugang erneuert hat.</p>{% endif %}
   <form method="post" class="actions" action="{{ url_for('main.delete_event', event_id=event_id) }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="rev" value="{{ rev }}">
     <input type="hidden" name="title" value="{{ title }}">
     <a class="button secondary" href="{{ url_for('main.edit_event', event_id=event_id) }}">Abbrechen</a>
-    <button type="submit" class="danger">Löschen</button>
+    <button type="submit" class="danger"{% if save_blocked %} disabled{% endif %}>Löschen</button>
   </form>
 </div>
 {% endblock %}

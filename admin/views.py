@@ -101,6 +101,9 @@ def logout_everywhere():
     resp = redirect(url_for("main.login"))
     security.clear_session_cookie(resp)
     return resp
+
+
+ALREADY_SAVED = "Dieser Termin war bereits gespeichert. Du kannst ihn hier noch korrigieren."
 BUSY = "GitHub war gerade beschäftigt – bitte nochmal speichern."
 
 
@@ -118,9 +121,9 @@ def _author():
     return changes.author_for(g.user.login, g.user.display_name)
 
 
-def _form(mode, data, event_id, rev, *, error=None, field_errors=None, status=200):
+def _form(mode, data, event_id, rev, *, error=None, field_errors=None, notice=None, status=200):
     return render_template(
-        "event_form.html", mode=mode, data=data, event_id=event_id, rev=rev, error=error,
+        "event_form.html", mode=mode, data=data, event_id=event_id, rev=rev, error=error, notice=notice,
         field_errors=field_errors or {}, save_blocked=services().store.unauthorized), status
 
 
@@ -167,7 +170,7 @@ def _commit(mode, data, event_id, rev, mutate, title, verb):
     except changes.SaveConflict:
         return _form(mode, data, event_id, rev, error=BUSY, status=409)
     except changes.DuplicateId:
-        return _form(mode, data, custom_events.new_id(), rev, error=BUSY, status=409)
+        return redirect(url_for("main.edit_event", event_id=event_id, hinweis="schon-gespeichert"), 303)
     except StoreError as exc:
         return _form(mode, data, event_id, rev,
                      error=f"{store_problem(exc)} Deine Eingaben sind noch da.", status=503)
@@ -198,7 +201,8 @@ def edit_event(event_id):
         entry, failed = _load_entry(event_id)
         if failed:
             return failed
-        return _form("edit", forms.from_event(entry), event_id, custom_events.event_rev(entry))
+        notice = ALREADY_SAVED if request.args.get("hinweis") == "schon-gespeichert" else None
+        return _form("edit", forms.from_event(entry), event_id, custom_events.event_rev(entry), notice=notice)
     if not changes.EVENT_ID_RE.fullmatch(event_id):
         abort(404)
     rev = request.form.get("rev", "")[:64]
@@ -216,17 +220,21 @@ def edit_event(event_id):
 @login_required
 def delete_event(event_id):
     if request.method != "POST":  # GET or HEAD
+        blocked = services().store.unauthorized  # read before the load below resets it
         entry, failed = _load_entry(event_id)
         if failed:
             return failed
-        return render_template("delete_confirm.html", event_id=event_id,
+        return render_template("delete_confirm.html", event_id=event_id, save_blocked=blocked,
                                title=forms.from_event(entry).title or "(ohne Titel)",
                                rev=custom_events.event_rev(entry))
     if not changes.EVENT_ID_RE.fullmatch(event_id):
         abort(404)
+    if services().store.unauthorized:
+        return render_template("message.html", title="Nicht gelöscht", text=store_problem(Unauthorized())), 503
     rev = request.form.get("rev", "")[:64]
-    title = request.form.get("title", "")[:200] or event_id
     try:
+        entry = changes.find(services().store.load(), event_id)
+        title = forms.from_event(entry).title or event_id
         changes.commit(services().store, lambda s: changes.delete(s, event_id, rev),
                        changes.message(g.user.display_name, title, "gelöscht"), _author())
     except changes.EventConflict as conflict:

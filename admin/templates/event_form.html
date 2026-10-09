@@ -7,6 +7,7 @@
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <input type="hidden" name="id" value="{{ event_id }}">
   <input type="hidden" name="rev" value="{{ rev }}">
+  {% if notice %}<p class="notice" role="status">{{ notice }}</p>{% endif %}
   {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
   {% if save_blocked %}<p class="error" role="alert">Speichern ist gesperrt, bis Julius den GitHub-Zugang erneuert hat.</p>{% endif %}
   <label>Titel
