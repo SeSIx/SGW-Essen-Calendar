@@ -139,8 +139,50 @@ def test_logout_everywhere(app, client):
     other = app.test_client()
     login(client)
     login(other)
-    post_form(client, "/abmelden/ueberall", {}, page=client.get("/"))
+    r = post_form(client, "/abmelden/ueberall", {}, page=client.get("/"))
+    assert r.status_code == 302 and r.headers["Location"].endswith("/login")
+    assert "Max-Age=0" in cookie(r, "__Host-sid")
+    assert client.get("/").status_code == 302
     assert other.get("/").status_code == 302
+
+
+def test_start_page_greets_inside_main(user_client):
+    html = user_client.get("/").get_data(as_text=True)
+    assert re.search(r"<main>.*Angemeldet\..*</main>", html, re.S)
+
+
+def _heights(css, selector):
+    found = []
+    for sel, body in re.findall(r"([^{}]+)\{([^}]*)\}", css):
+        if selector in [s.strip() for s in sel.split(",")]:
+            found += [int(v) for v in re.findall(r"(?<![\w-])(?:min-)?height:\s*(\d+)px", body)]
+    return found
+
+
+@pytest.mark.parametrize("selector", [".chip", "button", ".more", ".menu summary", ".fab", ".form input"])
+def test_touch_targets_are_at_least_44px(selector):
+    css = (TEMPLATES.parent / "static" / "app.css").read_text(encoding="utf-8")
+    heights = _heights(css, selector)
+    assert heights and max(heights) >= 44, selector
+
+
+def test_stale_session_post_redirects_to_login(app, client):
+    make_user(app)
+    other = app.test_client()
+    login(client)
+    login(other)
+    page = other.get("/")
+    post_form(client, "/abmelden/ueberall", {}, page=client.get("/"))
+    r = other.post("/abmelden", data={"csrf_token": csrf_of(page)},
+                   headers={"Origin": BASE, "Sec-Fetch-Site": "same-origin"})
+    assert r.status_code == 303 and r.headers["Location"].endswith("/login")
+    assert "Max-Age=0" in cookie(r, "__Host-sid")
+
+
+def test_bad_csrf_without_session_cookie_stays_400(client):
+    r = client.post("/login", data={"login": "a", "password": "b", "csrf_token": "x"},
+                    headers={"Origin": BASE, "Sec-Fetch-Site": "same-origin"})
+    assert r.status_code == 400
 
 
 def test_static_files_are_cacheable_and_protected(client):

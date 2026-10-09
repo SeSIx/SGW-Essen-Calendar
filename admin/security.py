@@ -10,7 +10,7 @@ import hmac
 import secrets
 from collections.abc import Callable
 
-from flask import Flask, abort, g, request
+from flask import Flask, abort, g, redirect, request, url_for
 from werkzeug.wrappers import Response
 
 from admin.auth import SESSION_TTL
@@ -56,6 +56,11 @@ def _check_post() -> None:
     # Compare bytes: compare_digest raises TypeError on non-ASCII str.
     if not isinstance(sent, str) or not sent or not hmac.compare_digest(
             sent.encode("utf-8"), csrf_token().encode("utf-8")):
+        if g.user is None and SESSION_COOKIE in request.cookies:
+            # Stale session (e.g. logged out elsewhere): send the user to the login page.
+            resp = redirect(url_for("main.login"), 303)
+            clear_session_cookie(resp)
+            abort(resp)
         abort(400)
 
 

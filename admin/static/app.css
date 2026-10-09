@@ -41,7 +41,7 @@ a { color: var(--royal); }
 
 .chips { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 8px; }
 .chip { flex: none; border: 1px solid #d1d5db; background: var(--card); color: var(--text); border-radius: 999px;
-  padding: 0 14px; min-height: 36px; display: inline-flex; align-items: center; text-decoration: none; font-size: 14px; }
+  padding: 0 14px; min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; font-size: 14px; }
 .chip.on { background: var(--royal); border-color: var(--royal); color: #fff; }
 
 .month { display: flex; justify-content: space-between; align-items: center; margin: 14px 4px 6px;
