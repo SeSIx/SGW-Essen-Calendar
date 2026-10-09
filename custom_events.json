@@ -38,15 +38,5 @@
     "end_time": "22:00",
     "location": null,
     "description": "Ab jetzt volles Trainingsprogramm"
-  },
-  {
-    "id": "6b380bfa-c508-4e89-86d0-de44a2d4aa90",
-    "title": "Test – bitte ignorieren",
-    "start_date": "2027-01-15",
-    "start_time": null,
-    "end_date": null,
-    "end_time": null,
-    "location": null,
-    "description": "Automatischer Test der Admin-Umstellung, wird gleich wieder gelöscht"
   }
 ]
