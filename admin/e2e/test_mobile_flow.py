@@ -101,3 +101,10 @@ def test_full_flow(page):
     assert "teams=" in page.url
     expect(page.locator("a.item", has_text="Damen").first).to_be_visible()
     shot(page, "07-filter-damen")
+
+    while page.locator("a.chip.on").count():
+        page.locator("a.chip.on").first.click()
+        page.wait_for_load_state()
+    expect(page.get_by_text("Keine Mannschaft gewählt – nur Vereinstermine")).to_be_visible()
+    expect(page.locator("a.item.game")).to_have_count(0)
+    shot(page, "08-filter-keine")

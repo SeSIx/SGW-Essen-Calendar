@@ -104,6 +104,18 @@ def parse_teams(value: str | None) -> tuple[str, ...] | None:
     return tuple(slug for slug, _ in TEAMS if slug in wanted)
 
 
+NO_TEAMS = "keine"
+
+
+def parse_selection(value: str | None) -> tuple[str, ...] | None:
+    """A stored or requested filter: None = not given or unusable, () = no team on purpose."""
+    if value is None:
+        return None
+    if value.strip() in ("", NO_TEAMS):
+        return ()
+    return parse_teams(value) or None
+
+
 class GameCache:
     def __init__(self, store: Store, clock: Callable[[], float] = time.monotonic, ttl: int = TTL):
         self._store = store

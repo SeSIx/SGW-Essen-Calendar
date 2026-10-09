@@ -54,17 +54,18 @@ RED_BANNER = ("Zugang zu GitHub abgelaufen oder ungültig – Speichern ist gesp
 
 def _selected_teams() -> tuple[str, ...]:
     for raw in (request.args.get("teams"), request.cookies.get(TEAMS_COOKIE)):
-        chosen = games.parse_teams(raw)
-        if chosen:
+        chosen = games.parse_selection(raw)
+        if chosen is not None:
             return chosen
     return games.DEFAULT_TEAMS
 
 
-def _chips(selected: tuple[str, ...]) -> list[SimpleNamespace]:
+def _chips(selected: tuple[str, ...], past: bool) -> list[SimpleNamespace]:
     chips = []
     for slug, label in games.TEAMS:
         toggled = [s for s, _ in games.TEAMS if (s in selected) != (s == slug)]
-        href = url_for("main.index", teams=",".join(toggled)) if toggled else None
+        extra = {"frueher": 1} if past else {}
+        href = url_for("main.index", teams=",".join(toggled), **extra)
         chips.append(SimpleNamespace(label=label, on=slug in selected, href=href))
     return chips
 
@@ -102,11 +103,11 @@ def index():
     today = datetime.fromtimestamp(svc.clock(), games.BERLIN).date()
     resp = make_response(render_template(
         "agenda.html", months=agenda.build(events, found, today, past=past), broken=broken,
-        chips=_chips(selected), past=past, problem=problem, games_stale=stale,
+        chips=_chips(selected, past), no_teams=not selected, past=past, problem=problem, games_stale=stale,
         notice=NOTICES.get(request.args.get("ok", "")),
         today_label=f"Heute: {today.day}. {agenda.MONTHS[today.month - 1][:3]}"))
     if request.args.get("teams") is not None:
-        resp.set_cookie(TEAMS_COOKIE, ",".join(selected), max_age=365 * 24 * 3600,
+        resp.set_cookie(TEAMS_COOKIE, ",".join(selected) or games.NO_TEAMS, max_age=365 * 24 * 3600,
                         secure=True, httponly=True, samesite="Lax", path="/")
     return resp
 
