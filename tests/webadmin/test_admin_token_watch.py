@@ -2,8 +2,11 @@
 
 import importlib.util
 import json
+import socket
 import sys
+import threading
 from datetime import date
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -362,5 +365,154 @@ def test_send_whatsapp_permanent_4xx_does_not_retry(status):
     assert _send(http, sleeps, logs) is False
     assert sleeps == []
     assert len(http.posts()) == 1
+    joined = "\n".join(logs)
+    assert API_KEY not in joined and NUMBER not in joined
+
+
+def _responder(hits, status, extra_headers=(), body=b"{}"):
+    """Local HTTP handler: records every request it gets, answers with a fixed status."""
+
+    class Handler(BaseHTTPRequestHandler):
+        def _answer(self):
+            length = int(self.headers.get("Content-Length") or 0)
+            payload = self.rfile.read(length) if length else b""
+            hits.append((self.command, self.path, dict(self.headers), payload))
+            self.send_response(status)
+            for name, value in extra_headers:
+                self.send_header(name, value)
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        do_GET = _answer
+        do_POST = _answer
+
+        def log_message(self, *args):
+            pass
+
+    return Handler
+
+
+@pytest.fixture
+def local_server():
+    """Starts threaded HTTP servers on 127.0.0.1 with ephemeral ports; stops them after the test."""
+    servers = []
+
+    def start(handler_cls):
+        server = ThreadingHTTPServer(("127.0.0.1", 0), handler_cls)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        servers.append(server)
+        return f"http://127.0.0.1:{server.server_address[1]}"
+
+    yield start
+    for server in servers:
+        server.shutdown()
+        server.server_close()
+
+
+@pytest.fixture
+def raw_server():
+    """Accepts one connection on 127.0.0.1, sends fixed bytes, closes."""
+    listener = socket.create_server(("127.0.0.1", 0))
+
+    def serve(reply):
+        def run():
+            try:
+                conn, _ = listener.accept()
+            except OSError:
+                return
+            with conn:
+                conn.recv(65536)
+                conn.sendall(reply)
+
+        threading.Thread(target=run, daemon=True).start()
+        return listener.getsockname()[1]
+
+    yield serve
+    listener.close()
+
+
+def test_urllib_http_does_not_follow_redirects_and_keeps_secrets_home(local_server):
+    sink_hits = []
+    sink = local_server(_responder(sink_hits, 200))
+    origin_hits = []
+    origin = local_server(_responder(origin_hits, 302, [("Location", sink + "/catch")]))
+    response = tw.urllib_http("POST", origin + "/x", {"apikey": API_KEY}, b"{}")
+    assert response.status == 302
+    assert response.headers["location"] == sink + "/catch"
+    assert len(origin_hits) == 1
+    received = {name.lower(): value for name, value in origin_hits[0][2].items()}
+    assert received["apikey"] == API_KEY
+    assert sink_hits == []
+
+
+def test_urllib_http_plain_get_and_503_round_trip(local_server):
+    ok = local_server(_responder([], 200, [("X-Test", "yes")], b'{"a": 1}'))
+    response = tw.urllib_http("GET", ok + "/", {"Accept": "application/json"}, None)
+    assert response.status == 200
+    assert response.body == b'{"a": 1}'
+    assert response.headers["x-test"] == "yes"
+    down = local_server(_responder([], 503, body=b"busy"))
+    response = tw.urllib_http("GET", down + "/", {}, None)
+    assert (response.status, response.body) == (503, b"busy")
+
+
+def test_urllib_http_garbage_status_line_is_connection_error(raw_server):
+    port = raw_server(b"garbage\r\n\r\n")
+    with pytest.raises(ConnectionError, match="BadStatusLine"):
+        tw.urllib_http("GET", f"http://127.0.0.1:{port}/", {}, None)
+
+
+@pytest.mark.parametrize("status", [301, 302, 303, 307])
+def test_check_token_redirect_is_unavailable(status):
+    with pytest.raises(tw.GitHubUnavailable):
+        tw.check_token(FakeHttp(github=[tw.HttpResponse(status, {}, b"")]), TOKEN)
+
+
+def test_check_token_403_is_unavailable():
+    with pytest.raises(tw.GitHubUnavailable):
+        tw.check_token(FakeHttp(github=[tw.HttpResponse(403, {}, b"{}")]), TOKEN)
+
+
+@pytest.mark.parametrize("answer", [
+    tw.HttpResponse(403, {}, b""),
+    tw.HttpResponse(502, {}, b""),
+    tw.HttpResponse(200, {"github-authentication-token-expiration": "bald " + TOKEN}, b""),
+    OSError("timed out"),
+])
+def test_github_unavailable_never_carries_token(answer):
+    with pytest.raises(tw.GitHubUnavailable) as caught:
+        tw.check_token(FakeHttp(github=[answer]), TOKEN)
+    assert TOKEN not in str(caught.value)
+    assert TOKEN not in repr(caught.value.args)
+
+
+def test_check_token_sends_github_api_headers():
+    http = FakeHttp(github=[github_expiring()])
+    tw.check_token(http, TOKEN)
+    headers = http.calls[0][2]
+    assert headers["Accept"] == "application/vnd.github+json"
+    assert headers["X-GitHub-Api-Version"] == "2022-11-28"
+
+
+@pytest.mark.parametrize("status", [301, 302, 303, 307])
+def test_send_whatsapp_redirect_is_permanent_failure(status):
+    http = FakeHttp(evolution=[tw.HttpResponse(status, {"location": "http://evil/"}, b"")])
+    sleeps, logs = [], []
+    assert _send(http, sleeps, logs) is False
+    assert sleeps == []
+    assert len(http.posts()) == 1
+
+
+def test_send_whatsapp_logs_never_contain_key_or_number_on_retry_paths():
+    secret_error = OSError(f"reset {API_KEY} {NUMBER}")
+    http = FakeHttp(evolution=[
+        secret_error,
+        tw.HttpResponse(503, {}, f"{API_KEY} {NUMBER}".encode()),
+        tw.HttpResponse(502, {}, f"{API_KEY} {NUMBER}".encode()),
+    ])
+    sleeps, logs = [], []
+    assert _send(http, sleeps, logs) is False
+    assert len(logs) == 3
     joined = "\n".join(logs)
     assert API_KEY not in joined and NUMBER not in joined

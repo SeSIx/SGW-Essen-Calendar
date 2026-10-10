@@ -17,6 +17,7 @@ import urllib.request
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
+from http.client import HTTPException
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -188,18 +189,33 @@ class HttpResponse:
 Http = Callable[[str, str, dict[str, str], bytes | None], HttpResponse]
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """Refuse redirects: the token and key must not follow a 3xx to another host."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):  # noqa: ARG002 (signature)
+        return None
+
+
+_OPENER = urllib.request.build_opener(_NoRedirect)
+
+
 def urllib_http(method: str, url: str, headers: dict[str, str],
                 body: bytes | None) -> HttpResponse:
-    """Plain urllib call; HTTP errors come back as responses, network errors raise OSError."""
+    """Plain urllib call; HTTP errors (3xx included) come back as responses.
+
+    Network errors and malformed replies raise OSError (ConnectionError for the latter).
+    """
     request = urllib.request.Request(url, data=body, headers=headers, method=method)
     try:
-        with urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS) as response:
+        with _OPENER.open(request, timeout=TIMEOUT_SECONDS) as response:
             return HttpResponse(response.status,
                                 {k.lower(): v for k, v in response.headers.items()},
                                 response.read())
     except urllib.error.HTTPError as err:
         return HttpResponse(err.code, {k.lower(): v for k, v in err.headers.items()},
                             err.read())
+    except HTTPException as exc:
+        raise ConnectionError(type(exc).__name__) from exc
 
 
 class GitHubUnavailable(Exception):
@@ -233,7 +249,8 @@ def check_token(http: Http, token: str) -> TokenStatus:
     try:
         return TokenStatus("expires", parse_expiry(raw))
     except ValueError as exc:
-        raise GitHubUnavailable(str(exc)) from exc
+        # Not str(exc): it echoes the raw header, which must never reach a log or message
+        raise GitHubUnavailable("Ablaufdatum des GitHub-Tokens nicht lesbar") from exc
 
 
 def send_whatsapp(http: Http, sleep: Callable[[float], None], log: Callable[[str], None], *,
