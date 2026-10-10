@@ -81,7 +81,8 @@ Der Wächter liest den GitHub-Token aus `admin/.env` und den Evolution-Schlüsse
 steht nur in `/etc/sgw-token-watch.conf` (Rechte 600):
 
 ```
-RECIPIENT=49…            # internationale Nummer ohne +
+# internationale Nummer ohne +
+RECIPIENT=49…
 # optional: GITHUB_ENV_FILE, EVOLUTION_COMPOSE, EVOLUTION_URL, EVOLUTION_INSTANCE, STATE_FILE
 ```
 
@@ -129,3 +130,7 @@ docker compose -f admin/compose.yml start sgw-admin
 docker ps --filter name=sgw-admin     # nach ca. 30 s „healthy“
 docker exec sgw-admin sgw-admin users
 ```
+
+Danach für jedes Konto in der `users`-Liste `docker exec sgw-admin sgw-admin logout-all <login>`
+ausführen und offene Einladungen neu ausstellen. Der Stand des Backups kann Sitzungen und
+Tokens enthalten, die inzwischen widerrufen wurden; ohne diesen Schritt leben sie wieder auf.

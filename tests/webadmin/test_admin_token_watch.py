@@ -25,6 +25,10 @@ NOW = datetime(2027, 9, 28, 9, 0, tzinfo=ZoneInfo("Europe/Berlin"))
 NUMBER = "4915112345678"  # fiktiv, nie eine echte Nummer ins Repo
 
 
+EXPIRY_NOON = datetime(2027, 10, 12, 12, 0, tzinfo=BERLIN)
+EXPIRY_MIDNIGHT = datetime(2027, 9, 10, 0, 0, tzinfo=BERLIN)
+
+
 @pytest.mark.parametrize(("days", "stage"), [
     (30, None), (15, None), (14, 14), (10, 14), (7, 7), (5, 7), (3, 3),
     (2, 3), (1, 1), (0, 0), (-2, 0),
@@ -57,8 +61,8 @@ def test_days_left_uses_berlin_calendar_day():
 
 
 def test_expiry_message_has_date_days_and_all_renew_steps():
-    text = tw.expiry_message(date(2027, 10, 12), 14)
-    assert "12.10.2027" in text
+    text = tw.expiry_message(EXPIRY_NOON, 14)
+    assert "am 12.10.2027 um 12:00 Uhr ab" in text
     assert "in 14 Tagen" in text
     assert "github.com/settings/personal-access-tokens" in text
     assert "nano /root/sgw-admin/admin/.env" in text
@@ -68,7 +72,7 @@ def test_expiry_message_has_date_days_and_all_renew_steps():
 
 @pytest.mark.parametrize(("days", "phrase"), [(1, "(morgen)"), (0, "(heute)"), (5, "(in 5 Tagen)")])
 def test_expiry_message_day_phrases(days, phrase):
-    assert phrase in tw.expiry_message(date(2027, 10, 12), days)
+    assert phrase in tw.expiry_message(EXPIRY_NOON, days)
 
 
 def test_invalid_message_mentions_locked_saving_and_steps():
@@ -216,7 +220,7 @@ def test_read_env_value_tolerates_bom(tmp_path):
 
 
 def test_expiry_message_after_expiry_says_expired():
-    text = tw.expiry_message(date(2027, 10, 12), -2)
+    text = tw.expiry_message(EXPIRY_NOON, -2)
     assert "12.10.2027" in text
     assert "abgelaufen (vor 2 Tagen)" in text
     assert "github.com/settings/personal-access-tokens" in text
@@ -252,8 +256,10 @@ def test_days_left_near_midnight_just_before_berlin_day_change():
 
 
 def test_days_left_near_midnight_just_after_berlin_day_change():
-    # 22:00:00 UTC = 00:00 CEST am 13.10. -> schon der 13.10.
+    # 22:00:00 UTC = 00:00 CEST am 13.10. -> letzter gültiger Moment liegt am 12.10.
     expiry = tw.parse_expiry("2027-10-12 22:00:00 UTC")
+    assert tw.days_left(expiry, date(2027, 9, 28)) == 14
+    expiry = tw.parse_expiry("2027-10-12 22:00:01 UTC")
     assert tw.days_left(expiry, date(2027, 9, 28)) == 15
 
 
@@ -721,7 +727,8 @@ def test_main_bad_config_exits_2(tmp_path):
 
 
 def test_save_state_failure_after_send_exits_1_and_logs_masked(cfg):
-    cfg.state_file.parent.write_text("regular file", encoding="utf-8")
+    cfg.state_file.parent.mkdir(parents=True)
+    cfg.state_file.with_name("state.json.tmp").mkdir()  # saving fails, reading does not
     http = FakeHttp(github=[github_expiring()])
     code, logs = run(cfg, http)
     assert code == tw.EXIT_FAILED and len(http.posts()) == 1
@@ -813,3 +820,80 @@ def test_load_state_wrong_shape_is_survived(tmp_path, content):
     logs = []
     assert tw.load_state(path, logs.append) == {"sent": []}
     assert any("Statusdatei" in line for line in logs)
+
+
+# --- final review fixes ---
+
+
+def test_conf_inline_comment_is_stripped(tmp_path):
+    conf = tmp_path / "c.conf"
+    conf.write_text(f"RECIPIENT={NUMBER}   # Kommentar\n", encoding="utf-8")
+    assert tw.load_config(conf).recipient == NUMBER
+
+
+def test_env_inline_comment_is_stripped_but_hash_without_space_and_quoted_hash_stay(tmp_path):
+    env = tmp_path / ".env"
+    env.write_text("GITHUB_TOKEN=abc # x\nA=\"p#q  # r\"  # c\nB='s # t'\nC=ab#cd\n",
+                   encoding="utf-8")
+    assert tw.read_env_value(env, "GITHUB_TOKEN") == "abc"
+    values = tw._read_key_values(env)
+    assert values["A"] == "p#q  # r"
+    assert values["B"] == "s # t"
+    assert values["C"] == "ab#cd"
+
+
+def test_midnight_expiry_counts_from_last_valid_moment():
+    assert tw.days_left(EXPIRY_MIDNIGHT, date(2027, 9, 8)) == 1
+    assert tw.days_left(EXPIRY_MIDNIGHT, date(2027, 9, 9)) == 0
+
+
+def test_midnight_expiry_message_states_exact_time():
+    text = tw.expiry_message(EXPIRY_MIDNIGHT, 1)
+    assert "läuft am 10.09.2027 um 00:00 Uhr ab (morgen)" in text
+    text = tw.expiry_message(EXPIRY_MIDNIGHT, 0)
+    assert "läuft heute Nacht um 00:00 Uhr ab" in text
+
+
+def midnight_github():
+    return tw.HttpResponse(
+        200, {"github-authentication-token-expiration": "2027-09-09 22:00:00 UTC"}, b"{}")
+
+
+def test_midnight_expiry_runs_stage_1_on_8th_and_stage_0_on_9th(cfg):
+    http = FakeHttp(github=[midnight_github()])
+    run(cfg, http, now=datetime(2027, 9, 8, 9, 0, tzinfo=BERLIN))
+    assert "um 00:00 Uhr ab (morgen)" in http.sent_texts()[0]
+    http = FakeHttp(github=[midnight_github()])
+    run(cfg, http, now=datetime(2027, 9, 9, 9, 0, tzinfo=BERLIN))
+    assert "heute Nacht um 00:00 Uhr" in http.sent_texts()[0]
+    assert "2027-09-10:0" in state_keys(cfg)
+
+
+def test_status_and_log_show_the_time(cfg):
+    _, logs = run(cfg, FakeHttp(github=[midnight_github()]),
+                  now=datetime(2027, 9, 8, 9, 0, tzinfo=BERLIN), mode="status")
+    assert any("10.09.2027 um 00:00 Uhr" in line and "noch 1 Tag)" in line for line in logs)
+
+
+def test_german_singular_days():
+    assert "vor 1 Tag)" in tw.expiry_message(EXPIRY_NOON, -1)
+    assert "vor 2 Tagen)" in tw.expiry_message(EXPIRY_NOON, -2)
+
+
+def test_http_proxy_env_is_ignored(local_server, monkeypatch):
+    proxy_hits, target_hits = [], []
+    proxy = local_server(_responder(proxy_hits, 200))
+    target = local_server(_responder(target_hits, 200))
+    monkeypatch.setenv("http_proxy", proxy)
+    monkeypatch.delenv("no_proxy", raising=False)
+    monkeypatch.delenv("NO_PROXY", raising=False)
+    assert tw.urllib_http("GET", target + "/x", {}, None).status == 200
+    assert len(target_hits) == 1 and proxy_hits == []
+
+
+def test_unreadable_state_file_exits_1_without_sending(cfg):
+    cfg.state_file.mkdir(parents=True)  # reading a directory raises OSError, not FileNotFound
+    http = FakeHttp(github=[github_expiring()])
+    code, logs = run(cfg, http)
+    assert code == tw.EXIT_FAILED and http.posts() == []
+    assert any(str(cfg.state_file) in line and "IsADirectoryError" in line for line in logs)

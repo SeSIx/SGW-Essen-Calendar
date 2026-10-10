@@ -83,11 +83,18 @@ def _read_key_values(path: Path) -> dict[str, str]:
             continue
         key, value = line.split("=", 1)
         key = key.removeprefix("export ").strip()
-        value = value.strip()
-        if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
-            value = value[1:-1]
-        values[key] = value
+        values[key] = _parse_value(value)
     return values
+
+
+def _parse_value(raw: str) -> str:
+    """Like dotenv/compose: quotes protect a '#', unquoted ' #…' is a comment."""
+    value = raw.strip()
+    if value[:1] in ("'", '"'):
+        end = value.find(value[0], 1)
+        if end != -1 and re.fullmatch(r"(\s+#.*)?", value[end + 1:]):
+            return value[1:end]
+    return re.sub(r"\s+#.*$", "", value).strip()
 
 
 def load_config(path: Path) -> Config:
@@ -144,13 +151,22 @@ def parse_expiry(value: str) -> datetime:
     raise ValueError(f"unbekanntes Format des Ablaufdatums: {value!r}")
 
 
+def last_valid_day(expiry: datetime) -> date:
+    """Berlin day of the last valid moment: a 00:00 expiry ends the day before."""
+    return (expiry - timedelta(seconds=1)).astimezone(BERLIN).date()
+
+
 def days_left(expiry: datetime, today: date) -> int:
-    return (expiry.astimezone(BERLIN).date() - today).days
+    return (last_valid_day(expiry) - today).days
 
 
 def due_stage(days: int) -> int | None:
     reached = [stage for stage in STAGES if days <= stage]
     return min(reached) if reached else None
+
+
+def _tage(count: int) -> str:
+    return "1 Tag" if count == 1 else f"{count} Tage"
 
 
 def _days_phrase(days: int) -> str:
@@ -161,11 +177,18 @@ def _days_phrase(days: int) -> str:
     return f"in {days} Tagen"
 
 
-def expiry_message(expiry_day: date, days: int) -> str:
+def expiry_message(expiry: datetime, days: int) -> str:
+    local = expiry.astimezone(BERLIN)
+    when = f"{local:%d.%m.%Y} um {local:%H:%M} Uhr"
     if days < 0:
-        return (f"⚠️ SGW-Admin: Der GitHub-Zugang ist am {expiry_day:%d.%m.%Y} abgelaufen "
-                f"(vor {-days} Tagen).\n\n{RENEW_STEPS}")
-    return (f"⚠️ SGW-Admin: Der GitHub-Zugang läuft am {expiry_day:%d.%m.%Y} ab "
+        count = -days
+        ago = "1 Tag" if count == 1 else f"{count} Tagen"
+        return (f"⚠️ SGW-Admin: Der GitHub-Zugang ist am {when} abgelaufen "
+                f"(vor {ago}).\n\n{RENEW_STEPS}")
+    if days == 0 and (local.hour, local.minute) == (0, 0):
+        return (f"⚠️ SGW-Admin: Der GitHub-Zugang läuft heute Nacht um 00:00 Uhr ab "
+                f"(am {local:%d.%m.%Y}).\n\n{RENEW_STEPS}")
+    return (f"⚠️ SGW-Admin: Der GitHub-Zugang läuft am {when} ab "
             f"({_days_phrase(days)}).\n\n{RENEW_STEPS}")
 
 
@@ -202,7 +225,9 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
         return None
 
 
-_OPENER = urllib.request.build_opener(_NoRedirect)
+def _opener() -> urllib.request.OpenerDirector:
+    # ProxyHandler({}): ignore http_proxy & co.; Evolution is on loopback, GitHub is direct
+    return urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoRedirect)
 
 
 def urllib_http(method: str, url: str, headers: dict[str, str],
@@ -213,7 +238,7 @@ def urllib_http(method: str, url: str, headers: dict[str, str],
     """
     request = urllib.request.Request(url, data=body, headers=headers, method=method)
     try:
-        with _OPENER.open(request, timeout=TIMEOUT_SECONDS) as response:
+        with _opener().open(request, timeout=TIMEOUT_SECONDS) as response:
             return HttpResponse(response.status,
                                 {k.lower(): v for k, v in response.headers.items()},
                                 response.read())
@@ -286,11 +311,12 @@ def send_whatsapp(http: Http, sleep: Callable[[float], None], log: Callable[[str
 
 
 def load_state(path: Path, log: Callable[[str], None]) -> dict:
+    """Other OSErrors propagate: guessing "nothing sent" could resend a warning."""
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except FileNotFoundError:
         return {"sent": []}
-    except (OSError, ValueError) as exc:
+    except ValueError as exc:
         log(f"Statusdatei {path} unlesbar ({exc.__class__.__name__}) – starte mit leerem Status")
         return {"sent": []}
     sent = data.get("sent") if isinstance(data, dict) else None
@@ -314,13 +340,13 @@ def save_state(path: Path, state: dict) -> None:
         raise
 
 
-def _status_report(log: Callable[[str], None], expiry_day: date, days: int,
+def _status_report(log: Callable[[str], None], expiry_day: date, end_day: date, days: int,
                    sent: list[str]) -> None:
     upcoming = [stage for stage in STAGES if stage < days]
     if upcoming:
         nxt = max(upcoming)
         log(f"Nächste Warnstufe: {nxt} Tage vorher, am "
-            f"{expiry_day - timedelta(days=nxt):%d.%m.%Y}")
+            f"{end_day - timedelta(days=nxt):%d.%m.%Y}")
     prefix = f"{expiry_day.isoformat()}:"
     stage = due_stage(days)
     if stage is not None and f"{prefix}{stage}" not in sent:
@@ -362,7 +388,12 @@ def run(cfg: Config, *, http: Http, now: datetime, sleep: Callable[[float], None
         log(f"{exc} – nächster Lauf versucht es erneut")
         return EXIT_FAILED
 
-    sent = load_state(cfg.state_file, log)["sent"]
+    try:
+        sent = load_state(cfg.state_file, log)["sent"]
+    except OSError as exc:
+        log(f"Statusdatei {cfg.state_file} nicht lesbar ({exc.__class__.__name__}) – "
+            "nichts gesendet, nächster Lauf versucht es erneut")
+        return EXIT_FAILED
 
     if status.kind == "no_expiry":
         log("Token hat kein Ablaufdatum – keine Warnung nötig")
@@ -380,11 +411,13 @@ def run(cfg: Config, *, http: Http, now: datetime, sleep: Callable[[float], None
         text = invalid_message()
         new_sent = [k for k in sent if not k.startswith("invalid:")] + [key]
     else:
-        expiry_day = status.expiry.astimezone(BERLIN).date()
-        days = (expiry_day - today).days
-        log(f"Token läuft am {expiry_day:%d.%m.%Y} ab (noch {days} Tage)")
+        local = status.expiry.astimezone(BERLIN)
+        expiry_day = local.date()
+        end_day = last_valid_day(status.expiry)
+        days = (end_day - today).days
+        log(f"Token läuft am {local:%d.%m.%Y} um {local:%H:%M} Uhr ab (noch {_tage(days)})")
         if mode == "status":
-            _status_report(log, expiry_day, days, sent)
+            _status_report(log, expiry_day, end_day, days, sent)
             return EXIT_OK
         stage = due_stage(days)
         prefix = f"{expiry_day.isoformat()}:"
@@ -392,7 +425,7 @@ def run(cfg: Config, *, http: Http, now: datetime, sleep: Callable[[float], None
             log("Keine Warnung fällig")
             return EXIT_OK
         key = f"{prefix}{stage}"
-        text = expiry_message(expiry_day, days)
+        text = expiry_message(status.expiry, days)
         # Catching up on stage N also settles every larger stage for this expiry date;
         # keys of earlier expiry dates are dropped, so a renewed token starts afresh.
         new_sent = sorted({k for k in sent if k.startswith(prefix)}

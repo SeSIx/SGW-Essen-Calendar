@@ -30,7 +30,9 @@ for suffix in ("", "-wal", "-shm"):
         os.remove(dst + suffix)
 if sys.argv[1:] == ["rm"]:
     sys.exit(0)
-source, target = sqlite3.connect(src), sqlite3.connect(dst)
+# mode=ro: a wrong path must fail, not create an empty database
+source = sqlite3.connect(f"file:{src}?mode=ro", uri=True)
+target = sqlite3.connect(dst)
 try:
     source.backup(target)
 finally:

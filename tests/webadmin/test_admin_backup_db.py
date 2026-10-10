@@ -171,3 +171,11 @@ def test_second_run_is_refused_while_lock_is_held(env):
     assert result.returncode == 1
     assert "already running" in result.stderr
     assert not Path(env["FAKE_LOG"]).exists()
+
+
+def test_missing_source_fails_and_creates_no_database(env):
+    (Path(env["FAKE_DATA"]) / "sgw-admin.db").unlink()
+    result = _run(env)
+    assert result.returncode != 0
+    assert list(Path(env["FAKE_DATA"]).iterdir()) == []
+    assert list(Path(env["BACKUP_DEST"]).glob("sgw-admin-*")) == []

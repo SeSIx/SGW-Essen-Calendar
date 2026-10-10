@@ -72,3 +72,30 @@ def test_readme_restore_block_grants_needed_caps_and_chmods_before_chown():
     assert "--cap-add DAC_OVERRIDE" in block
     assert "--cap-add CHOWN" in block
     assert block.index("chmod 600") < block.index("chown sgw:sgw")
+
+
+def test_units_have_start_timeouts():
+    assert unit("sgw-admin-backup.service")["Service"]["TimeoutStartSec"] == "10min"
+    assert unit("sgw-token-watch.service")["Service"]["TimeoutStartSec"] == "5min"
+
+
+def test_token_watch_retries_hourly_but_not_on_config_errors():
+    parsed = unit("sgw-token-watch.service")
+    service = parsed["Service"]
+    assert service["Restart"] == "on-failure"
+    assert service["RestartSec"] == "1h"
+    assert service["RestartPreventExitStatus"] == "2"
+    assert parsed["Unit"]["StartLimitIntervalSec"] == "1d"
+    assert parsed["Unit"]["StartLimitBurst"] == "4"
+
+
+def test_readme_restore_revokes_old_sessions():
+    readme = (OPS.parent / "README.md").read_text(encoding="utf-8")
+    section = readme.split("Backup wiederherstellen", 1)[1]
+    assert "sgw-admin logout-all <login>" in section
+    assert "Einladungen" in section
+
+
+def test_readme_conf_template_has_no_inline_comment():
+    readme = (OPS.parent / "README.md").read_text(encoding="utf-8")
+    assert not re.search(r"^RECIPIENT=\S+[ \t]+#", readme, re.M)

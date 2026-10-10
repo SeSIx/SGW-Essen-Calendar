@@ -6,6 +6,7 @@ After=docker.service
 
 [Service]
 Type=oneshot
+TimeoutStartSec=10min
 ExecStart=/usr/bin/bash /root/sgw-admin/admin/ops/backup_db.sh
 UMask=0077
 ProtectSystem=full
