@@ -59,8 +59,9 @@ STATUS:CONFIRMED
 TRANSP:OPAQUE
 DTSTART;VALUE=DATE:20270305
 DTEND;VALUE=DATE:20270308
-LOCATION:Hesse
+LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
 DESCRIPTION:Test\n\nKarte: https://www.google.com/maps/search/?api=1&query=
- Hesse
+ Freibad%20Dellwig%20%22Hesse%22%2C%20Scheppmannskamp%206%2C%2045357%20Esse
+ n
 END:VEVENT
 END:VCALENDAR
