@@ -6,7 +6,7 @@ deletion) stops the save.
 """
 
 import re
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 
 import custom_events
 from admin.github_store import Author, Conflict, Snapshot, Store
@@ -103,5 +103,28 @@ def message(display_name: str, title: str, verb: str) -> str:
     return f"{display_name}: „{' '.join(title.split())}“ {verb}"
 
 
-def author_for(login: str, display_name: str) -> Author:
-    return Author(display_name, f"admin+{login}@sgw-essen.local")
+def author_for(login: str, display_name: str,
+               mapping: Mapping[str, tuple[str, str]] | None = None) -> Author:
+    """The mapped identity if there is one. Otherwise a name no GitHub login can equal.
+
+    GitHub Mobile matches the author *name* to an account, so a bare "Julius" would show
+    github.com/julius. The suffix adds a space and parentheses, which logins cannot contain.
+    """
+    if mapping and login in mapping:
+        return Author(*mapping[login])
+    return Author(f"{display_name}{AUTHOR_SUFFIX}", f"admin+{login}@sgw-essen.local")
+
+
+AUTHOR_SUFFIX = " (SGW-Admin)"
+
+
+def shown_author(raw: str, mapping: Mapping[str, tuple[str, str]],
+                 display_name_of: Callable[[str], str | None]) -> str:
+    """The app display name for a stored commit author name; foreign authors stay as they are.
+
+    The store only reports the name, so a mapped identity is recognised by its mapped name.
+    """
+    for login, (name, _email) in mapping.items():
+        if raw == name:
+            return display_name_of(login) or raw
+    return raw.removesuffix(AUTHOR_SUFFIX)

@@ -219,7 +219,7 @@ def store_problem(exc: StoreError) -> str:
 
 
 def _author():
-    return changes.author_for(g.user.login, g.user.display_name)
+    return changes.author_for(g.user.login, g.user.display_name, services().settings.git_authors)
 
 
 def _form(mode, data, event_id, rev, *, error=None, field_errors=None, notice=None, status=200):
@@ -238,9 +238,16 @@ def _invalid(mode, data, event_id, rev, err):
 
 def _who() -> str:
     try:
-        return services().store.last_author() or "jemand anderem"
+        raw = services().store.last_author()
     except StoreError:
         return "jemand anderem"
+    if not raw:
+        return "jemand anderem"
+
+    def display_name_of(login):
+        row = auth.get_user(get_db(), login)
+        return row["display_name"] if row else None
+    return changes.shown_author(raw, services().settings.git_authors, display_name_of)
 
 
 def _conflict(kind, event_id, mine, current):
