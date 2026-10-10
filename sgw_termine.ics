@@ -1192,7 +1192,9 @@ TRANSP:OPAQUE
 DTSTART:20260903T173000Z
 DTEND:20260903T193000Z
 LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
-DESCRIPTION:Mannschaftsbesprechung zum Saisonstart
+DESCRIPTION:Mannschaftsbesprechung zum Saisonstart\n\nKarte: https://www.go
+ ogle.com/maps/search/?api=1&query=Freibad%20Dellwig%20%22Hesse%22%2C%20Sch
+ eppmannskamp%206%2C%2045357%20Essen
 END:VEVENT
 BEGIN:VEVENT
 UID:custom-c5a7f6fb-7448-4b99-a5c1-382cb642584f@sgw-essen.local
@@ -1233,6 +1235,7 @@ TRANSP:OPAQUE
 DTSTART;VALUE=DATE:20270305
 DTEND;VALUE=DATE:20270308
 LOCATION:Hesse
-DESCRIPTION:Test
+DESCRIPTION:Test\n\nKarte: https://www.google.com/maps/search/?api=1&query=
+ Hesse
 END:VEVENT
 END:VCALENDAR
