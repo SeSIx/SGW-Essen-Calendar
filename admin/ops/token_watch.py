@@ -33,6 +33,7 @@ RENEW_STEPS = (
 _RECIPIENT = re.compile(r"\d{8,15}")
 _COMPOSE_KEY = re.compile(
     r"""^\s*-?\s*["']?AUTHENTICATION_API_KEY["']?\s*[=:]\s*["']?([^\s"'#]+)""")
+_COMPOSE_TAIL = re.compile(r"""["']?\s*(#.*)?""")
 
 
 class ConfigError(Exception):
@@ -49,11 +50,15 @@ class Config:
     state_file: Path = Path("/var/lib/sgw-token-watch/state.json")
 
 
-def _read_key_values(path: Path) -> dict[str, str]:
+def _read_text(path: Path) -> str:
     try:
-        text = path.read_text(encoding="utf-8")
-    except OSError as exc:
+        return path.read_text(encoding="utf-8-sig")
+    except (OSError, UnicodeDecodeError) as exc:
         raise ConfigError(f"{path} nicht lesbar ({exc.__class__.__name__})") from exc
+
+
+def _read_key_values(path: Path) -> dict[str, str]:
+    text = _read_text(path)
     values = {}
     for raw in text.splitlines():
         line = raw.strip()
@@ -94,10 +99,7 @@ def read_env_value(path: Path, key: str) -> str:
 
 
 def read_evolution_key(compose_path: Path) -> str:
-    try:
-        text = compose_path.read_text(encoding="utf-8")
-    except OSError as exc:
-        raise ConfigError(f"{compose_path} nicht lesbar ({exc.__class__.__name__})") from exc
+    text = _read_text(compose_path)
     for line in text.splitlines():
         if line.lstrip().startswith("#"):
             continue
@@ -107,6 +109,9 @@ def read_evolution_key(compose_path: Path) -> str:
         if match.group(1).startswith("$"):
             raise ConfigError(
                 f"AUTHENTICATION_API_KEY in {compose_path} ist eine Variablen-Referenz")
+        if not _COMPOSE_TAIL.fullmatch(line[match.end():]):
+            raise ConfigError(
+                f"AUTHENTICATION_API_KEY in {compose_path} hat unerwarteten Text hinter dem Wert")
         return match.group(1)
     raise ConfigError(f"AUTHENTICATION_API_KEY nicht in {compose_path} gefunden")
 
@@ -140,6 +145,9 @@ def _days_phrase(days: int) -> str:
 
 
 def expiry_message(expiry_day: date, days: int) -> str:
+    if days < 0:
+        return (f"⚠️ SGW-Admin: Der GitHub-Zugang ist am {expiry_day:%d.%m.%Y} abgelaufen "
+                f"(vor {-days} Tagen).\n\n{RENEW_STEPS}")
     return (f"⚠️ SGW-Admin: Der GitHub-Zugang läuft am {expiry_day:%d.%m.%Y} ab "
             f"({_days_phrase(days)}).\n\n{RENEW_STEPS}")
 
@@ -149,10 +157,12 @@ def invalid_message() -> str:
             f"App ist gesperrt, bis ein neuer Token eingetragen ist.\n\n{RENEW_STEPS}")
 
 
-def test_message() -> str:
+def probe_message() -> str:
     return ("✅ SGW-Admin: Test des Token-Wächters. Die Warnungen vor dem Ablauf des "
             "GitHub-Zugangs kommen genauso hier an.")
 
 
 def mask_number(number: str) -> str:
+    if len(number) <= 4:
+        return "…"
     return f"…{number[-4:]}"
