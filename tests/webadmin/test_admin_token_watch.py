@@ -708,8 +708,9 @@ def test_secrets_never_logged(cfg):
 
 
 def test_main_rejects_combined_flags(capsys):
-    with pytest.raises(SystemExit):
+    with pytest.raises(SystemExit) as exc:
         tw.main(["--status", "--dry-run"])
+    assert exc.value.code == 2
     capsys.readouterr()
 
 
@@ -717,3 +718,98 @@ def test_main_bad_config_exits_2(tmp_path):
     conf = tmp_path / "c.conf"
     conf.write_text("RECIPIENT=\n", encoding="utf-8")
     assert tw.main(["--config", str(conf)]) == tw.EXIT_CONFIG
+
+
+def test_save_state_failure_after_send_exits_1_and_logs_masked(cfg):
+    cfg.state_file.parent.write_text("regular file", encoding="utf-8")
+    http = FakeHttp(github=[github_expiring()])
+    code, logs = run(cfg, http)
+    assert code == tw.EXIT_FAILED and len(http.posts()) == 1
+    line = next(entry for entry in logs if "Statusdatei nicht gespeichert" in entry)
+    assert "…5678" in line and "erneut kommen" in line
+    for secret in (TOKEN, API_KEY, NUMBER):
+        assert secret not in "\n".join(logs)
+
+
+def test_save_state_removes_tmp_on_failure(tmp_path, monkeypatch):
+    path = tmp_path / "state.json"
+
+    def boom(*_args):
+        raise OSError("disk")
+
+    monkeypatch.setattr(tw.os, "replace", boom)
+    with pytest.raises(OSError):
+        tw.save_state(path, {"sent": []})
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_run_rejects_unknown_mode(cfg):
+    http = FakeHttp(github=[github_expiring()])
+    with pytest.raises(ValueError):
+        run(cfg, http, mode="sned")
+    assert http.calls == []
+
+
+@pytest.mark.parametrize(("argv", "mode"), [
+    ([], "send"), (["--status"], "status"), (["--dry-run"], "dry-run"),
+    (["--test-message"], "test-message"),
+])
+def test_main_maps_flags_to_modes(monkeypatch, argv, mode):
+    seen = []
+    monkeypatch.setattr(tw, "load_config", lambda _path: "cfg")
+    monkeypatch.setattr(tw, "run", lambda cfg, **kw: seen.append((cfg, kw["mode"])) or 0)
+    assert tw.main(argv) == 0
+    assert seen == [("cfg", mode)]
+
+
+def test_status_shows_due_stage_not_yet_sent(cfg):
+    http = FakeHttp(github=[github_expiring()])
+    _, logs = run(cfg, http, mode="status")
+    assert any("Fällig: Stufe 14 (noch nicht gesendet)" in line for line in logs)
+
+
+def test_status_when_due_today(cfg):
+    code, logs = run(cfg, FakeHttp(github=[github_expiring()]),
+                     now=NOW + timedelta(days=14), mode="status")
+    assert code == tw.EXIT_OK
+    assert any("Fällig: Stufe 0" in line for line in logs)
+
+
+def test_status_when_already_expired(cfg):
+    code, logs = run(cfg, FakeHttp(github=[github_expiring()]),
+                     now=NOW + timedelta(days=16), mode="status")
+    assert code == tw.EXIT_OK
+    assert any("Fällig: Stufe 0" in line for line in logs)
+
+
+def test_status_sorts_sent_stages_numerically(cfg):
+    cfg.state_file.parent.mkdir(parents=True)
+    keys = [f"2027-10-12:{s}" for s in (14, 7, 3, 1, 0)]
+    cfg.state_file.write_text(json.dumps({"sent": keys}), encoding="utf-8")
+    _, logs = run(cfg, FakeHttp(github=[github_expiring()]),
+                  now=NOW + timedelta(days=14), mode="status")
+    assert any("2027-10-12:0, 2027-10-12:1, 2027-10-12:3, 2027-10-12:7, 2027-10-12:14" in line
+               for line in logs)
+
+
+def test_invalid_already_reported_today_is_logged(cfg):
+    run(cfg, FakeHttp(github=[tw.HttpResponse(401, {}, b"")]))
+    _, logs = run(cfg, FakeHttp(github=[tw.HttpResponse(401, {}, b"")]))
+    assert any("heute bereits gemeldet" in line for line in logs)
+
+
+@pytest.mark.parametrize("mode", ["dry-run", "status"])
+def test_invalid_token_in_non_send_modes_sends_and_writes_nothing(cfg, mode):
+    http = FakeHttp(github=[tw.HttpResponse(401, {}, b"")])
+    code, _ = run(cfg, http, mode=mode)
+    assert code == tw.EXIT_OK and http.posts() == []
+    assert not cfg.state_file.exists()
+
+
+@pytest.mark.parametrize("content", ['{"sent": "x"}', "[1]", '{"sent": [1]}'])
+def test_load_state_wrong_shape_is_survived(tmp_path, content):
+    path = tmp_path / "s.json"
+    path.write_text(content, encoding="utf-8")
+    logs = []
+    assert tw.load_state(path, logs.append) == {"sent": []}
+    assert any("Statusdatei" in line for line in logs)

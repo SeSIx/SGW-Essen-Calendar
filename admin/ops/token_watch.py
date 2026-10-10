@@ -31,6 +31,7 @@ STAGES = (14, 7, 3, 1, 0)
 EXIT_OK = 0
 EXIT_FAILED = 1
 EXIT_CONFIG = 2
+MODES = ("send", "dry-run", "status", "test-message")
 
 GITHUB_RATE_LIMIT_URL = "https://api.github.com/rate_limit"
 EXPIRY_HEADER = "github-authentication-token-expiration"
@@ -302,11 +303,15 @@ def load_state(path: Path, log: Callable[[str], None]) -> dict:
 def save_state(path: Path, state: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_name(path.name + ".tmp")
-    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-    with os.fdopen(fd, "w", encoding="utf-8") as handle:
-        handle.write(json.dumps(state, indent=2, sort_keys=True) + "\n")
-    os.chmod(tmp, 0o600)
-    os.replace(tmp, path)
+    try:
+        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(json.dumps(state, indent=2, sort_keys=True) + "\n")
+        os.chmod(tmp, 0o600)
+        os.replace(tmp, path)
+    except OSError:
+        tmp.unlink(missing_ok=True)
+        raise
 
 
 def _status_report(log: Callable[[str], None], expiry_day: date, days: int,
@@ -316,12 +321,20 @@ def _status_report(log: Callable[[str], None], expiry_day: date, days: int,
         nxt = max(upcoming)
         log(f"Nächste Warnstufe: {nxt} Tage vorher, am "
             f"{expiry_day - timedelta(days=nxt):%d.%m.%Y}")
-    done = sorted(key for key in sent if key.startswith(f"{expiry_day.isoformat()}:"))
+    prefix = f"{expiry_day.isoformat()}:"
+    stage = due_stage(days)
+    if stage is not None and f"{prefix}{stage}" not in sent:
+        log(f"Fällig: Stufe {stage} (noch nicht gesendet)")
+    done = sorted((key for key in sent if key.startswith(prefix)),
+                  key=lambda key: int(key.rsplit(":", 1)[1]) if key.rsplit(":", 1)[1].isdigit()
+                  else -1)
     log(f"Bereits gesendet: {', '.join(done) if done else 'nichts'}")
 
 
 def run(cfg: Config, *, http: Http, now: datetime, sleep: Callable[[float], None],
         log: Callable[[str], None], mode: str) -> int:
+    if mode not in MODES:
+        raise ValueError(f"unbekannter Modus: {mode!r}")
     today = now.astimezone(BERLIN).date()
     try:
         api_key = read_evolution_key(cfg.evolution_compose)
@@ -362,6 +375,7 @@ def run(cfg: Config, *, http: Http, now: datetime, sleep: Callable[[float], None
             log(f"Heutige Meldung: {'bereits gesendet' if key in sent else 'noch offen'}")
             return EXIT_OK
         if key in sent:
+            log("Token ungültig – heute bereits gemeldet")
             return EXIT_OK
         text = invalid_message()
         new_sent = [k for k in sent if not k.startswith("invalid:")] + [key]
@@ -391,7 +405,12 @@ def run(cfg: Config, *, http: Http, now: datetime, sleep: Callable[[float], None
     if not deliver(text):
         log("Warnung konnte nicht gesendet werden – nächster Lauf versucht es erneut")
         return EXIT_FAILED
-    save_state(cfg.state_file, {"sent": new_sent})
+    try:
+        save_state(cfg.state_file, {"sent": new_sent})
+    except OSError as exc:
+        log(f"Warnung an {mask_number(cfg.recipient)} gesendet ({key}), aber Statusdatei "
+            f"nicht gespeichert ({exc.__class__.__name__}) – Nachricht kann morgen erneut kommen")
+        return EXIT_FAILED
     log(f"Warnung an {mask_number(cfg.recipient)} gesendet ({key})")
     return EXIT_OK
 
