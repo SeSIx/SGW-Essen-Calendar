@@ -1,0 +1,26 @@
+[Unit]
+Description=SGW-Admin: GitHub-Token-Ablauf prüfen und per WhatsApp warnen
+Documentation=file:///root/sgw-admin/admin/README.md
+Wants=network-online.target
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 -I /root/sgw-admin/admin/ops/token_watch.py
+StateDirectory=sgw-token-watch
+StateDirectoryMode=0700
+UMask=0077
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=yes
+PrivateDevices=yes
+NoNewPrivileges=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=yes
+LockPersonality=yes
+RestrictRealtime=yes
+SystemCallArchitectures=native
+CapabilityBoundingSet=
