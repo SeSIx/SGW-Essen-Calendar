@@ -66,3 +66,71 @@ pip install -r requirements-dev.txt
 pytest tests/webadmin && ruff check .
 admin/e2e/run.sh          # Handy-Browser gegen den Container; Screenshots in admin/e2e/screenshots/
 ```
+
+## Token-Wächter & Backup
+
+Zwei systemd-Timer auf dem Host (nicht im Container):
+
+| Timer | Wann | Was |
+|---|---|---|
+| `sgw-token-watch.timer` | täglich 09:00 (Berlin) | prüft das Ablaufdatum des GitHub-Tokens und warnt per WhatsApp 14, 7, 3, 1 und 0 Tage vorher; bei ungültigem Token einmal pro Tag |
+| `sgw-admin-backup.timer` | täglich 03:30 (Berlin) | Snapshot der App-SQLite nach `/root/backups/sgw-admin/`, die neuesten 14 bleiben |
+
+Der Wächter liest den GitHub-Token aus `admin/.env` und den Evolution-Schlüssel aus
+`/root/evolution/docker-compose.yml`. Beides wird nicht kopiert. Die Empfängernummer
+steht nur in `/etc/sgw-token-watch.conf` (Rechte 600):
+
+```
+# internationale Nummer ohne +
+RECIPIENT=49…
+# optional: GITHUB_ENV_FILE, EVOLUTION_COMPOSE, EVOLUTION_URL, EVOLUTION_INSTANCE, STATE_FILE
+```
+
+Installieren (einmalig, als root):
+
+```bash
+install -m 600 /dev/null /etc/sgw-token-watch.conf && nano /etc/sgw-token-watch.conf
+cp /root/sgw-admin/admin/ops/sgw-token-watch.{service,timer} \
+   /root/sgw-admin/admin/ops/sgw-admin-backup.{service,timer} /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable --now sgw-token-watch.timer sgw-admin-backup.timer
+```
+
+Prüfen:
+
+```bash
+python3 -I /root/sgw-admin/admin/ops/token_watch.py --status    # Ablaufdatum, nächste Stufe
+python3 -I /root/sgw-admin/admin/ops/token_watch.py --dry-run   # fällige Nachricht anzeigen
+python3 -I /root/sgw-admin/admin/ops/token_watch.py --test-message
+systemctl list-timers sgw-token-watch.timer sgw-admin-backup.timer
+journalctl -u sgw-token-watch -u sgw-admin-backup -n 50 --no-pager
+```
+
+Token erneuern: wie oben unter „GitHub-Token erneuern“ (die WhatsApp-Warnung enthält dieselben
+Schritte). Danach `docker exec sgw-admin sgw-admin token-status` prüfen; der Wächter liest
+das neue Ablaufdatum am nächsten Morgen selbst. Wird der Evolution-Schlüssel rotiert, liest
+der Wächter automatisch den neuen Wert aus der Compose-Datei.
+
+Die Backup-Unit hat bewusst kein `ProtectHome`, weil sie nach `/root/backups` schreibt.
+
+Backup wiederherstellen (`<datei>` = Name aus `ls /root/backups/sgw-admin/`; die Backups
+gehören root mit Rechten 600, daher läuft der Wiederherstellungs-Container als root und
+übergibt die Datei danach an `sgw`. Der Container erbt `cap_drop: ALL` und ein
+schreibgeschütztes Root-Dateisystem, deshalb braucht er `DAC_OVERRIDE` (Schreiben in `/data`,
+Lesen der 600-Datei) und `CHOWN`):
+
+```bash
+cd /root/sgw-admin
+docker compose -f admin/compose.yml stop sgw-admin
+docker compose -f admin/compose.yml run --rm --no-deps --user root \
+  --cap-add DAC_OVERRIDE --cap-add CHOWN --entrypoint sh \
+  -v /root/backups/sgw-admin:/backup:ro sgw-admin \
+  -c 'db="${SGW_ADMIN_DB:-/data/sgw-admin.db}"; rm -f "$db-wal" "$db-shm" && cp /backup/<datei> "$db" && chmod 600 "$db" && chown sgw:sgw "$db"'
+docker compose -f admin/compose.yml start sgw-admin
+docker ps --filter name=sgw-admin     # nach ca. 30 s „healthy“
+docker exec sgw-admin sgw-admin users
+```
+
+Danach für jedes Konto in der `users`-Liste `docker exec sgw-admin sgw-admin logout-all <login>`
+ausführen und offene Einladungen neu ausstellen. Der Stand des Backups kann Sitzungen und
+Tokens enthalten, die inzwischen widerrufen wurden; ohne diesen Schritt leben sie wieder auf.
