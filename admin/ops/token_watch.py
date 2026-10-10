@@ -9,7 +9,12 @@ the files that already hold them and are never copied or logged.
 
 from __future__ import annotations
 
+import json
 import re
+import urllib.error
+import urllib.parse
+import urllib.request
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from pathlib import Path
@@ -21,6 +26,11 @@ STAGES = (14, 7, 3, 1, 0)
 EXIT_OK = 0
 EXIT_FAILED = 1
 EXIT_CONFIG = 2
+
+GITHUB_RATE_LIMIT_URL = "https://api.github.com/rate_limit"
+EXPIRY_HEADER = "github-authentication-token-expiration"
+SEND_BACKOFF_SECONDS = (2, 4)
+TIMEOUT_SECONDS = 10
 
 RENEW_STEPS = (
     "So erneuerst du ihn (ca. 2 Min.):\n"
@@ -166,3 +176,87 @@ def mask_number(number: str) -> str:
     if len(number) <= 4:
         return "…"
     return f"…{number[-4:]}"
+
+
+@dataclass(frozen=True)
+class HttpResponse:
+    status: int
+    headers: dict[str, str]
+    body: bytes
+
+
+Http = Callable[[str, str, dict[str, str], bytes | None], HttpResponse]
+
+
+def urllib_http(method: str, url: str, headers: dict[str, str],
+                body: bytes | None) -> HttpResponse:
+    """Plain urllib call; HTTP errors come back as responses, network errors raise OSError."""
+    request = urllib.request.Request(url, data=body, headers=headers, method=method)
+    try:
+        with urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS) as response:
+            return HttpResponse(response.status,
+                                {k.lower(): v for k, v in response.headers.items()},
+                                response.read())
+    except urllib.error.HTTPError as err:
+        return HttpResponse(err.code, {k.lower(): v for k, v in err.headers.items()},
+                            err.read())
+
+
+class GitHubUnavailable(Exception):
+    """GitHub could not tell us the token's state this time."""
+
+
+@dataclass(frozen=True)
+class TokenStatus:
+    kind: str  # "expires" | "no_expiry" | "invalid"
+    expiry: datetime | None = None
+
+
+def check_token(http: Http, token: str) -> TokenStatus:
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent": "sgw-token-watch",
+    }
+    try:
+        response = http("GET", GITHUB_RATE_LIMIT_URL, headers, None)
+    except OSError as exc:
+        raise GitHubUnavailable(f"GitHub nicht erreichbar ({exc.__class__.__name__})") from exc
+    if response.status == 401:
+        return TokenStatus("invalid")
+    if response.status != 200:
+        raise GitHubUnavailable(f"GitHub antwortete mit HTTP {response.status}")
+    raw = response.headers.get(EXPIRY_HEADER)
+    if not raw:
+        return TokenStatus("no_expiry")
+    try:
+        return TokenStatus("expires", parse_expiry(raw))
+    except ValueError as exc:
+        raise GitHubUnavailable(str(exc)) from exc
+
+
+def send_whatsapp(http: Http, sleep: Callable[[float], None], log: Callable[[str], None], *,
+                  base_url: str, instance: str, api_key: str, number: str,
+                  text: str) -> bool:
+    url = f"{base_url.rstrip('/')}/message/sendText/{urllib.parse.quote(instance, safe='')}"
+    # linkPreview off: Evolution would otherwise fetch every URL in the text itself
+    body = json.dumps({"number": number, "text": text, "linkPreview": False}).encode("utf-8")
+    headers = {"Content-Type": "application/json; charset=utf-8", "apikey": api_key}
+    attempts = len(SEND_BACKOFF_SECONDS) + 1
+    for attempt in range(attempts):
+        try:
+            response = http("POST", url, headers, body)
+        except OSError as exc:
+            log(f"WhatsApp-Versand Versuch {attempt + 1}/{attempts}: Netzfehler "
+                f"({exc.__class__.__name__})")
+        else:
+            if 200 <= response.status < 300:
+                return True
+            if response.status < 500 and response.status != 429:
+                log(f"WhatsApp-Versand abgelehnt (HTTP {response.status}), kein neuer Versuch")
+                return False
+            log(f"WhatsApp-Versand Versuch {attempt + 1}/{attempts}: HTTP {response.status}")
+        if attempt < attempts - 1:
+            sleep(SEND_BACKOFF_SECONDS[attempt])
+    return False

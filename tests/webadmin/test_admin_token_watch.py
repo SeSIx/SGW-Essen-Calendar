@@ -1,6 +1,7 @@
 """Token-Wächter: warnt per WhatsApp, bevor der GitHub-Token der Admin-App abläuft."""
 
 import importlib.util
+import json
 import sys
 from datetime import date
 from pathlib import Path
@@ -257,3 +258,109 @@ def test_days_left_across_dst_change_day():
     expiry = tw.parse_expiry("2027-10-31 00:30:00 UTC")
     assert tw.days_left(expiry, date(2027, 10, 31)) == 0
     assert tw.days_left(expiry, date(2027, 10, 28)) == 3
+
+
+class FakeHttp:
+    """Answers GitHub and Evolution calls from queues; records every call."""
+
+    def __init__(self, github=None, evolution=None):
+        self.github = list(github or [])
+        self.evolution = list(evolution or [])
+        self.calls = []
+
+    def __call__(self, method, url, headers, body):
+        self.calls.append((method, url, headers, body))
+        queue = self.github if "api.github.com" in url else self.evolution
+        item = queue.pop(0) if queue else tw.HttpResponse(200, {}, b"{}")
+        if isinstance(item, Exception):
+            raise item
+        return item
+
+    def posts(self):
+        return [c for c in self.calls if c[0] == "POST"]
+
+    def sent_texts(self):
+        return [json.loads(body)["text"] for _, _, _, body in self.posts()]
+
+
+def github_expiring(day="2027-10-12"):
+    return tw.HttpResponse(
+        200, {"github-authentication-token-expiration": f"{day} 09:00:00 UTC"}, b"{}")
+
+
+def test_check_token_reads_expiry_header_and_sends_bearer():
+    http = FakeHttp(github=[github_expiring()])
+    status = tw.check_token(http, TOKEN)
+    assert status.kind == "expires"
+    assert status.expiry.astimezone(BERLIN).date() == date(2027, 10, 12)
+    method, url, headers, body = http.calls[0]
+    assert (method, url, body) == ("GET", "https://api.github.com/rate_limit", None)
+    assert headers["Authorization"] == f"Bearer {TOKEN}"
+    assert headers["User-Agent"] == "sgw-token-watch"
+
+
+def test_check_token_without_header_is_no_expiry():
+    http = FakeHttp(github=[tw.HttpResponse(200, {}, b"{}")])
+    assert tw.check_token(http, TOKEN).kind == "no_expiry"
+
+
+def test_check_token_401_is_invalid():
+    http = FakeHttp(github=[tw.HttpResponse(401, {}, b"{}")])
+    assert tw.check_token(http, TOKEN).kind == "invalid"
+
+
+@pytest.mark.parametrize("answer", [tw.HttpResponse(502, {}, b""), OSError("timed out")])
+def test_check_token_outage_is_unavailable(answer):
+    with pytest.raises(tw.GitHubUnavailable):
+        tw.check_token(FakeHttp(github=[answer]), TOKEN)
+
+
+def test_check_token_unparseable_header_is_unavailable():
+    answer = tw.HttpResponse(200, {"github-authentication-token-expiration": "bald"}, b"{}")
+    with pytest.raises(tw.GitHubUnavailable):
+        tw.check_token(FakeHttp(github=[answer]), TOKEN)
+
+
+def _send(http, sleeps, logs):
+    return tw.send_whatsapp(
+        http, sleeps.append, logs.append, base_url="http://127.0.0.1:8080/",
+        instance="SGW Bot", api_key=API_KEY, number=NUMBER, text="Hallo")
+
+
+def test_send_whatsapp_posts_expected_request():
+    http, sleeps, logs = FakeHttp(evolution=[tw.HttpResponse(201, {}, b"{}")]), [], []
+    assert _send(http, sleeps, logs) is True
+    method, url, headers, body = http.calls[0]
+    assert method == "POST"
+    assert url == "http://127.0.0.1:8080/message/sendText/SGW%20Bot"
+    assert headers["apikey"] == API_KEY
+    assert json.loads(body) == {"number": NUMBER, "text": "Hallo", "linkPreview": False}
+    assert sleeps == []
+
+
+def test_send_whatsapp_retries_transient_failures_with_backoff():
+    http = FakeHttp(evolution=[tw.HttpResponse(503, {}, b""), OSError("reset"),
+                               tw.HttpResponse(200, {}, b"{}")])
+    sleeps, logs = [], []
+    assert _send(http, sleeps, logs) is True
+    assert sleeps == [2, 4]
+    assert len(http.posts()) == 3
+
+
+def test_send_whatsapp_gives_up_after_three_attempts():
+    http = FakeHttp(evolution=[tw.HttpResponse(429, {}, b"")] * 3)
+    sleeps, logs = [], []
+    assert _send(http, sleeps, logs) is False
+    assert sleeps == [2, 4]
+    assert len(http.posts()) == 3
+
+
+@pytest.mark.parametrize("status", [400, 401, 404])
+def test_send_whatsapp_permanent_4xx_does_not_retry(status):
+    http = FakeHttp(evolution=[tw.HttpResponse(status, {}, f"bad {NUMBER}".encode())])
+    sleeps, logs = [], []
+    assert _send(http, sleeps, logs) is False
+    assert sleeps == []
+    assert len(http.posts()) == 1
+    joined = "\n".join(logs)
+    assert API_KEY not in joined and NUMBER not in joined
