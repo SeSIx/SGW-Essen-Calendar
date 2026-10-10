@@ -112,4 +112,19 @@ def author_for(login: str, display_name: str,
     """
     if mapping and login in mapping:
         return Author(*mapping[login])
-    return Author(f"{display_name} (SGW-Admin)", f"admin+{login}@sgw-essen.local")
+    return Author(f"{display_name}{AUTHOR_SUFFIX}", f"admin+{login}@sgw-essen.local")
+
+
+AUTHOR_SUFFIX = " (SGW-Admin)"
+
+
+def shown_author(raw: str, mapping: Mapping[str, tuple[str, str]],
+                 display_name_of: Callable[[str], str | None]) -> str:
+    """The app display name for a stored commit author name; foreign authors stay as they are.
+
+    The store only reports the name, so a mapped identity is recognised by its mapped name.
+    """
+    for login, (name, _email) in mapping.items():
+        if raw == name:
+            return display_name_of(login) or raw
+    return raw.removesuffix(AUTHOR_SUFFIX)

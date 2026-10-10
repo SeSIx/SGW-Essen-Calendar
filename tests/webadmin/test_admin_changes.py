@@ -131,3 +131,12 @@ def test_commit_without_change_does_not_write(fake_dir):
     store = FakeGitHubStore(fake_dir)
     changes.commit(store, lambda s: changes.create(s, dict(EVENT_TIMED)), "m", Author("A", "a@b"))
     assert store.saves == 0
+
+
+def test_shown_author_is_the_app_display_name():
+    mapping = {"julius": ("Julius Gerecke", "j@x.de")}
+    names = {"julius": "Julius"}.get
+    assert changes.shown_author("MaxK (SGW-Admin)", mapping, names) == "MaxK"
+    assert changes.shown_author("Julius Gerecke", mapping, names) == "Julius"
+    assert changes.shown_author("Fremder", mapping, names) == "Fremder"
+    assert changes.shown_author("Julius Gerecke", mapping, {}.get) == "Julius Gerecke"
