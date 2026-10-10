@@ -12,20 +12,24 @@ set -euo pipefail
 
 CONTAINER="${CONTAINER:-sgw-admin}"
 DEST="${BACKUP_DEST:-/root/backups/sgw-admin}"
-KEEP="${BACKUP_KEEP:-14}"
+KEEP="${BACKUP_KEEP-14}"
+if ! [[ "$KEEP" =~ ^[1-9][0-9]*$ ]]; then
+    echo "backup: BACKUP_KEEP must be a positive integer, got '$KEEP'" >&2
+    exit 2
+fi
 OUT="$DEST/sgw-admin-$(date -u +%Y%m%dT%H%M%SZ).db"
 
-# Argument "rm" only removes the temp snapshot; otherwise take it and print its path.
+# Argument "rm" only removes the temp snapshot and its -wal/-shm sidecars;
+# otherwise take the snapshot and print its path.
 SNAPSHOT_PY='
 import os, sqlite3, sys
 src = os.environ.get("SGW_ADMIN_DB", "/data/sgw-admin.db")
 dst = os.path.join(os.path.dirname(src), ".backup-tmp.db")
+for suffix in ("", "-wal", "-shm"):
+    if os.path.exists(dst + suffix):
+        os.remove(dst + suffix)
 if sys.argv[1:] == ["rm"]:
-    if os.path.exists(dst):
-        os.remove(dst)
     sys.exit(0)
-if os.path.exists(dst):
-    os.remove(dst)
 source, target = sqlite3.connect(src), sqlite3.connect(dst)
 try:
     source.backup(target)
@@ -37,23 +41,54 @@ print(dst)
 
 umask 077
 install -d -m 700 "$DEST"
+exec 9>"$DEST/.lock"
+if ! flock -n 9; then
+    echo "backup: another backup is already running" >&2
+    exit 1
+fi
 cleanup() {
     docker exec "$CONTAINER" python -I -c "$SNAPSHOT_PY" rm >/dev/null 2>&1 || true
     rm -f "$OUT.part"
 }
 trap cleanup EXIT
 
-snapshot="$(docker exec "$CONTAINER" python -I -c "$SNAPSHOT_PY")"
-docker cp "$CONTAINER:$snapshot" "$OUT.part"
-python3 -I - "$OUT.part" <<'PY'
+snapshot="$(docker exec "$CONTAINER" python -I -c "$SNAPSHOT_PY")" || {
+    echo "backup: container $CONTAINER not running or snapshot failed" >&2
+    exit 1
+}
+docker exec "$CONTAINER" cat "$snapshot" >"$OUT.part" || {
+    echo "backup: copying the snapshot out of $CONTAINER failed" >&2
+    exit 1
+}
+python3 -I - "$OUT.part" <<'PY' || exit 1
+import os
 import sqlite3
 import sys
 
-result = sqlite3.connect(sys.argv[1]).execute("PRAGMA integrity_check").fetchone()[0]
-sys.exit(0 if result == "ok" else f"integrity_check: {result}")
+path = sys.argv[1]
+if os.path.getsize(path) == 0:
+    sys.exit("backup: copy is empty")
+try:
+    conn = sqlite3.connect(path)
+    result = conn.execute("PRAGMA integrity_check").fetchone()[0]
+    tables = conn.execute("SELECT count(*) FROM sqlite_master WHERE type='table'").fetchone()[0]
+except sqlite3.DatabaseError as exc:
+    sys.exit(f"backup: copy is not a valid database: {exc}")
+if result != "ok":
+    sys.exit(f"backup: integrity_check failed: {result}")
+if tables == 0:
+    sys.exit("backup: copy has no tables")
 PY
 chmod 600 "$OUT.part"
 mv "$OUT.part" "$OUT"
 
-ls -1 "$DEST"/sgw-admin-*.db | sort | head -n -"$KEEP" | xargs -r rm -f --
+# Retention: only files with the generated name, never the new one; the new one
+# counts towards KEEP.
+old=()
+for f in "$DEST"/sgw-admin-*.db; do
+    [[ "${f##*/}" =~ ^sgw-admin-[0-9]{8}T[0-9]{6}Z\.db$ ]] && [ "$f" != "$OUT" ] && old+=("$f")
+done
+if [ "${#old[@]}" -ge "$KEEP" ]; then
+    printf '%s\n' "${old[@]}" | sort | head -n -"$((KEEP - 1))" | xargs -r rm -f --
+fi
 echo "Backup: $OUT"
