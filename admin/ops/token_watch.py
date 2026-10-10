@@ -9,14 +9,18 @@ the files that already hold them and are never copied or logged.
 
 from __future__ import annotations
 
+import argparse
 import json
+import os
 import re
+import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from http.client import HTTPException
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -32,6 +36,7 @@ GITHUB_RATE_LIMIT_URL = "https://api.github.com/rate_limit"
 EXPIRY_HEADER = "github-authentication-token-expiration"
 SEND_BACKOFF_SECONDS = (2, 4)
 TIMEOUT_SECONDS = 10
+CONFIG_PATH = Path("/etc/sgw-token-watch.conf")
 
 RENEW_STEPS = (
     "So erneuerst du ihn (ca. 2 Min.):\n"
@@ -277,3 +282,146 @@ def send_whatsapp(http: Http, sleep: Callable[[float], None], log: Callable[[str
         if attempt < attempts - 1:
             sleep(SEND_BACKOFF_SECONDS[attempt])
     return False
+
+
+def load_state(path: Path, log: Callable[[str], None]) -> dict:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return {"sent": []}
+    except (OSError, ValueError) as exc:
+        log(f"Statusdatei {path} unlesbar ({exc.__class__.__name__}) – starte mit leerem Status")
+        return {"sent": []}
+    sent = data.get("sent") if isinstance(data, dict) else None
+    if not isinstance(sent, list) or not all(isinstance(key, str) for key in sent):
+        log(f"Statusdatei {path} hat ein unerwartetes Format – starte mit leerem Status")
+        return {"sent": []}
+    return {"sent": sent}
+
+
+def save_state(path: Path, state: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(path.name + ".tmp")
+    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8") as handle:
+        handle.write(json.dumps(state, indent=2, sort_keys=True) + "\n")
+    os.chmod(tmp, 0o600)
+    os.replace(tmp, path)
+
+
+def _status_report(log: Callable[[str], None], expiry_day: date, days: int,
+                   sent: list[str]) -> None:
+    upcoming = [stage for stage in STAGES if stage < days]
+    if upcoming:
+        nxt = max(upcoming)
+        log(f"Nächste Warnstufe: {nxt} Tage vorher, am "
+            f"{expiry_day - timedelta(days=nxt):%d.%m.%Y}")
+    done = sorted(key for key in sent if key.startswith(f"{expiry_day.isoformat()}:"))
+    log(f"Bereits gesendet: {', '.join(done) if done else 'nichts'}")
+
+
+def run(cfg: Config, *, http: Http, now: datetime, sleep: Callable[[float], None],
+        log: Callable[[str], None], mode: str) -> int:
+    today = now.astimezone(BERLIN).date()
+    try:
+        api_key = read_evolution_key(cfg.evolution_compose)
+        token = (None if mode == "test-message"
+                 else read_env_value(cfg.github_env_file, "GITHUB_TOKEN"))
+    except ConfigError as exc:
+        log(f"Konfigurationsfehler: {exc}")
+        return EXIT_CONFIG
+
+    def deliver(text: str) -> bool:
+        return send_whatsapp(http, sleep, log, base_url=cfg.evolution_url,
+                             instance=cfg.evolution_instance, api_key=api_key,
+                             number=cfg.recipient, text=text)
+
+    if mode == "test-message":
+        if deliver(probe_message()):
+            log(f"Testnachricht an {mask_number(cfg.recipient)} gesendet")
+            return EXIT_OK
+        log("Testnachricht konnte nicht gesendet werden")
+        return EXIT_FAILED
+
+    try:
+        status = check_token(http, token)
+    except GitHubUnavailable as exc:
+        log(f"{exc} – nächster Lauf versucht es erneut")
+        return EXIT_FAILED
+
+    sent = load_state(cfg.state_file, log)["sent"]
+
+    if status.kind == "no_expiry":
+        log("Token hat kein Ablaufdatum – keine Warnung nötig")
+        return EXIT_OK
+
+    if status.kind == "invalid":
+        key = f"invalid:{today.isoformat()}"
+        log("GitHub meldet 401: Token ungültig oder abgelaufen")
+        if mode == "status":
+            log(f"Heutige Meldung: {'bereits gesendet' if key in sent else 'noch offen'}")
+            return EXIT_OK
+        if key in sent:
+            return EXIT_OK
+        text = invalid_message()
+        new_sent = [k for k in sent if not k.startswith("invalid:")] + [key]
+    else:
+        expiry_day = status.expiry.astimezone(BERLIN).date()
+        days = (expiry_day - today).days
+        log(f"Token läuft am {expiry_day:%d.%m.%Y} ab (noch {days} Tage)")
+        if mode == "status":
+            _status_report(log, expiry_day, days, sent)
+            return EXIT_OK
+        stage = due_stage(days)
+        prefix = f"{expiry_day.isoformat()}:"
+        if stage is None or f"{prefix}{stage}" in sent:
+            log("Keine Warnung fällig")
+            return EXIT_OK
+        key = f"{prefix}{stage}"
+        text = expiry_message(expiry_day, days)
+        # Catching up on stage N also settles every larger stage for this expiry date;
+        # keys of earlier expiry dates are dropped, so a renewed token starts afresh.
+        new_sent = sorted({k for k in sent if k.startswith(prefix)}
+                          | {f"{prefix}{s}" for s in STAGES if s >= stage})
+
+    if mode == "dry-run":
+        log("Trockenlauf – diese Nachricht würde gesendet:")
+        log(text)
+        return EXIT_OK
+    if not deliver(text):
+        log("Warnung konnte nicht gesendet werden – nächster Lauf versucht es erneut")
+        return EXIT_FAILED
+    save_state(cfg.state_file, {"sent": new_sent})
+    log(f"Warnung an {mask_number(cfg.recipient)} gesendet ({key})")
+    return EXIT_OK
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Warnt per WhatsApp, bevor der GitHub-Token der SGW-Admin-App abläuft.")
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument("--status", action="store_true",
+                       help="nur Ablaufdatum und Warnstufen anzeigen")
+    modes.add_argument("--dry-run", action="store_true",
+                       help="fällige Nachricht anzeigen, nichts senden oder speichern")
+    modes.add_argument("--test-message", action="store_true",
+                       help="eine Testnachricht senden (ohne GitHub-Prüfung)")
+    parser.add_argument("--config", type=Path, default=CONFIG_PATH)
+    args = parser.parse_args(argv)
+    mode = ("status" if args.status else "dry-run" if args.dry_run
+            else "test-message" if args.test_message else "send")
+
+    def log(message: str) -> None:
+        print(message, flush=True)
+
+    try:
+        cfg = load_config(args.config)
+    except ConfigError as exc:
+        log(f"Konfigurationsfehler: {exc}")
+        return EXIT_CONFIG
+    return run(cfg, http=urllib_http, now=datetime.now(tz=BERLIN), sleep=time.sleep,
+               log=log, mode=mode)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

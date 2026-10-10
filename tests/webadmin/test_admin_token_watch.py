@@ -5,7 +5,7 @@ import json
 import socket
 import sys
 import threading
-from datetime import date
+from datetime import date, datetime, timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -21,6 +21,7 @@ _spec.loader.exec_module(tw)
 BERLIN = ZoneInfo("Europe/Berlin")
 TOKEN = "github_pat_TESTTOKEN123"
 API_KEY = "evo-test-key-123"
+NOW = datetime(2027, 9, 28, 9, 0, tzinfo=ZoneInfo("Europe/Berlin"))
 NUMBER = "4915112345678"  # fiktiv, nie eine echte Nummer ins Repo
 
 
@@ -516,3 +517,203 @@ def test_send_whatsapp_logs_never_contain_key_or_number_on_retry_paths():
     assert len(logs) == 3
     joined = "\n".join(logs)
     assert API_KEY not in joined and NUMBER not in joined
+
+
+@pytest.fixture
+def cfg(tmp_path):
+    env = tmp_path / ".env"
+    env.write_text(f"SECRET_KEY=x\nGITHUB_TOKEN={TOKEN}\n", encoding="utf-8")
+    compose = tmp_path / "docker-compose.yml"
+    compose.write_text("services:\n  api:\n    environment:\n"
+                       f"      - AUTHENTICATION_API_KEY={API_KEY}\n", encoding="utf-8")
+    return tw.Config(recipient=NUMBER, github_env_file=env, evolution_compose=compose,
+                     state_file=tmp_path / "state" / "state.json")
+
+
+def run(cfg, http, now=NOW, mode="send"):
+    logs, sleeps = [], []
+    code = tw.run(cfg, http=http, now=now, sleep=sleeps.append, log=logs.append, mode=mode)
+    return code, logs
+
+
+def state_keys(cfg):
+    return set(json.loads(cfg.state_file.read_text(encoding="utf-8"))["sent"])
+
+
+def test_sends_stage_14_once_per_expiry(cfg):
+    code, _ = run(cfg, FakeHttp(github=[github_expiring()]))  # NOW + 14 Tage
+    assert code == tw.EXIT_OK
+    assert state_keys(cfg) == {"2027-10-12:14"}
+    http = FakeHttp(github=[github_expiring()])
+    code, _ = run(cfg, http)
+    assert code == tw.EXIT_OK
+    assert http.posts() == []
+
+
+def test_message_text_matches_stage(cfg):
+    http = FakeHttp(github=[github_expiring()])
+    run(cfg, http)
+    [text] = http.sent_texts()
+    assert "12.10.2027" in text and "in 14 Tagen" in text
+
+
+def test_nothing_due_between_stages(cfg):
+    run(cfg, FakeHttp(github=[github_expiring()]))
+    http = FakeHttp(github=[github_expiring()])
+    code, logs = run(cfg, http, now=NOW + timedelta(days=1))  # 13 Tage
+    assert code == tw.EXIT_OK and http.posts() == []
+    assert any("Keine Warnung fällig" in line for line in logs)
+
+
+def test_catch_up_sends_one_message_and_marks_larger_stages(cfg):
+    http = FakeHttp(github=[github_expiring()])
+    run(cfg, http, now=NOW + timedelta(days=9))  # 5 Tage übrig → Stufe 7
+    assert len(http.posts()) == 1
+    assert "in 5 Tagen" in http.sent_texts()[0]
+    assert state_keys(cfg) == {"2027-10-12:14", "2027-10-12:7"}
+
+
+def test_downtime_jump_sends_only_smallest_reached_stage(cfg):
+    run(cfg, FakeHttp(github=[github_expiring()]))  # Stufe 14 gesendet
+    http = FakeHttp(github=[github_expiring()])
+    run(cfg, http, now=NOW + timedelta(days=12))  # 2 Tage übrig → Stufe 3, 7 übersprungen
+    assert len(http.posts()) == 1 and "in 2 Tagen" in http.sent_texts()[0]
+    assert state_keys(cfg) == {f"2027-10-12:{s}" for s in (14, 7, 3)}
+    http = FakeHttp(github=[github_expiring()])
+    run(cfg, http, now=NOW + timedelta(days=12, hours=3))  # gleicher Tag: nichts
+    assert http.posts() == []
+    for days_later, phrase in ((13, "(morgen)"), (14, "(heute)")):
+        http = FakeHttp(github=[github_expiring()])
+        run(cfg, http, now=NOW + timedelta(days=days_later))
+        assert len(http.posts()) == 1 and phrase in http.sent_texts()[0]
+
+
+def test_renewed_token_starts_fresh_stage_cycle(cfg):
+    run(cfg, FakeHttp(github=[github_expiring()]), now=NOW + timedelta(days=14))
+    assert "2027-10-12:0" in state_keys(cfg)
+    http = FakeHttp(github=[github_expiring("2028-10-12")])
+    run(cfg, http, now=NOW + timedelta(days=15))
+    assert http.posts() == []
+    http = FakeHttp(github=[github_expiring("2028-10-12")])
+    run(cfg, http, now=datetime(2028, 9, 28, 9, 0, tzinfo=BERLIN))
+    assert len(http.posts()) == 1
+    assert state_keys(cfg) == {"2028-10-12:14"}, "old expiry keys are pruned"
+
+
+def test_no_expiry_header_sends_nothing(cfg):
+    http = FakeHttp(github=[tw.HttpResponse(200, {}, b"{}")])
+    code, logs = run(cfg, http)
+    assert code == tw.EXIT_OK and http.posts() == []
+    assert any("kein Ablaufdatum" in line for line in logs)
+
+
+def test_invalid_token_warns_at_most_once_per_day(cfg):
+    http = FakeHttp(github=[tw.HttpResponse(401, {}, b"")])
+    assert run(cfg, http)[0] == tw.EXIT_OK
+    assert "ungültig" in http.sent_texts()[0]
+    http = FakeHttp(github=[tw.HttpResponse(401, {}, b"")])
+    run(cfg, http, now=NOW + timedelta(hours=5))
+    assert http.posts() == []
+    http = FakeHttp(github=[tw.HttpResponse(401, {}, b"")])
+    run(cfg, http, now=NOW + timedelta(days=1))
+    assert len(http.posts()) == 1
+    assert state_keys(cfg) == {"invalid:2027-09-29"}
+
+
+def test_github_outage_exits_1_without_message_or_state(cfg):
+    http = FakeHttp(github=[OSError("down")])
+    code, _ = run(cfg, http)
+    assert code == tw.EXIT_FAILED and http.posts() == []
+    assert not cfg.state_file.exists()
+
+
+def test_failed_send_keeps_stage_pending(cfg):
+    http = FakeHttp(github=[github_expiring()], evolution=[tw.HttpResponse(503, {}, b"")] * 3)
+    code, _ = run(cfg, http)
+    assert code == tw.EXIT_FAILED
+    assert not cfg.state_file.exists()
+    http = FakeHttp(github=[github_expiring()])
+    assert run(cfg, http)[0] == tw.EXIT_OK
+    assert len(http.posts()) == 1
+
+
+def test_corrupt_state_file_is_survived(cfg):
+    cfg.state_file.parent.mkdir(parents=True)
+    cfg.state_file.write_text("{kaputt", encoding="utf-8")
+    http = FakeHttp(github=[github_expiring()])
+    code, logs = run(cfg, http)
+    assert code == tw.EXIT_OK and len(http.posts()) == 1
+    assert any("Statusdatei" in line for line in logs)
+    assert state_keys(cfg) == {"2027-10-12:14"}
+
+
+def test_state_file_is_private(cfg):
+    run(cfg, FakeHttp(github=[github_expiring()]))
+    assert cfg.state_file.stat().st_mode & 0o777 == 0o600
+
+
+def test_dry_run_sends_and_writes_nothing(cfg):
+    http = FakeHttp(github=[github_expiring()])
+    code, logs = run(cfg, http, mode="dry-run")
+    assert code == tw.EXIT_OK and http.posts() == []
+    assert not cfg.state_file.exists()
+    assert any("12.10.2027" in line for line in logs)
+
+
+def test_status_reports_without_side_effects(cfg):
+    http = FakeHttp(github=[github_expiring()])
+    code, logs = run(cfg, http, now=NOW - timedelta(days=10), mode="status")
+    assert code == tw.EXIT_OK and http.posts() == []
+    assert not cfg.state_file.exists()
+    joined = "\n".join(logs)
+    assert "12.10.2027" in joined and "24 Tage" in joined
+    assert "28.09.2027" in joined, "date of the next stage (14 days before)"
+
+
+def test_test_message_skips_github_and_state(cfg):
+    http = FakeHttp()
+    code, _ = run(cfg, http, mode="test-message")
+    assert code == tw.EXIT_OK
+    assert [c[0] for c in http.calls] == ["POST"]
+    assert "Test" in http.sent_texts()[0]
+    assert not cfg.state_file.exists()
+
+
+def test_config_error_makes_no_http_calls(cfg):
+    cfg.evolution_compose.write_text("      - SERVER_PORT=8080\n", encoding="utf-8")
+    http = FakeHttp(github=[github_expiring()])
+    code, _ = run(cfg, http)
+    assert code == tw.EXIT_CONFIG and http.calls == []
+
+
+def test_missing_github_token_is_config_error(cfg):
+    cfg.github_env_file.write_text("SECRET_KEY=x\n", encoding="utf-8")
+    http = FakeHttp()
+    assert run(cfg, http)[0] == tw.EXIT_CONFIG and http.calls == []
+
+
+def test_secrets_never_logged(cfg):
+    all_logs = []
+    for http, mode in [
+        (FakeHttp(github=[github_expiring()]), "send"),
+        (FakeHttp(github=[github_expiring()]), "status"),
+        (FakeHttp(github=[tw.HttpResponse(401, {}, b"")]), "send"),
+        (FakeHttp(evolution=[tw.HttpResponse(400, {}, NUMBER.encode())]), "test-message"),
+    ]:
+        all_logs += run(cfg, http, now=NOW + timedelta(days=2), mode=mode)[1]
+    joined = "\n".join(all_logs)
+    for secret in (TOKEN, API_KEY, NUMBER):
+        assert secret not in joined
+    assert "…5678" in joined
+
+
+def test_main_rejects_combined_flags(capsys):
+    with pytest.raises(SystemExit):
+        tw.main(["--status", "--dry-run"])
+    capsys.readouterr()
+
+
+def test_main_bad_config_exits_2(tmp_path):
+    conf = tmp_path / "c.conf"
+    conf.write_text("RECIPIENT=\n", encoding="utf-8")
+    assert tw.main(["--config", str(conf)]) == tw.EXIT_CONFIG
