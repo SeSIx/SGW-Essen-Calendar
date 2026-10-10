@@ -31,6 +31,7 @@ STAGES = (14, 7, 3, 1, 0)
 EXIT_OK = 0
 EXIT_FAILED = 1
 EXIT_CONFIG = 2
+EXIT_SENT_UNSAVED = 3  # warning sent but state not saved: systemd must not retry (would resend)
 MODES = ("send", "dry-run", "status", "test-message")
 
 GITHUB_RATE_LIMIT_URL = "https://api.github.com/rate_limit"
@@ -442,8 +443,9 @@ def run(cfg: Config, *, http: Http, now: datetime, sleep: Callable[[float], None
         save_state(cfg.state_file, {"sent": new_sent})
     except OSError as exc:
         log(f"Warnung an {mask_number(cfg.recipient)} gesendet ({key}), aber Statusdatei "
-            f"nicht gespeichert ({exc.__class__.__name__}) – Nachricht kann morgen erneut kommen")
-        return EXIT_FAILED
+            f"nicht gespeichert ({exc.__class__.__name__}) – "
+            "Nachricht kann beim nächsten Lauf erneut kommen")
+        return EXIT_SENT_UNSAVED
     log(f"Warnung an {mask_number(cfg.recipient)} gesendet ({key})")
     return EXIT_OK
 

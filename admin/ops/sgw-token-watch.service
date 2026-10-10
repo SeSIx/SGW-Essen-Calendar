@@ -3,7 +3,7 @@ Description=SGW-Admin: GitHub-Token-Ablauf prüfen und per WhatsApp warnen
 Documentation=file:///root/sgw-admin/admin/README.md
 Wants=network-online.target
 After=network-online.target docker.service
-StartLimitIntervalSec=1d
+StartLimitIntervalSec=12h
 StartLimitBurst=4
 
 [Service]
@@ -11,7 +11,7 @@ Type=oneshot
 TimeoutStartSec=5min
 Restart=on-failure
 RestartSec=1h
-RestartPreventExitStatus=2
+RestartPreventExitStatus=2 3
 ExecStart=/usr/bin/python3 -I /root/sgw-admin/admin/ops/token_watch.py
 StateDirectory=sgw-token-watch
 StateDirectoryMode=0700

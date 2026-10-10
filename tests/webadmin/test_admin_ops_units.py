@@ -84,8 +84,8 @@ def test_token_watch_retries_hourly_but_not_on_config_errors():
     service = parsed["Service"]
     assert service["Restart"] == "on-failure"
     assert service["RestartSec"] == "1h"
-    assert service["RestartPreventExitStatus"] == "2"
-    assert parsed["Unit"]["StartLimitIntervalSec"] == "1d"
+    assert service["RestartPreventExitStatus"] == "2 3"
+    assert parsed["Unit"]["StartLimitIntervalSec"] == "12h"
     assert parsed["Unit"]["StartLimitBurst"] == "4"
 
 

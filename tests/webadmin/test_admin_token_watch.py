@@ -731,7 +731,7 @@ def test_save_state_failure_after_send_exits_1_and_logs_masked(cfg):
     cfg.state_file.with_name("state.json.tmp").mkdir()  # saving fails, reading does not
     http = FakeHttp(github=[github_expiring()])
     code, logs = run(cfg, http)
-    assert code == tw.EXIT_FAILED and len(http.posts()) == 1
+    assert code == tw.EXIT_SENT_UNSAVED == 3 and len(http.posts()) == 1
     line = next(entry for entry in logs if "Statusdatei nicht gespeichert" in entry)
     assert "…5678" in line and "erneut kommen" in line
     for secret in (TOKEN, API_KEY, NUMBER):
