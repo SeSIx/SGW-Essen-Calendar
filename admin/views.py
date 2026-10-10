@@ -219,7 +219,7 @@ def store_problem(exc: StoreError) -> str:
 
 
 def _author():
-    return changes.author_for(g.user.login, g.user.display_name)
+    return changes.author_for(g.user.login, g.user.display_name, services().settings.git_authors)
 
 
 def _form(mode, data, event_id, rev, *, error=None, field_errors=None, notice=None, status=200):

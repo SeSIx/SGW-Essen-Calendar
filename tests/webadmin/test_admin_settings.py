@@ -52,3 +52,43 @@ def test_hand_built_production_settings_refuse_fake_store(settings):
 
     with pytest.raises(RuntimeError, match="production"):
         create_app(replace(settings, env="production"))
+
+
+JULIUS = "julius=Julius Gerecke <76214201+SeSIx@users.noreply.github.com>"
+
+
+def test_git_authors_default_to_empty():
+    assert from_env(GOOD).git_authors == {}
+    assert from_env({**GOOD, "SGW_ADMIN_GIT_AUTHORS": ""}).git_authors == {}
+    assert from_env({**GOOD, "SGW_ADMIN_GIT_AUTHORS": "  "}).git_authors == {}
+
+
+def test_git_authors_are_parsed():
+    s = from_env({**GOOD, "SGW_ADMIN_GIT_AUTHORS": f"{JULIUS}; max-k=Max K <max@example.org>;"})
+    assert s.git_authors == {
+        "julius": ("Julius Gerecke", "76214201+SeSIx@users.noreply.github.com"),
+        "max-k": ("Max K", "max@example.org"),
+    }
+
+
+@pytest.mark.parametrize("value", [
+    "julius",
+    "Julius=Julius <a@b.de>",
+    "j=Julius <a@b.de>",
+    "julius=<a@b.de>",
+    "julius= <a@b.de>",
+    "julius=Julius a@b.de",
+    "julius=Julius <a@b.de",
+    "julius=Julius <a@@b.de>",
+    "julius=Julius <ab.de>",
+    "julius=Julius <a<b@c.de>",
+    "julius=Julius <a@b.de> x",
+    "julius=Ju\tlius <a@b.de>",
+    "julius=Ju\nlius <a@b.de>",
+    "julius=Julius <a@b.de>;julius=Julius <c@d.de>",
+])
+def test_malformed_git_authors_refuse_to_start(value):
+    with pytest.raises(RuntimeError, match="SGW_ADMIN_GIT_AUTHORS") as exc:
+        from_env({**GOOD, "SGW_ADMIN_GIT_AUTHORS": value})
+    assert value not in str(exc.value)
+    assert "a@b.de" not in str(exc.value)

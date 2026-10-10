@@ -6,7 +6,7 @@ deletion) stops the save.
 """
 
 import re
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 
 import custom_events
 from admin.github_store import Author, Conflict, Snapshot, Store
@@ -103,5 +103,13 @@ def message(display_name: str, title: str, verb: str) -> str:
     return f"{display_name}: „{' '.join(title.split())}“ {verb}"
 
 
-def author_for(login: str, display_name: str) -> Author:
-    return Author(display_name, f"admin+{login}@sgw-essen.local")
+def author_for(login: str, display_name: str,
+               mapping: Mapping[str, tuple[str, str]] | None = None) -> Author:
+    """The mapped identity if there is one. Otherwise a name no GitHub login can equal.
+
+    GitHub Mobile matches the author *name* to an account, so a bare "Julius" would show
+    github.com/julius. The suffix adds a space and parentheses, which logins cannot contain.
+    """
+    if mapping and login in mapping:
+        return Author(*mapping[login])
+    return Author(f"{display_name} (SGW-Admin)", f"admin+{login}@sgw-essen.local")

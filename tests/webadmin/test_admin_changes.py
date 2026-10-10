@@ -97,7 +97,18 @@ def test_broken_entries_are_carried_along_and_editable():
 def test_message_and_author():
     assert changes.message("Trainer", "Weihnachtsfeier", "geändert") == "Trainer: „Weihnachtsfeier“ geändert"
     assert changes.message("Trainer", "Zeile\nzwei", "angelegt") == "Trainer: „Zeile zwei“ angelegt"
-    assert changes.author_for("trainer", "Trainer") == Author("Trainer", "admin+trainer@sgw-essen.local")
+
+
+def test_author_for_unmapped_login_cannot_match_a_github_account():
+    author = changes.author_for("trainer", "Trainer")
+    assert author == Author("Trainer (SGW-Admin)", "admin+trainer@sgw-essen.local")
+    assert changes.author_for("trainer", "Trainer", {"julius": ("J", "j@x.de")}) == author
+
+
+def test_author_for_mapped_login_uses_the_exact_identity():
+    mapping = {"julius": ("Julius Gerecke", "76214201+SeSIx@users.noreply.github.com")}
+    assert changes.author_for("julius", "Julius", mapping) == Author(
+        "Julius Gerecke", "76214201+SeSIx@users.noreply.github.com")
 
 
 def test_commit_retries_once_on_conflict(fake_dir):

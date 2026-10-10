@@ -52,6 +52,20 @@ Jeder Befehl gibt einen Link aus, der einmal und 48 Stunden lang funktioniert. S
 3. `cd /root/sgw-admin && docker compose -f admin/compose.yml up -d`
 4. `docker exec sgw-admin sgw-admin token-status`
 
+## Commit-Autoren (`SGW_ADMIN_GIT_AUTHORS`)
+
+GitHub Mobile ordnet den Autorennamen eines Commits einem gleichnamigen GitHub-Konto zu (aus „Julius“ würde github.com/julius, ein Fremder). Darum schreibt die App Commits standardmäßig als `<Anzeigename> (SGW-Admin)`; Leerzeichen und Klammern kann kein GitHub-Login enthalten.
+
+Wer in GitHub korrekt angezeigt werden soll, trägt in `admin/.env` optional eine Zuordnung ein (Einträge mit `;` getrennt, Format `login=Name <E-Mail>`):
+
+```
+SGW_ADMIN_GIT_AUTHORS=julius=Julius Gerecke <76214201+SeSIx@users.noreply.github.com>;maxk=Max K <max@example.org>
+```
+
+- `login` ist der Login in der App (Kleinbuchstaben, Ziffern, `-`); alle anderen Konten bleiben bei `<Anzeigename> (SGW-Admin)`.
+- Ein fehlerhafter Wert verhindert den Start (Meldung im Log: `docker logs sgw-admin`).
+- Nach dem Ändern der `.env`: `cd /root/sgw-admin && docker compose -f admin/compose.yml up -d`
+
 ## Betrieb: Hinweise zu Traefik
 
 - Traefik leitet erst weiter, wenn der Container „healthy“ ist, also ca. 30 s nach `up -d`. Bis dahin liefert die Adresse 404; das ist normal.

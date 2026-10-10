@@ -4,8 +4,12 @@ Every combination that would run the app half-protected refuses to start.
 """
 
 import os
+import re
+import unicodedata
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
+from admin.auth import LOGIN_RE
 
 ENVIRONMENTS = ("production", "e2e", "test")
 PRODUCTION_HOST = "sgw-admin.srv1136792.hstgr.cloud"
@@ -22,10 +26,32 @@ class Settings:
     repo: str
     branch: str
     fake_github_dir: str | None
+    git_authors: dict[str, tuple[str, str]] = field(default_factory=dict)  # login -> (name, email)
 
     @property
     def origin(self) -> str:
         return f"{self.scheme}://{self.host}"
+
+
+_AUTHOR_RE = re.compile(r"([^=]*)=([^<>]*?)\s*<([^<>]*)>")
+_GIT_AUTHORS_HINT = "SGW_ADMIN_GIT_AUTHORS ist fehlerhaft; erwartet: login=Name <mail@beispiel.de>;login2=…"
+
+
+def parse_git_authors(raw: str) -> dict[str, tuple[str, str]]:
+    """`login=Name <email>` entries separated by `;`; any malformed entry fails the whole value."""
+    authors: dict[str, tuple[str, str]] = {}
+    for entry in filter(None, (part.strip() for part in raw.split(";"))):
+        match = _AUTHOR_RE.fullmatch(entry)
+        if not match:
+            raise RuntimeError(_GIT_AUTHORS_HINT)
+        login, name, email = match.group(1), match.group(2).strip(), match.group(3)
+        local, at, domain = email.partition("@")
+        if (not LOGIN_RE.fullmatch(login) or login in authors or not name
+                or any(unicodedata.category(c) == "Cc" for c in entry)
+                or not at or "@" in domain or not local or not domain or any(c.isspace() for c in email)):
+            raise RuntimeError(_GIT_AUTHORS_HINT)
+        authors[login] = (name, email)
+    return authors
 
 
 def from_env(environ: Mapping[str, str] = os.environ) -> Settings:
@@ -61,4 +87,5 @@ def from_env(environ: Mapping[str, str] = os.environ) -> Settings:
         github_token=token,
         repo=environ.get("SGW_ADMIN_REPO", "SeSIx/SGW-Essen-Calendar"),
         branch=environ.get("SGW_ADMIN_BRANCH", "main"),
-        fake_github_dir=fake_dir)
+        fake_github_dir=fake_dir,
+        git_authors=parse_git_authors(environ.get("SGW_ADMIN_GIT_AUTHORS", "")))

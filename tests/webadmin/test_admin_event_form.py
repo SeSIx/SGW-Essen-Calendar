@@ -1,5 +1,6 @@
 """Creating, editing and deleting events through the form, including the awkward cases."""
 
+import dataclasses
 import html
 import json
 import re
@@ -8,7 +9,7 @@ import pytest
 
 import custom_events
 from admin.github_store import Author, Conflict, CorruptFile, RateLimited, Unauthorized, Unavailable
-from webadmin.testdata import BASE, EVENT_MULTI, EVENT_TIMED, csrf_of
+from webadmin.testdata import BASE, EVENT_MULTI, EVENT_TIMED, HOST, csrf_of, make_user
 
 BROKEN = {"id": "kaputt-1", "title": "Feier", "start_date": "2026-13-01"}
 FORM = {"title": "Weihnachtsfeier", "start_date": "2026-12-19", "start_time": "18:00",
@@ -52,7 +53,19 @@ def test_create_timed_event(user_client, store, fake_dir):
     assert r.status_code == 302 and r.headers["Location"].endswith("/?ok=gespeichert")
     [new] = [e for e in stored(fake_dir) if e["title"] == "Weihnachtsfeier"]
     assert (new["start_time"], new["end_time"], new["end_date"]) == ("18:00", "23:00", None)
-    assert store.last_commit() == ("Julius", "admin+julius@sgw-essen.local", "Julius: „Weihnachtsfeier“ angelegt")
+    assert store.last_commit() == (
+        "Julius (SGW-Admin)", "admin+julius@sgw-essen.local", "Julius: „Weihnachtsfeier“ angelegt")
+
+
+def test_save_uses_mapped_author_for_mapped_login_only(app, user_client, store):
+    app.extensions["sgw"].settings = dataclasses.replace(
+        app.extensions["sgw"].settings, git_authors={"julius": ("Julius Gerecke", "j@users.noreply.github.com")})
+    submit(user_client, "/termin/neu", user_client.get("/termin/neu"))
+    assert store.last_commit() == ("Julius Gerecke", "j@users.noreply.github.com", "Julius: „Weihnachtsfeier“ angelegt")
+    other = app.test_client()
+    other.set_cookie("__Host-sid", make_user(app, "maxk", "MaxK"), domain=HOST)
+    submit(other, "/termin/neu", other.get("/termin/neu"), title="Zweiter")
+    assert store.last_commit() == ("MaxK (SGW-Admin)", "admin+maxk@sgw-essen.local", "MaxK: „Zweiter“ angelegt")
 
 
 def test_create_multi_day_all_day_event(user_client, fake_dir):
