@@ -110,15 +110,22 @@ Schritte). Danach `docker exec sgw-admin sgw-admin token-status` prüfen; der W�
 das neue Ablaufdatum am nächsten Morgen selbst. Wird der Evolution-Schlüssel rotiert, liest
 der Wächter automatisch den neuen Wert aus der Compose-Datei.
 
+Die Backup-Unit hat bewusst kein `ProtectHome`, weil sie nach `/root/backups` schreibt.
+
 Backup wiederherstellen (`<datei>` = Name aus `ls /root/backups/sgw-admin/`; die Backups
 gehören root mit Rechten 600, daher läuft der Wiederherstellungs-Container als root und
-übergibt die Datei danach an `sgw`):
+übergibt die Datei danach an `sgw`. Der Container erbt `cap_drop: ALL` und ein
+schreibgeschütztes Root-Dateisystem, deshalb braucht er `DAC_OVERRIDE` (Schreiben in `/data`,
+Lesen der 600-Datei) und `CHOWN`):
 
 ```bash
 cd /root/sgw-admin
 docker compose -f admin/compose.yml stop sgw-admin
-docker compose -f admin/compose.yml run --rm --no-deps --user root --entrypoint sh \
+docker compose -f admin/compose.yml run --rm --no-deps --user root \
+  --cap-add DAC_OVERRIDE --cap-add CHOWN --entrypoint sh \
   -v /root/backups/sgw-admin:/backup:ro sgw-admin \
-  -c 'db="${SGW_ADMIN_DB:-/data/sgw-admin.db}"; rm -f "$db-wal" "$db-shm" && cp /backup/<datei> "$db" && chown sgw:sgw "$db" && chmod 600 "$db"'
+  -c 'db="${SGW_ADMIN_DB:-/data/sgw-admin.db}"; rm -f "$db-wal" "$db-shm" && cp /backup/<datei> "$db" && chmod 600 "$db" && chown sgw:sgw "$db"'
 docker compose -f admin/compose.yml start sgw-admin
+docker ps --filter name=sgw-admin     # nach ca. 30 s „healthy“
+docker exec sgw-admin sgw-admin users
 ```

@@ -64,3 +64,11 @@ def test_units_contain_no_phone_numbers_or_keys(name):
     text = (OPS / name).read_text(encoding="utf-8")
     assert not re.search(r"\d{10,}", text)
     assert "AUTHENTICATION_API_KEY" not in text and "GITHUB_TOKEN" not in text
+
+
+def test_readme_restore_block_grants_needed_caps_and_chmods_before_chown():
+    readme = (OPS.parent / "README.md").read_text(encoding="utf-8")
+    block = readme.split("Backup wiederherstellen", 1)[1].split("```bash", 1)[1].split("```", 1)[0]
+    assert "--cap-add DAC_OVERRIDE" in block
+    assert "--cap-add CHOWN" in block
+    assert block.index("chmod 600") < block.index("chown sgw:sgw")
