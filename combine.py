@@ -13,7 +13,6 @@ import argparse
 import sqlite3
 from datetime import date, datetime, timedelta
 from pathlib import Path
-from urllib.parse import quote
 
 import config
 import custom_events
@@ -268,10 +267,6 @@ def _build_game_vevent(row: dict, dtstamp: str, today: date) -> str:
     return "\r\n".join(lines)
 
 
-def _maps_url(location: str) -> str:
-    return "https://www.google.com/maps/search/?api=1&query=" + quote(location, safe="")
-
-
 def _build_custom_vevent(row: dict, dtstamp: str) -> str:
     uid = f"custom-{row['id']}@sgw-essen.local"
     lines = [
@@ -305,9 +300,6 @@ def _build_custom_vevent(row: dict, dtstamp: str) -> str:
     if row.get("location"):
         lines.append(_fold(f"LOCATION:{_esc(row['location'])}"))
     description = row.get("description") or ""
-    if row.get("location"):
-        karte = f"Karte: {_maps_url(row['location'])}"
-        description = f"{description}\n\n{karte}" if description else karte
     if description:
         lines.append(_fold(f"DESCRIPTION:{_esc(description)}"))
 
