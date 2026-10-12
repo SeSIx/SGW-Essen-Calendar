@@ -38,5 +38,15 @@
     "end_time": "22:00",
     "location": null,
     "description": "Ab jetzt volles Trainingsprogramm"
+  },
+  {
+    "id": "6fad1f7b-5609-4449-be83-a574a6c213f2",
+    "title": "Weihnachtsmarkt Freibad Hesse",
+    "start_date": "2026-12-19",
+    "start_time": "12:00",
+    "end_date": null,
+    "end_time": "17:00",
+    "location": "Freibad Dellwig \"Hesse\", Scheppmannskamp 6, 45357 Essen",
+    "description": null
   }
 ]
