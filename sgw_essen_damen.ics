@@ -10,7 +10,7 @@ CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
 UID:2025_225__6@sgw-essen.local
-DTSTAMP:20261006T011842Z
+DTSTAMP:20261014T134616Z
 SUMMARY:Duisburger SSC 09/20 4:11 SG Wasserball Essen (Ruhrgebietsliga weib
  lich)
 STATUS:CONFIRMED
@@ -27,7 +27,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__7@sgw-essen.local
-DTSTAMP:20261006T011842Z
+DTSTAMP:20261014T134616Z
 SUMMARY:SG Wasserball Essen 12:11 Düsseldorfer SC 1898 (Ruhrgebietsliga we
  iblich)
 STATUS:CONFIRMED
@@ -44,7 +44,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__24@sgw-essen.local
-DTSTAMP:20261006T011842Z
+DTSTAMP:20261014T134616Z
 SUMMARY:WSG Oberhausen 97/27 5:8 SG Wasserball Essen (Ruhrgebietsliga weibl
  ich)
 STATUS:CONFIRMED
@@ -61,7 +61,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__12@sgw-essen.local
-DTSTAMP:20261006T011842Z
+DTSTAMP:20261014T134616Z
 SUMMARY:Duisburger SSC 09/20 II 5:17 SG Wasserball Essen (Ruhrgebietsliga w
  eiblich)
 STATUS:CONFIRMED
@@ -78,7 +78,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__29@sgw-essen.local
-DTSTAMP:20261006T011842Z
+DTSTAMP:20261014T134616Z
 SUMMARY:SGW Essen Masters 12:9 SG Wasserball Essen (Ruhrgebietsliga weiblic
  h)
 STATUS:CONFIRMED
@@ -95,7 +95,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__30@sgw-essen.local
-DTSTAMP:20261006T011842Z
+DTSTAMP:20261014T134616Z
 SUMMARY:SG Wasserball Essen 5:12 WSG Oberhausen 97/27 (Ruhrgebietsliga weib
  lich)
 STATUS:CONFIRMED
@@ -112,7 +112,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__33@sgw-essen.local
-DTSTAMP:20261006T011842Z
+DTSTAMP:20261014T134616Z
 SUMMARY:SG Wasserball Essen 11:6 WSG Vest (Ruhrgebietsliga weiblich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -128,7 +128,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__36@sgw-essen.local
-DTSTAMP:20261006T011842Z
+DTSTAMP:20261014T134616Z
 SUMMARY:SG Wasserball Essen 9:15 Duisburger SSC 09/20 (Ruhrgebietsliga weib
  lich)
 STATUS:CONFIRMED
@@ -145,7 +145,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__39@sgw-essen.local
-DTSTAMP:20261006T011842Z
+DTSTAMP:20261014T134616Z
 SUMMARY:WSG Vest 5:9 SG Wasserball Essen (Ruhrgebietsliga weiblich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -161,7 +161,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__40@sgw-essen.local
-DTSTAMP:20261006T011842Z
+DTSTAMP:20261014T134616Z
 SUMMARY:SG Wasserball Essen 12:20 SGW Essen Masters (Ruhrgebietsliga weibli
  ch)
 STATUS:CONFIRMED
@@ -178,7 +178,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_251__1@sgw-essen.local
-DTSTAMP:20261006T011842Z
+DTSTAMP:20261014T134616Z
 SUMMARY:SG Wasserball Essen 8:17 Duisburger SSC 09/20 (Pokalrunde Ruhrgebie
  t weiblich)
 STATUS:CONFIRMED
@@ -195,7 +195,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_251__3@sgw-essen.local
-DTSTAMP:20261006T011842Z
+DTSTAMP:20261014T134616Z
 SUMMARY:SG Wasserball Essen : WSG Oberhausen 97/27 (Pokalrunde Ruhrgebiet w
  eiblich)
 STATUS:CONFIRMED
@@ -207,6 +207,22 @@ DESCRIPTION:Wettbewerb: Pokalrunde Ruhrgebiet weiblich\nErgebnis: geplant\n
  Details: https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2025&LeagueID
  =251&Group=&LeagueKind=C&GameID=3\nLive: https://lizenz.dsv.de/Live.aspx\n
  DSV-Portal: https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+END:VEVENT
+BEGIN:VEVENT
+UID:2026_225__3@sgw-essen.local
+DTSTAMP:20261014T134616Z
+SUMMARY:Duisburger SSC 09/20 : SG Wasserball Essen (Ruhrgebietsliga weiblic
+ h)
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+DTSTART:20261119T190000Z
+DTEND:20261119T203000Z
+LOCATION:Kombibad Homberg\, Schillerstr. 162\, 47198 Duisburg
+DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: geplant\nDetail
+ s: https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2026&LeagueID=225&G
+ roup=&LeagueKind=L&GameID=3\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Po
+ rtal: https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 END:VCALENDAR
