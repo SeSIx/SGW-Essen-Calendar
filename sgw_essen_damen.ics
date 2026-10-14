@@ -10,7 +10,7 @@ CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
 UID:2025_225__6@sgw-essen.local
-DTSTAMP:20261014T134616Z
+DTSTAMP:20261014T231640Z
 SUMMARY:Duisburger SSC 09/20 4:11 SG Wasserball Essen (Ruhrgebietsliga weib
  lich)
 STATUS:CONFIRMED
@@ -27,7 +27,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__7@sgw-essen.local
-DTSTAMP:20261014T134616Z
+DTSTAMP:20261014T231640Z
 SUMMARY:SG Wasserball Essen 12:11 Düsseldorfer SC 1898 (Ruhrgebietsliga we
  iblich)
 STATUS:CONFIRMED
@@ -44,7 +44,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__24@sgw-essen.local
-DTSTAMP:20261014T134616Z
+DTSTAMP:20261014T231640Z
 SUMMARY:WSG Oberhausen 97/27 5:8 SG Wasserball Essen (Ruhrgebietsliga weibl
  ich)
 STATUS:CONFIRMED
@@ -61,7 +61,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__12@sgw-essen.local
-DTSTAMP:20261014T134616Z
+DTSTAMP:20261014T231640Z
 SUMMARY:Duisburger SSC 09/20 II 5:17 SG Wasserball Essen (Ruhrgebietsliga w
  eiblich)
 STATUS:CONFIRMED
@@ -78,7 +78,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__29@sgw-essen.local
-DTSTAMP:20261014T134616Z
+DTSTAMP:20261014T231640Z
 SUMMARY:SGW Essen Masters 12:9 SG Wasserball Essen (Ruhrgebietsliga weiblic
  h)
 STATUS:CONFIRMED
@@ -95,7 +95,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__30@sgw-essen.local
-DTSTAMP:20261014T134616Z
+DTSTAMP:20261014T231640Z
 SUMMARY:SG Wasserball Essen 5:12 WSG Oberhausen 97/27 (Ruhrgebietsliga weib
  lich)
 STATUS:CONFIRMED
@@ -112,7 +112,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__33@sgw-essen.local
-DTSTAMP:20261014T134616Z
+DTSTAMP:20261014T231640Z
 SUMMARY:SG Wasserball Essen 11:6 WSG Vest (Ruhrgebietsliga weiblich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -128,7 +128,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__36@sgw-essen.local
-DTSTAMP:20261014T134616Z
+DTSTAMP:20261014T231640Z
 SUMMARY:SG Wasserball Essen 9:15 Duisburger SSC 09/20 (Ruhrgebietsliga weib
  lich)
 STATUS:CONFIRMED
@@ -145,7 +145,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__39@sgw-essen.local
-DTSTAMP:20261014T134616Z
+DTSTAMP:20261014T231640Z
 SUMMARY:WSG Vest 5:9 SG Wasserball Essen (Ruhrgebietsliga weiblich)
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -161,7 +161,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_225__40@sgw-essen.local
-DTSTAMP:20261014T134616Z
+DTSTAMP:20261014T231640Z
 SUMMARY:SG Wasserball Essen 12:20 SGW Essen Masters (Ruhrgebietsliga weibli
  ch)
 STATUS:CONFIRMED
@@ -178,7 +178,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_251__1@sgw-essen.local
-DTSTAMP:20261014T134616Z
+DTSTAMP:20261014T231640Z
 SUMMARY:SG Wasserball Essen 8:17 Duisburger SSC 09/20 (Pokalrunde Ruhrgebie
  t weiblich)
 STATUS:CONFIRMED
@@ -195,7 +195,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_251__3@sgw-essen.local
-DTSTAMP:20261014T134616Z
+DTSTAMP:20261014T231640Z
 SUMMARY:SG Wasserball Essen : WSG Oberhausen 97/27 (Pokalrunde Ruhrgebiet w
  eiblich)
 STATUS:CONFIRMED
@@ -211,7 +211,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_225__3@sgw-essen.local
-DTSTAMP:20261014T134616Z
+DTSTAMP:20261014T231640Z
 SUMMARY:Duisburger SSC 09/20 : SG Wasserball Essen (Ruhrgebietsliga weiblic
  h)
 STATUS:CONFIRMED
@@ -223,6 +223,195 @@ DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: geplant\nDetail
  s: https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2026&LeagueID=225&G
  roup=&LeagueKind=L&GameID=3\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Po
  rtal: https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+END:VEVENT
+BEGIN:VEVENT
+UID:2026_225__13@sgw-essen.local
+DTSTAMP:20261014T231640Z
+SUMMARY:Düsseldorfer SC 1898 : SG Wasserball Essen (Ruhrgebietsliga weibli
+ ch)
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+DTSTART:20270228T164500Z
+DTEND:20270228T181500Z
+LOCATION:Rheinbad\, Europaplatz 1\, 40474 Düsseldorf
+DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: geplant\nDetail
+ s: https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2026&LeagueID=225&G
+ roup=&LeagueKind=L&GameID=13\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-P
+ ortal: https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+END:VEVENT
+BEGIN:VEVENT
+UID:2026_225__16@sgw-essen.local
+DTSTAMP:20261014T231640Z
+SUMMARY:WSG Oberhausen 97/27 : SG Wasserball Essen (Ruhrgebietsliga weiblic
+ h)
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+DTSTART:20270410T153000Z
+DTEND:20270410T170000Z
+LOCATION:AquaPark Oberhausen\, Heinz-Schleußer-Str. 1\, 46047 Oberhausen
+DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: geplant\nDetail
+ s: https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2026&LeagueID=225&G
+ roup=&LeagueKind=L&GameID=16\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-P
+ ortal: https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+END:VEVENT
+BEGIN:VEVENT
+UID:2026_225__19@sgw-essen.local
+DTSTAMP:20261014T231640Z
+SUMMARY:WSG Vest : SG Wasserball Essen (Ruhrgebietsliga weiblich)
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+DTSTART:20270422T181500Z
+DTEND:20270422T194500Z
+LOCATION:Hallenbad Herner Strasse\, Herner Str. 160\, 45659 Recklinghausen
+DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: geplant\nDetail
+ s: https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2026&LeagueID=225&G
+ roup=&LeagueKind=L&GameID=19\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-P
+ ortal: https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+END:VEVENT
+BEGIN:VEVENT
+UID:2026_225__21@sgw-essen.local
+DTSTAMP:20261014T231640Z
+SUMMARY:SG Wasserball Essen : Duisburger SSC 09/20 (Ruhrgebietsliga weiblic
+ h)
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+DTSTART:20270502T180000Z
+DTEND:20270502T193000Z
+LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
+DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: geplant\nDetail
+ s: https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2026&LeagueID=225&G
+ roup=&LeagueKind=L&GameID=21\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-P
+ ortal: https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+END:VEVENT
+BEGIN:VEVENT
+UID:2026_225__22@sgw-essen.local
+DTSTAMP:20261014T231640Z
+SUMMARY:SG Wasserball Essen Masters : SG Wasserball Essen (Ruhrgebietsliga 
+ weiblich)
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+DTSTART:20270511T180000Z
+DTEND:20270511T193000Z
+LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
+DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: geplant\nDetail
+ s: https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2026&LeagueID=225&G
+ roup=&LeagueKind=L&GameID=22\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-P
+ ortal: https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+END:VEVENT
+BEGIN:VEVENT
+UID:2026_225__23@sgw-essen.local
+DTSTAMP:20261014T231640Z
+SUMMARY:SG Wasserball Essen Masters : Düsseldorfer SC 1898 (Ruhrgebietslig
+ a weiblich)
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+DTSTART:20270522T180000Z
+DTEND:20270522T193000Z
+LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
+DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: geplant\nDetail
+ s: https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2026&LeagueID=225&G
+ roup=&LeagueKind=L&GameID=23\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-P
+ ortal: https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+END:VEVENT
+BEGIN:VEVENT
+UID:2026_225__24@sgw-essen.local
+DTSTAMP:20261014T231640Z
+SUMMARY:SG Wasserball Essen : SG Wasserball Essen Masters (Ruhrgebietsliga 
+ weiblich)
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+DTSTART:20270525T180000Z
+DTEND:20270525T193000Z
+LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
+DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: geplant\nDetail
+ s: https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2026&LeagueID=225&G
+ roup=&LeagueKind=L&GameID=24\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-P
+ ortal: https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+END:VEVENT
+BEGIN:VEVENT
+UID:2026_225__25@sgw-essen.local
+DTSTAMP:20261014T231640Z
+SUMMARY:SG Wasserball Essen : Düsseldorfer SC 1898 (Ruhrgebietsliga weibli
+ ch)
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+DTSTART:20270612T180000Z
+DTEND:20270612T193000Z
+LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
+DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: geplant\nDetail
+ s: https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2026&LeagueID=225&G
+ roup=&LeagueKind=L&GameID=25\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-P
+ ortal: https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+END:VEVENT
+BEGIN:VEVENT
+UID:2026_225__26@sgw-essen.local
+DTSTAMP:20261014T231640Z
+SUMMARY:SG Wasserball Essen : WSG Vest (Ruhrgebietsliga weiblich)
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+DTSTART:20270615T180000Z
+DTEND:20270615T193000Z
+LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
+DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: geplant\nDetail
+ s: https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2026&LeagueID=225&G
+ roup=&LeagueKind=L&GameID=26\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-P
+ ortal: https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+END:VEVENT
+BEGIN:VEVENT
+UID:2026_225__28@sgw-essen.local
+DTSTAMP:20261014T231640Z
+SUMMARY:SG Wasserball Essen Masters : WSG Oberhausen 97/27 (Ruhrgebietsliga
+  weiblich)
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+DTSTART:20270629T180000Z
+DTEND:20270629T193000Z
+LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
+DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: geplant\nDetail
+ s: https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2026&LeagueID=225&G
+ roup=&LeagueKind=L&GameID=28\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-P
+ ortal: https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+END:VEVENT
+BEGIN:VEVENT
+UID:2026_225__29@sgw-essen.local
+DTSTAMP:20261014T231640Z
+SUMMARY:SG Wasserball Essen Masters : WSG Vest (Ruhrgebietsliga weiblich)
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+DTSTART:20270704T180000Z
+DTEND:20270704T193000Z
+LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
+DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: geplant\nDetail
+ s: https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2026&LeagueID=225&G
+ roup=&LeagueKind=L&GameID=29\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-P
+ ortal: https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+END:VEVENT
+BEGIN:VEVENT
+UID:2026_225__30@sgw-essen.local
+DTSTAMP:20261014T231640Z
+SUMMARY:SG Wasserball Essen : WSG Oberhausen 97/27 (Ruhrgebietsliga weiblic
+ h)
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+DTSTART:20270706T180000Z
+DTEND:20270706T193000Z
+LOCATION:Freibad Dellwig "Hesse"\, Scheppmannskamp 6\, 45357 Essen
+DESCRIPTION:Wettbewerb: Ruhrgebietsliga weiblich\nErgebnis: geplant\nDetail
+ s: https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2026&LeagueID=225&G
+ roup=&LeagueKind=L&GameID=30\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-P
+ ortal: https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 END:VCALENDAR
