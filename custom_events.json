@@ -40,6 +40,16 @@
     "description": "Ab jetzt volles Trainingsprogramm"
   },
   {
+    "id": "3d7c270a-c295-4faf-9845-5e171e968b2c",
+    "title": "Herren: Weihnachtsmarkt",
+    "start_date": "2026-12-11",
+    "start_time": "19:00",
+    "end_date": null,
+    "end_time": "23:00",
+    "location": "Weihnachtsmarkt Essen",
+    "description": null
+  },
+  {
     "id": "6fad1f7b-5609-4449-be83-a574a6c213f2",
     "title": "Weihnachtsmarkt Freibad Hesse",
     "start_date": "2026-12-19",
