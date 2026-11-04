@@ -40,6 +40,16 @@
     "description": "Ab jetzt volles Trainingsprogramm"
   },
   {
+    "id": "eb547820-886c-461e-bc6a-a213e50c209d",
+    "title": "Trainingsspiel + Fotoshooting",
+    "start_date": "2026-12-06",
+    "start_time": "12:00",
+    "end_date": null,
+    "end_time": "16:00",
+    "location": "Sportbad Thurmfeld, Reckhammerweg 84, 45141 Essen",
+    "description": "Blocker Fotoshooting + Traingingspiele"
+  },
+  {
     "id": "3d7c270a-c295-4faf-9845-5e171e968b2c",
     "title": "Weihnachtsmarkt (Herren)",
     "start_date": "2026-12-11",
