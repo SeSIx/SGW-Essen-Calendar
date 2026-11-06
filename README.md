@@ -111,7 +111,8 @@ ruff check .
 
 `main.py` exits `2` when no team has a single upcoming fixture — the failure mode
 that would otherwise publish an empty calendar unnoticed. The scheduled workflow
-turns that exit code into a GitHub issue.
+turns that exit code into a GitHub issue and closes it again after the next
+successful scheduled run.
 
 ## Tech stack
 

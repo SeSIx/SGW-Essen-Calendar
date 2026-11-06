@@ -153,7 +153,7 @@ run and executed nightly by their own workflow.
 | Twice-daily scrape and commit | `.github/workflows/update-calendar.yml` |
 | Tests and lint on every push | `.github/workflows/tests.yml` |
 | Nightly live check against the DSV | `.github/workflows/live-smoke.yml` |
-| Alarms | GitHub issue labelled `scrape-alarm`, deduplicated to one open issue |
+| Alarms | GitHub issue labelled `scrape-alarm`, deduplicated to one open issue, closed by the next successful scheduled run |
 
 Automation commits as `SGW Bot <bot@sgw-essen.local>`, which keeps machine commits
 visually distinct from human ones.

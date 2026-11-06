@@ -103,6 +103,22 @@ jobs:
           gh api -X PATCH "repos/${GITHUB_REPOSITORY}/git/refs/heads/sgw-scraper-rewrite" \
             -f sha="$target" --jq '.ref + " -> " + .object.sha'
 
+      # A transient DSV timeout once left its alarm open for weeks after the
+      # scraper had recovered, so an open issue stopped meaning "broken now".
+      # Only this workflow's own alarm is closed; a live-smoke alarm stays open
+      # until someone looks at it. Never fails the run.
+      - name: Clear alarm
+        if: github.event_name != 'push' && steps.scrape.outputs.exit_code == '0'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue list --label scrape-alarm --state open --json number,title \
+            --jq '.[] | select(.title == "Scraper alarm: no upcoming fixtures") | .number' |
+          while read -r n; do
+            gh issue close "$n" --comment "Scheduled run succeeded again: [Run]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)"
+          done
+
       - name: Raise alarm
         if: github.event_name != 'push' && steps.scrape.outputs.exit_code != '0'
         env:

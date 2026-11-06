@@ -108,7 +108,8 @@ und pushen — beim nächsten Sync sehen alle Abonnenten den neuen Termin.
 Der Scraper meldet sich selbst: Findet ein Lauf für keine Mannschaft ein
 kommendes Spiel, legt die Automatisierung ein GitHub-Issue an. Das passiert
 typischerweise beim Saisonwechsel, wenn der DSV die neue Spielzeit noch nicht
-veröffentlicht hat.
+veröffentlicht hat. Der nächste erfolgreiche Lauf schließt das Issue
+wieder.
 
 ## Lizenz
 
