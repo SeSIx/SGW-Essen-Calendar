@@ -50,6 +50,16 @@
     "description": "Blocker Fotoshooting + Traingingspiele"
   },
   {
+    "id": "9dac1d97-215c-4b89-9c4e-8303a921d3f0",
+    "title": "Trainingsspiel 2. Mannschaft gg WSGO",
+    "start_date": "2026-12-10",
+    "start_time": "19:20",
+    "end_date": null,
+    "end_time": "22:00",
+    "location": "Schwimmleistungszentrum Essen, von-Einem-Straße 77, 45130 Essen",
+    "description": "Trainingsspiel Fokus 2. Mannschaft, Training erste Mannschaft findet normal statt"
+  },
+  {
     "id": "3d7c270a-c295-4faf-9845-5e171e968b2c",
     "title": "Weihnachtsmarkt (Herren)",
     "start_date": "2026-12-11",
