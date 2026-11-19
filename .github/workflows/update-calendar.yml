@@ -7,10 +7,14 @@ on:
     - cron: "15 20 * * *"
   workflow_dispatch:
   # The admin app commits club dates; republish them without a full scrape.
+  # A merged code change (a hotfix through the agent platform) rebuilds with a
+  # full scrape, so the fix goes live without waiting for the next schedule.
   push:
     branches: [main]
     paths:
       - custom_events.json
+      - "**.py"
+      - requirements.txt
 
 permissions:
   contents: write
@@ -25,6 +29,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
 
       - uses: actions/setup-python@v7
         with:
@@ -45,9 +51,20 @@ jobs:
           restore-keys: |
             dsv-data-
 
+      # Code changed in this push (HEAD~1 is main before it): scrape fully.
+      - name: Changed paths
+        id: changed
+        if: github.event_name == 'push'
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -qE '(\.py|(^|/)requirements\.txt)$'; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "code=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Scrape DSV and rebuild calendars
         id: scrape
-        if: github.event_name != 'push'
+        if: github.event_name != 'push' || steps.changed.outputs.code == 'true'
         run: |
           set +e
           python main.py 2>&1 | tee run.log
@@ -58,7 +75,7 @@ jobs:
       # sgw_termine.ics, so fall back to the full scrape then.
       - name: Rebuild calendars from cached data
         id: rebuild
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && steps.changed.outputs.code != 'true'
         run: |
           if [ -f output/sgw_essen_herren_1.db ] && [ -f output/sgw_essen_herren_2.db ]; then
             python combine.py
@@ -72,10 +89,12 @@ jobs:
           git config user.name "SGW Bot"
           git config user.email "bot@sgw-essen.local"
           git add -- '*.ics'
-          if git diff --cached --quiet; then
+          # A push run always commits, even with unchanged calendars: the agent
+          # platform's deploy runner waits for this commit to see the push live.
+          if [ "${{ github.event_name }}" != push ] && git diff --cached --quiet; then
             echo "No calendar changes."
           else
-            git commit -m "Auto-update: calendars $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git commit --allow-empty -m "Auto-update: calendars $(date -u +'%Y-%m-%d %H:%M UTC')"
             git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
             git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
