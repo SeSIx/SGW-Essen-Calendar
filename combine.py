@@ -165,12 +165,42 @@ def _sync_custom_events(termine_conn: sqlite3.Connection) -> None:
         )
 
 
+def _source_slug(row: dict) -> str | None:
+    for side in ("home_team", "away_team"):
+        name = row.get(side) or ""
+        if "wasserball essen" in name.lower():
+            return db.slug_for_team(name, row.get("competition") or "")
+    return None
+
+
+def _drop_vanished_games(termine_conn: sqlite3.Connection, merged_ids: set[str],
+                         present_slugs: set[str]) -> None:
+    """Remove games their team database no longer has (withdrawn by the DSV).
+
+    Only rows whose source database was read this run are considered, so a
+    missing database never empties its team from the combined calendar.
+    """
+    stale = [
+        r["id"] for r in (
+            dict(zip(("id", "home_team", "away_team", "competition"), t))
+            for t in termine_conn.execute(
+                "SELECT id, home_team, away_team, competition FROM games")
+        )
+        if r["id"] not in merged_ids and _source_slug(r) in present_slugs
+    ]
+    if stale:
+        termine_conn.executemany("DELETE FROM games WHERE id = ?", [(i,) for i in stale])
+        print(f"[Combine] removed {len(stale)} game(s) no longer in the team databases")
+
+
 def build_termine_db(output_dir: Path) -> tuple[int, int]:
     """Return (game_count, custom_event_count)."""
     termine_path = output_dir / "sgw_termine.db"
     termine_conn = _init_termine_db(str(termine_path))
 
     game_count = 0
+    merged_ids: set[str] = set()
+    present_slugs: set[str] = set()
     for slug in SOURCE_SLUGS:
         src_path = output_dir / f"{slug}.db"
         if not src_path.exists():
@@ -180,10 +210,14 @@ def build_termine_db(output_dir: Path) -> tuple[int, int]:
         src.row_factory = sqlite3.Row
         rows = src.execute("SELECT * FROM games").fetchall()
         src.close()
+        present_slugs.add(slug)
         for row in rows:
             _upsert_game(termine_conn, dict(row))
+            merged_ids.add(row["id"])
             game_count += 1
         print(f"[Combine] {slug}: {len(rows)} game(s) merged")
+
+    _drop_vanished_games(termine_conn, merged_ids, present_slugs)
 
     _sync_custom_events(termine_conn)
     custom_count = termine_conn.execute("SELECT COUNT(*) FROM custom_events").fetchone()[0]
