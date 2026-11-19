@@ -42,11 +42,12 @@ def test_rebuild_requires_every_source_db():
         assert f"[ -f output/{slug}.db ]" in step, slug
 
 
-def test_alarm_never_fires_for_push_runs():
-    """The scrape step is skipped on push, so its exit_code output is empty —
-    and '' != '0' would otherwise open a false scraper alarm."""
-    step = _step("Raise alarm")
-    assert "if: github.event_name != 'push' && steps.scrape.outputs.exit_code != '0'" in step
+def test_alarm_fires_only_when_the_scrape_ran():
+    """A push without code changes skips the scrape, so its exit_code output is
+    empty -- and '' != '0' would otherwise open a false scraper alarm. A code
+    push scrapes fully, so a broken hotfix alarms like a scheduled run."""
+    assert "if: steps.scrape.outputs.exit_code != '' && steps.scrape.outputs.exit_code != '0'" in _step("Raise alarm")
+    assert "if: steps.scrape.outputs.exit_code == '0'" in _step("Clear alarm")
 
 
 def test_commit_and_legacy_branch_steps_still_run_on_every_event():
