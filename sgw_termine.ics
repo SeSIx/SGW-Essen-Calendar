@@ -832,21 +832,6 @@ DESCRIPTION:Wettbewerb: NRW Oberliga männlich\nErgebnis: geplant\nDetails:
 URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
-UID:2026_196__68@sgw-essen.local
-DTSTAMP:20261117T174405Z
-SUMMARY:Stolberger SV 1910 : SG Wasserball Essen (NRW Oberliga männlich)
-STATUS:CONFIRMED
-TRANSP:OPAQUE
-DTSTART:20270123T172000Z
-DTEND:20270123T185000Z
-LOCATION:Hallenbad Glashütter Weiher\, Schafberg 1\, 52223 Stolberg
-DESCRIPTION:Wettbewerb: NRW Oberliga männlich\nErgebnis: geplant\nDetails:
-  https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2026&LeagueID=196&Gro
- up=&LeagueKind=L&GameID=68\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Por
- tal: https://dsvdaten.dsv.de/Modules/WB/Index.aspx
-URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
-END:VEVENT
-BEGIN:VEVENT
 UID:2026_197__12@sgw-essen.local
 DTSTAMP:20261117T174405Z
 SUMMARY:Wassersportverein Schermbeck : SG Wasserball Essen II (NRW Verbands
