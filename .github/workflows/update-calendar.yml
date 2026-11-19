@@ -15,6 +15,7 @@ on:
       - custom_events.json
       - "**.py"
       - requirements.txt
+      - .github/workflows/update-calendar.yml
 
 permissions:
   contents: write
@@ -91,7 +92,7 @@ jobs:
           git add -- '*.ics'
           # A push run always commits, even with unchanged calendars: the agent
           # platform's deploy runner waits for this commit to see the push live.
-          if [ "${{ github.event_name }}" != push ] && git diff --cached --quiet; then
+          if [ "$GITHUB_EVENT_NAME" != push ] && git diff --cached --quiet; then
             echo "No calendar changes."
           else
             git commit --allow-empty -m "Auto-update: calendars $(date -u +'%Y-%m-%d %H:%M UTC')"
@@ -125,9 +126,10 @@ jobs:
       # A transient DSV timeout once left its alarm open for weeks after the
       # scraper had recovered, so an open issue stopped meaning "broken now".
       # Only this workflow's own alarm is closed; a live-smoke alarm stays open
-      # until someone looks at it. Never fails the run.
+      # until someone looks at it. Never fails the run. Keyed on the scrape, not
+      # the event: a code push scrapes fully, so a broken hotfix alarms at once.
       - name: Clear alarm
-        if: github.event_name != 'push' && steps.scrape.outputs.exit_code == '0'
+        if: steps.scrape.outputs.exit_code == '0'
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -135,11 +137,11 @@ jobs:
           gh issue list --label scrape-alarm --state open --json number,title \
             --jq '.[] | select(.title == "Scraper alarm: no upcoming fixtures") | .number' |
           while read -r n; do
-            gh issue close "$n" --comment "Scheduled run succeeded again: [Run]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)"
+            gh issue close "$n" --comment "Scrape succeeded again: [Run]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)"
           done
 
       - name: Raise alarm
-        if: github.event_name != 'push' && steps.scrape.outputs.exit_code != '0'
+        if: steps.scrape.outputs.exit_code != '' && steps.scrape.outputs.exit_code != '0'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
