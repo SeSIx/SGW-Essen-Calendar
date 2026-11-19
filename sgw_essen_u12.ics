@@ -10,7 +10,7 @@ CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
 UID:2025_261_A_1@sgw-essen.local
-DTSTAMP:20261117T174356Z
+DTSTAMP:20261119T015810Z
 SUMMARY:SG Wasserball Essen : Duisburger SV 1898 (U12 Ruhrgebietsliga - Gru
  ppe A)
 STATUS:CONFIRMED
@@ -26,7 +26,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_261_A_2@sgw-essen.local
-DTSTAMP:20261117T174356Z
+DTSTAMP:20261119T015810Z
 SUMMARY:SG Wasserball Essen : WSG Oberhausen 97/27 (U12 Ruhrgebietsliga - G
  ruppe A)
 STATUS:CONFIRMED
@@ -43,7 +43,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_261_A_6@sgw-essen.local
-DTSTAMP:20261117T174356Z
+DTSTAMP:20261119T015810Z
 SUMMARY:SG Wasserball Essen 5:6 Wassersportverein Schermbeck (U12 Ruhrgebie
  tsliga - Gruppe A)
 STATUS:CONFIRMED
@@ -60,7 +60,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_261_A_9@sgw-essen.local
-DTSTAMP:20261117T174356Z
+DTSTAMP:20261119T015810Z
 SUMMARY:Wassersportverein Schermbeck 15:4 SG Wasserball Essen (U12 Ruhrgebi
  etsliga - Gruppe A)
 STATUS:CONFIRMED
@@ -77,7 +77,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_261_A_12@sgw-essen.local
-DTSTAMP:20261117T174356Z
+DTSTAMP:20261119T015810Z
 SUMMARY:WSG Oberhausen 97/27 7:5 SG Wasserball Essen (U12 Ruhrgebietsliga -
   Gruppe A)
 STATUS:CONFIRMED
@@ -94,7 +94,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2025_261_A_20@sgw-essen.local
-DTSTAMP:20261117T174356Z
+DTSTAMP:20261119T015810Z
 SUMMARY:SG Wasserball Essen 3:13 ASC Duisburg (U12 Ruhrgebietsliga - Gruppe
   A)
 STATUS:CONFIRMED
@@ -111,7 +111,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_261_A_1@sgw-essen.local
-DTSTAMP:20261117T174356Z
+DTSTAMP:20261119T015810Z
 SUMMARY:SG Wasserball Essen : WSG Oberhausen 97/27 (U12 Ruhrgebietsliga - G
  ruppe A)
 STATUS:CONFIRMED
@@ -128,7 +128,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_261_A_2@sgw-essen.local
-DTSTAMP:20261117T174356Z
+DTSTAMP:20261119T015810Z
 SUMMARY:SG Wasserball Essen : Duisburger SV 1898 (U12 Ruhrgebietsliga - Gru
  ppe A)
 STATUS:CONFIRMED
@@ -145,7 +145,7 @@ URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 BEGIN:VEVENT
 UID:2026_261_A_3@sgw-essen.local
-DTSTAMP:20261117T174356Z
+DTSTAMP:20261119T015810Z
 SUMMARY:SG Wasserball Essen : Wassersportverein Schermbeck (U12 Ruhrgebiets
  liga - Gruppe A)
 STATUS:CONFIRMED
@@ -158,6 +158,21 @@ DESCRIPTION:Wettbewerb: U12 Ruhrgebietsliga - Gruppe A mixed\nErgebnis: gep
  /Modules/WB/Game.aspx?Season=2026&LeagueID=261&Group=A&LeagueKind=E&GameID
  =3\nLive: https://lizenz.dsv.de/Live.aspx\nDSV-Portal: https://dsvdaten.ds
  v.de/Modules/WB/Index.aspx
+URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
+END:VEVENT
+BEGIN:VEVENT
+UID:2026_261_A_9@sgw-essen.local
+DTSTAMP:20261119T015810Z
+SUMMARY:ASC Duisburg : SG Wasserball Essen (U12 Ruhrgebietsliga - Gruppe A)
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+DTSTART:20270425T113000Z
+DTEND:20270425T130000Z
+LOCATION:Hallenbad Neuenkamp\, Paul-Rücker-Straße 33\, 47059 Duisburg
+DESCRIPTION:Wettbewerb: U12 Ruhrgebietsliga - Gruppe A mixed\nErgebnis: gep
+ lant\nDetails: https://dsvdaten.dsv.de/Modules/WB/Game.aspx?Season=2026&Le
+ agueID=261&Group=A&LeagueKind=E&GameID=9\nLive: https://lizenz.dsv.de/Live
+ .aspx\nDSV-Portal: https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 URL:https://dsvdaten.dsv.de/Modules/WB/Index.aspx
 END:VEVENT
 END:VCALENDAR
