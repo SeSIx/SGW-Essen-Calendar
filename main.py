@@ -39,6 +39,38 @@ def _clean_game_dict(game: dict) -> dict:
     return {k: v for k, v in game.items() if k in _GAME_COLS_SET}
 
 
+def _prune_withdrawn(conn: sqlite3.Connection, slug: str, bucket: list[dict],
+                     season_keys: list[str]) -> int:
+    """Delete stored fixtures the DSV no longer lists for this team.
+
+    Upserts alone keep a withdrawn or renumbered game forever, so it shows up
+    next to its replacement. A truncated club page must not wipe real games,
+    though: a season is only pruned when the fresh listing still has games for
+    this team, and never when more than half of its stored games would go.
+    """
+    stored = [r[0] for r in conn.execute("SELECT id FROM games")]
+    removed = 0
+    for key in season_keys:
+        prefix = f"{key}_"
+        fresh = {g["id"] for g in bucket if g["id"].startswith(prefix)}
+        if not fresh:
+            continue
+        season_ids = [i for i in stored if i.startswith(prefix)]
+        stale = [i for i in season_ids if i not in fresh]
+        if not stale:
+            continue
+        if len(stale) * 2 > len(season_ids):
+            print(f"[Main] WARNING: {slug}: {len(stale)} of {len(season_ids)} stored game(s) "
+                  f"of season {config.season_label(key)} missing from the DSV listing — "
+                  "not pruning, the club page may be incomplete")
+            continue
+        conn.executemany("DELETE FROM games WHERE id = ?", [(i,) for i in stale])
+        print(f"[Main] {slug}: removed {len(stale)} game(s) no longer listed by the DSV: "
+              f"{', '.join(sorted(stale))}")
+        removed += len(stale)
+    return removed
+
+
 def cmd_summary() -> None:
     if not OUTPUT_DIR.exists():
         print("[Main] output/ directory not found — nothing to summarise")
@@ -100,6 +132,7 @@ def cmd_scrape(season_keys: list[str], fetch_details: bool, write_ics_files: boo
             conns[slug] = conn
             for game in bucket:
                 db.upsert_game(conn, _clean_game_dict(game))
+            _prune_withdrawn(conn, slug, bucket, season_keys)
             conn.commit()
             print(f"[Main] {slug}: upserted {len(bucket)} game(s)")
 
